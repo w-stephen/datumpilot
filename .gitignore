@@ -1,2 +1,9 @@
 .DS_Store
 Planning/Dimensioning and Tolerancing-ASMR Y14-5-2018.pdf
+node_modules
+.next
+pnpm-lock.yaml
+.vercel
+.env
+.env.*.local
+apps/web/.env.local
