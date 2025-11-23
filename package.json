@@ -2,6 +2,9 @@
   "name": "datumpilot-root",
   "private": true,
   "version": "0.0.0",
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
   "scripts": {
     "dev": "next dev --turbo",
     "build": "next build",
