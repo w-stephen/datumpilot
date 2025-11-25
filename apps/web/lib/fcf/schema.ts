@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 // Enumerations kept tight to the current product scope and the v2 data model.
 export type Characteristic = "position" | "flatness" | "perpendicularity" | "profile" | "other";
 export type Unit = "mm" | "inch";
@@ -84,6 +86,125 @@ export type FcfJson = {
   composite?: CompositeFrame; // Composite or multiple single segments when needed.
   notes?: string[]; // Free-form annotations (e.g., "basic angle 30°").
 };
+
+const characteristicSchema = z.enum(["position", "flatness", "perpendicularity", "profile", "other"]);
+const unitSchema = z.enum(["mm", "inch"]);
+const featureTypeSchema = z.enum(["hole", "slot", "pin", "boss", "surface", "plane", "edge"]);
+const materialConditionSchema = z.enum(["MMC", "LMC", "RFS"]);
+const frameModifierSchema = z.enum([
+  "FREE_STATE",
+  "PROJECTED_TOLERANCE_ZONE",
+  "TANGENT_PLANE",
+  "UNEQUALLY_DISPOSED"
+]);
+const geometricStandardSchema = z.enum(["ASME_Y14_5_2018", "ISO_1101"]);
+const zoneShapeSchema = z.enum(["cylindrical", "spherical", "twoParallelPlanes", "twoParallelLines"]);
+const sourceInputTypeSchema = z.enum(["image", "builder", "json"]);
+
+const datumReferenceSchema = z.object({
+  id: z.string().min(1),
+  materialCondition: materialConditionSchema.optional()
+});
+
+const toleranceZoneSchema = z.object({
+  value: z.number(),
+  unit: unitSchema.optional(),
+  diameter: z.boolean().optional(),
+  materialCondition: materialConditionSchema.optional(),
+  zoneShape: zoneShapeSchema.optional()
+});
+
+const patternSpecSchema = z.object({
+  count: z.number().optional(),
+  note: z.string().optional()
+});
+
+const sizeDimensionSchema = z.object({
+  nominal: z.number(),
+  tolerancePlus: z.number().optional(),
+  toleranceMinus: z.number().optional(),
+  unit: unitSchema.optional(),
+  note: z.string().optional()
+});
+
+const projectedZoneSchema = z.object({
+  height: z.number(),
+  unit: unitSchema.optional()
+});
+
+const compositeSegmentSchema = z.object({
+  tolerance: toleranceZoneSchema,
+  datums: datumReferenceSchema.array().optional(),
+  modifiers: frameModifierSchema.array().optional()
+});
+
+const compositeFrameSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("composite"),
+    segments: z.array(compositeSegmentSchema).min(1)
+  }),
+  z.object({
+    type: z.literal("multipleSingleSegments"),
+    segments: z.array(compositeSegmentSchema).min(1)
+  })
+]);
+
+const sourceInfoSchema = z.object({
+  inputType: sourceInputTypeSchema,
+  fileUrl: z.string().optional(),
+  uploadId: z.string().optional(),
+  notes: z.string().optional()
+});
+
+export const fcfJsonSchema: z.ZodType<FcfJson> = z.object({
+  characteristic: characteristicSchema,
+  featureType: featureTypeSchema.optional(),
+  name: z.string().optional(),
+  sourceUnit: unitSchema,
+  standard: geometricStandardSchema.optional(),
+  source: sourceInfoSchema,
+  tolerance: toleranceZoneSchema,
+  datums: datumReferenceSchema.array().optional(),
+  modifiers: frameModifierSchema.array().optional(),
+  pattern: patternSpecSchema.optional(),
+  sizeDimension: sizeDimensionSchema.optional(),
+  projectedZone: projectedZoneSchema.optional(),
+  composite: compositeFrameSchema.optional(),
+  notes: z.array(z.string()).optional()
+});
+
+export function parseFcfJson(raw: unknown): FcfJson {
+  return fcfJsonSchema.parse(raw);
+}
+
+export function isFcfJson(raw: unknown): raw is FcfJson {
+  return fcfJsonSchema.safeParse(raw).success;
+}
+
+export function validateSchemaOnly(fcf: FcfJson): string[] {
+  const issues: string[] = [];
+
+  if (!fcf.characteristic) {
+    issues.push("Characteristic is required.");
+  }
+
+  if (!fcf.sourceUnit) {
+    issues.push("Source unit is required.");
+  }
+
+  if (!fcf.tolerance || typeof fcf.tolerance.value !== "number") {
+    issues.push("Tolerance value is required.");
+  }
+
+  if (
+    (fcf.characteristic === "position" || fcf.characteristic === "perpendicularity") &&
+    (!fcf.datums || fcf.datums.length === 0)
+  ) {
+    issues.push("Datum references are required for position/perpendicularity.");
+  }
+
+  return issues;
+}
 
 // Examples (annotated) to exercise common characteristics.
 export const exampleFcfs: Record<string, FcfJson> = {
