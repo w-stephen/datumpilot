@@ -91,7 +91,7 @@ const characteristicSchema = z.enum(["position", "flatness", "perpendicularity",
 const unitSchema = z.enum(["mm", "inch"]);
 const featureTypeSchema = z.enum(["hole", "slot", "pin", "boss", "surface", "plane", "edge"]);
 const materialConditionSchema = z.enum(["MMC", "LMC", "RFS"]);
-const frameModifierSchema = z.enum([
+export const frameModifierSchema = z.enum([
   "FREE_STATE",
   "PROJECTED_TOLERANCE_ZONE",
   "TANGENT_PLANE",
