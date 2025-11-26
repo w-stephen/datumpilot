@@ -63,6 +63,10 @@ export interface InterpretFcfRequest {
   calculationInput?: CalculationInput;
   parseConfidenceOverride?: number;
   correlationId?: string;
+  hints?: {
+    featureType?: FeatureType;
+    standard?: GeometricStandard;
+  };
 }
 
 export interface InterpretFcfSuccess {

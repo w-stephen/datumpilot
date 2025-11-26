@@ -25,13 +25,15 @@ export async function chatJson<T>(
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 30000);
 
   try {
-    const completion = await openaiClient.chat.completions.create({
-      model: options.model ?? "gpt-5.1",
-      temperature: options.temperature ?? 0,
-      response_format: { type: "json_object" },
-      messages,
-      signal: controller.signal
-    });
+    const completion = await openaiClient.chat.completions.create(
+      {
+        model: options.model ?? "gpt-5.1",
+        temperature: options.temperature ?? 0,
+        response_format: { type: "json_object" },
+        messages
+      },
+      { signal: controller.signal }
+    );
 
     const content = completion.choices[0]?.message?.content;
     if (!content) {

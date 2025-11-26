@@ -8,7 +8,7 @@ import { calculatePosition } from "@/lib/calc/position";
 import { calculateProfile } from "@/lib/calc/profile";
 
 import { runExtractionAgent } from "./extractionAgent";
-import { runExplanationAgent } from "./interpretationAgent";
+import { runExplanationAgent } from "./explanationAgent";
 import {
   CalcResult,
   CalculationInput,
@@ -58,8 +58,10 @@ function runDeterministicCalculation(input: CalculationInput): CalcOutcome {
       }
       return { ok: true, calcResult: { characteristic: "profile", result: response.result } };
     }
-    default:
-      return { ok: false, message: `Unsupported characteristic ${input.characteristic}` };
+    default: {
+      const _exhaustiveCheck: never = input;
+      return { ok: false, message: `Unsupported characteristic: ${(_exhaustiveCheck as CalculationInput).characteristic}` };
+    }
   }
 }
 
@@ -77,7 +79,7 @@ export async function orchestrateFcfInterpretation(
       const extraction = await runExtractionAgent({
         imageUrl: request.imageUrl,
         text: request.text,
-        hints: request.fcf?.featureType ? { featureType: request.fcf.featureType } : undefined
+        hints: request.hints
       });
       fcf = extraction.fcf;
       parseConfidence = request.parseConfidenceOverride ?? extraction.parseConfidence;

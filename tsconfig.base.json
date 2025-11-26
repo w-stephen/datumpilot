@@ -12,6 +12,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "jsx": "preserve",
     "paths": {}
   },
   "exclude": ["node_modules", "dist"]

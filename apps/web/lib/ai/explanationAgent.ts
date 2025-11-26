@@ -29,6 +29,3 @@ export async function runExplanationAgent(
 
   return { ...response, warnings: response.warnings ?? [], promptVersion };
 }
-
-// Backwards compatibility for any lingering imports during the 4→2 agent migration.
-export const runInterpretationAgent = runExplanationAgent;

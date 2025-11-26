@@ -2,9 +2,9 @@ import { FcfJson } from "./schema";
 
 export const exampleFcf: FcfJson = {
   source: { inputType: "builder" },
+  sourceUnit: "mm",
   characteristic: "position",
-  tolerance: { value: 0.7, diameter: true },
-  modifiers: ["MMC"],
+  tolerance: { value: 0.7, diameter: true, materialCondition: "MMC" },
   datums: [
     { id: "A", materialCondition: "RFS" },
     { id: "B", materialCondition: "RFS" },

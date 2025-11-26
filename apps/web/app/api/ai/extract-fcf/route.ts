@@ -5,14 +5,17 @@ import { runExtractionAgent } from "@/lib/ai/extractionAgent";
 import { promptVersion } from "@/lib/ai/prompts";
 import { fcfJsonSchema } from "@/lib/fcf/schema";
 
+const featureTypeSchema = z.enum(["hole", "slot", "pin", "boss", "surface", "plane", "edge"]);
+const geometricStandardSchema = z.enum(["ASME_Y14_5_2018", "ISO_1101"]);
+
 const requestSchema = z
   .object({
     imageUrl: z.string().url().optional(),
     text: z.string().optional(),
     hints: z
       .object({
-        featureType: z.string().optional(),
-        standard: z.string().optional()
+        featureType: featureTypeSchema.optional(),
+        standard: geometricStandardSchema.optional()
       })
       .optional()
   })

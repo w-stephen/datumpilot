@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { orchestrateFcfInterpretation } from "@/lib/ai/orchestrator.server";
-import { fcfJsonSchema } from "@/lib/fcf/schema";
+import { InterpretFcfRequest } from "@/lib/ai/types";
+import { fcfJsonSchema, FcfJson } from "@/lib/fcf/schema";
 
 const calculationInputSchema = z
   .object({
@@ -31,7 +32,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: parsed.error.format() }, { status: 400 });
     }
 
-    // Optional server-side schema validation if fcf provided directly.
+    // Validate and type-narrow the FCF if provided directly.
+    let validatedFcf: FcfJson | undefined;
     if (parsed.data.fcf) {
       const check = fcfJsonSchema.safeParse(parsed.data.fcf);
       if (!check.success) {
@@ -40,9 +42,19 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
+      validatedFcf = check.data;
     }
 
-    const result = await orchestrateFcfInterpretation(parsed.data);
+    const request: InterpretFcfRequest = {
+      imageUrl: parsed.data.imageUrl,
+      text: parsed.data.text,
+      fcf: validatedFcf,
+      calculationInput: parsed.data.calculationInput as InterpretFcfRequest["calculationInput"],
+      parseConfidenceOverride: parsed.data.parseConfidenceOverride,
+      correlationId: parsed.data.correlationId
+    };
+
+    const result = await orchestrateFcfInterpretation(request);
     const statusCode = result.status === "ok" ? 200 : result.stage === "extraction" ? 502 : 400;
     return NextResponse.json(result, { status: statusCode });
   } catch (error) {
