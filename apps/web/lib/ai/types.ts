@@ -39,6 +39,7 @@ export interface ExtractionAgentResponse {
   parseConfidence: number; // 0.0–1.0 signal from the model
   notes?: string[];
   rawText?: string;
+  promptVersion?: string;
 }
 
 export interface ExplanationAgentRequest {
@@ -52,6 +53,7 @@ export interface ExplanationAgentRequest {
 export interface ExplanationAgentResponse {
   explanation: string;
   warnings?: string[];
+  promptVersion?: string;
 }
 
 export interface InterpretFcfRequest {

@@ -1,27 +1,33 @@
+import { chatJson } from "./openaiClient";
+import { buildExplanationUserPrompt, explanationSystemPrompt, promptVersion } from "./prompts";
 import { ExplanationAgentRequest, ExplanationAgentResponse } from "./types";
 
 /**
  * Calls the GPT-5.1 Explanation Agent to produce a constrained narrative
  * using authoritative validation + calculation outputs.
- * This placeholder keeps outputs deterministic until the LLM call is wired.
  */
 export async function runExplanationAgent(
   request: ExplanationAgentRequest
 ): Promise<ExplanationAgentResponse> {
-  const { fcf, calcResult, validation } = request;
-  const warningMessages = validation.warnings.map((issue) => `${issue.code}: ${issue.message}`);
+  const { fcf, calcResult, validation, parseConfidence, format } = request;
 
-  const explanationLines = [
-    `Characteristic: ${fcf.characteristic}`,
-    `Stated tolerance: ${calcResult.result.statedTolerance} ${calcResult.result.unit}`,
-    `Calculation summary: ${calcResult.result.summary}`,
-    warningMessages.length > 0 ? `Warnings: ${warningMessages.join("; ")}` : "Validation clean"
-  ];
+  const userPrompt = buildExplanationUserPrompt({
+    fcfJson: JSON.stringify(fcf, null, 2),
+    calcResult: JSON.stringify(calcResult, null, 2),
+    validationResult: JSON.stringify(validation, null, 2),
+    parseConfidence,
+    format
+  });
 
-  return {
-    explanation: explanationLines.join("\n"),
-    warnings: warningMessages.length > 0 ? warningMessages : undefined
-  };
+  const response = await chatJson<ExplanationAgentResponse>(
+    [
+      { role: "system", content: explanationSystemPrompt.trim() },
+      { role: "user", content: userPrompt.trim() }
+    ],
+    { model: "gpt-5.1", temperature: 0 }
+  );
+
+  return { ...response, warnings: response.warnings ?? [], promptVersion };
 }
 
 // Backwards compatibility for any lingering imports during the 4→2 agent migration.

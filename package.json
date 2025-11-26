@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "dependencies": {
+    "openai": "^4.59.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -22,5 +23,6 @@
     "test:ci": "vitest run --runInBand",
     "check": "pnpm lint:ci && pnpm typecheck && pnpm test:ci",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,mdx}\""
-  }
+  },
+  "pnpm-peer-dependency-was-here": "false"
 }
