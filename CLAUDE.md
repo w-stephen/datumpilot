@@ -37,7 +37,7 @@ DatumPilot is a GD&T (Geometric Dimensioning and Tolerancing) feature control fr
 
 2. **API Layer** (`apps/web/app/api/`)
    - `/api/fcf/*` - FCF validation, interpretation, export
-   - `/api/ai/*` - AI agent endpoints (extract, interpret, combined, QA)
+- `/api/ai/*` - AI agent endpoints (extract; explanation invoked via `/api/fcf/interpret`)
    - `/api/projects/`, `/api/uploads/` - CRUD operations
 
 3. **Deterministic Core** (`apps/web/lib/`)
@@ -47,7 +47,8 @@ DatumPilot is a GD&T (Geometric Dimensioning and Tolerancing) feature control fr
    - `calc/` - Calculators for position, flatness, perpendicularity, profile
 
 4. **AI Orchestration** (`apps/web/lib/ai/`)
-   - Multi-agent pattern: extraction, interpretation, combined, QA agents
+   - 2-agent pattern: Extraction + Explanation (GPT-5.1) with deterministic validation/calculation as authority
+   - AI model: GPT-5.1 for both agents; see `docs/06_ai_architecture.md` for prompts and flow
    - `orchestrator.server.ts` - Server-only orchestration
    - AI cannot override deterministic validation; serves to explain and suggest
 

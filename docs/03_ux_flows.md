@@ -14,12 +14,12 @@
 ### Mode 1 – Image Interpretation
 1. Navigate to `/app/image-interpreter` from shell or CTA.
 2. Upload/paste image/PDF snippet; see upload progress; stored privately.
-3. System runs Extraction and Combined agents; shows spinner and correlation ID (for support).
+3. System runs the Extraction Agent; shows spinner and correlation ID (for support).
 4. Extracted fields populate editable form; confidence shown. If low, warning displayed.
 5. User reviews/edits fields (characteristic, tolerance, diameter, modifiers, datums, pattern, size, feature type).
 6. Validation runs; inline errors with codes must be resolved; user retries if needed.
-7. On confirm, canonical FCF JSON saved with `source=inputType:image`; calculation engine computes; Interpretation + QA run.
-8. Final explanation + confidence/warnings displayed; user can copy JSON/explanation or save to project (select/create).
+7. On confirm, canonical FCF JSON saved with `source=inputType:image`; calculation engine computes; Explanation Agent runs.
+8. Final explanation + derived confidence/warnings displayed; user can copy JSON/explanation or save to project (select/create).
 9. User exports PNG/SVG/JSON as needed; return/back to previous route preserves unsaved edits until cleared or saved.
 
 ### Mode 2 – FCF Builder
@@ -37,7 +37,7 @@
 1. Navigate to `/app/interpreter`.
 2. Paste/load FCF JSON from project or file; schema validation runs immediately.
 3. If invalid, inline errors with codes/hints; user edits JSON or reloads.
-4. On valid JSON, deterministic calculations run; Interpretation + QA produce explanation and confidence.
+4. On valid JSON, deterministic calculations run; Explanation Agent produces explanation and confidence is derived from validation (and parseConfidence=1 for builder/JSON paths).
 5. Calculators show results (pass/fail, intermediates) using current unit/precision; user can adjust measurement inputs and rerun.
 6. User saves the FCF record and measurement run to a project; can export/copy JSON/explanation.
 7. Navigation away warns on unsaved measurement inputs; back returns to last loaded FCF state.
@@ -61,7 +61,7 @@
 - Global state: auth/session; units (mm/inch), decimals, dual display; active project selection (optional); correlation ID for AI runs.
 - FCF draft state (builder/image): characteristic, tolerance, diameter, modifiers, datums, feature type, pattern, size, advanced options; retain on route change until saved/cleared.
 - Validation state: error codes and messages; should block finalize/export; displayed inline near offending fields.
-- Confidence state: parseConfidence and QA confidence (`high|medium|low`); drives warnings/UI emphasis.
+- Confidence state: derived from parseConfidence (image mode) + validation cleanliness (`high|medium|low`); drives warnings/UI emphasis.
 - Measurement state: inputs, computed results, pass/fail, linked FCF/project; warn on unsaved changes when navigating away.
 - Navigation behaviors: 
   - Back/Cancel returns to prior route without losing unsaved form state unless explicitly cleared.

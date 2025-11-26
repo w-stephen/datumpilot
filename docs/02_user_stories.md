@@ -10,7 +10,7 @@ Acceptance Criteria:
 - When extraction returns `parseConfidence` below the threshold, I see a warning and can either re-upload or proceed to manual corrections.
 - When validation fails, I see inline errors with standard codes (e.g., E001–E005) and cannot finalize until corrected.
 - After I confirm or edit fields, the canonical FCF JSON is saved with `source.inputType = "image"`, an explanation is shown, and confidence/warnings are displayed.
-- If agents disagree with deterministic calculations, the QA step flags the discrepancy and surfaces warnings before completion.
+- If extraction confidence is low or validation finds issues, the flow surfaces warnings and blocks until corrected; explanations always mirror deterministic calculations.
 
 ### DE2 – FCF Builder with Validation & Live Preview (Priority: Must, Phase: Core Build)
 As a design engineer, I want a guided builder with standards-aware controls and live SVG preview so that I can create ASME Y14.5-2018 compliant FCFs without errors.
@@ -50,7 +50,7 @@ Acceptance Criteria:
 - Pasted/loaded FCF JSON is validated against the schema; invalid fields produce blocking errors with codes and hints.
 - On valid input, deterministic calculations (bonus, virtual condition, effective tolerance) run before AI, and the explanation references those numeric results.
 - When measurement inputs are provided, pass/fail status and intermediate values are displayed for the relevant calculator.
-- If the interpretation text conflicts with rules/calculations, QA marks confidence as medium/low and surfaces warnings.
+- If the interpretation text conflicts with rules/calculations, the Explanation Agent prompt is constrained to deterministic outputs and confidence is lowered; warnings are shown.
 - Users can copy/download the final JSON and explanation for documentation.
 
 ### QE2 – Calculators (Position @ MMC, Flatness, Perpendicularity, Profile) (Priority: Must, Phase: Core Build)
@@ -72,14 +72,14 @@ Acceptance Criteria:
 - Measurement runs list shows timestamped entries; selecting one reveals inputs and computed outputs.
 - RLS prevents access to measurement records for other users; unauthenticated calls are rejected.
 
-### QE4 – Multi-Agent QA & Confidence (Priority: Should, Phase: Core Build)
-As a quality/manufacturing engineer, I want the system to reconcile multiple AI outputs and surface confidence/warnings so that I know when to trust or override results.
+### QE4 – Confidence & Warnings (Priority: Should, Phase: Core Build)
+As a quality/manufacturing engineer, I want the system to surface confidence/warnings based on extraction certainty and validation so that I know when to trust or override results.
 
 Acceptance Criteria:
-- For image/text inputs, the orchestrator runs Extraction and Combined agents in parallel, then Interpretation and QA; sequencing is logged with correlation IDs.
-- QA selects or synthesizes a final FCF JSON and explanation, returning confidence (`high|medium|low`) and warnings when discrepancies exist.
+- For image inputs, the orchestrator uses the Extraction Agent once; `parseConfidence` is recorded and shown alongside validation status.
+- Confidence (`high|medium|low`) is derived from parseConfidence + validation cleanliness; failures block and show inline errors.
 - UI displays confidence state and warnings; when confidence is low, editing of fields is offered before finalizing.
-- If agents disagree beyond thresholds or fail, the flow surfaces retry guidance and does not present a high-confidence result.
+- If extraction fails or validation blocks, the flow surfaces retry guidance and does not present a high-confidence result.
 
 ## Project Lead / Technical Manager
 

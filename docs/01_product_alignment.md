@@ -3,7 +3,7 @@
 ## 1) Summary
 - SaaS web app for engineers to define, validate, and interpret GD&T Feature Control Frames (FCFs) strictly against ASME Y14.5-2018.
 - Primary personas: design engineer (fast understanding/build), quality/manufacturing engineer (trustworthy interpretation and calculators), and project lead/manager (traceability across parts/runs).
-- Mode 1: image/PDF/screenshot interpretation with AI extraction, user confirmation, and QA-adjudicated final JSON + explanation.
+- Mode 1: image/PDF/screenshot interpretation with AI extraction (GPT-5.1), user confirmation, deterministic validation/calcs, and Explanation Agent output.
 - Mode 2: form-based FCF Builder with rules-driven validation and live SVG preview, producing canonical FCF JSON.
 - Deterministic rules + calculation engine is the source of truth for standards constraints, bonus tolerance, virtual condition, and pass/fail math; LLM outputs must align to it.
 - Canonical FCF JSON schema underpins storage, preview, exports (PNG/SVG/JSON), calculators, and agent prompts.
@@ -14,10 +14,10 @@
 ## 2) Scope
 | In Scope (v1) | Out of Scope (v1) |
 | --- | --- |
-| Mode 1 image/PDF upload, AI extraction, user correction, QA/adjudicated explanation | CAD geometry interrogation or feature recognition from STEP |
+| Mode 1 image/PDF upload, AI extraction, user correction, deterministic validation + explanation agent | CAD geometry interrogation or feature recognition from STEP |
 | Mode 2 form-based FCF Builder with rules validation and live SVG preview | Automated tolerance stack-up analysis |
 | Canonical FCF JSON schema; validation and deterministic calculations | ISO GPS or other standards (ASME Y14.5-2018 only) |
-| Multi-agent orchestration: Extraction, Interpretation, Combined, QA/Adjudicator | Advanced composite FCF modeling beyond simple placeholders |
+| 2-agent architecture: Extraction + Explanation (GPT-5.1) with deterministic rules/calcs authority | Advanced composite FCF modeling beyond simple placeholders |
 | Calculators: position at MMC, flatness, perpendicularity, profile | Multi-tenant enterprise admin, billing, SSO (beyond Supabase auth) |
 | Projects CRUD with tags/search; store FCF records and measurement runs | Offline desktop client; batch interpretation/import at scale |
 | File uploads for metadata only (STEP/CSV), linked to projects | Full CMM integration or direct gage programming |
@@ -36,9 +36,9 @@
 - Scope limits: metadata-only STEP/CSV handling; composite FCF restricted to null/simple placeholder; single-tenant app shell (no enterprise workspace features).
 
 ## 4) Risks & Unknowns
-- AI hallucinations or standards drift leading to incorrect explanations; mitigation relies on deterministic rules/calcs and QA agent, but coverage depth must be validated.
+- AI hallucinations or standards drift leading to incorrect explanations; mitigation relies on deterministic rules/calcs, constrained Explanation Agent prompts, and derived confidence, but coverage depth must be validated.
 - Ambiguous/low-quality images lowering parse confidence and increasing manual correction; need strong UX for warnings, retries, and edits.
-- Performance/cost of multi-agent calls; must monitor latency and spend, cache prompts, and rate-limit.
+- Performance/cost of 2-agent GPT-5.1 calls; must monitor latency and spend, cache prompts, and rate-limit.
 - Validation coverage for edge-case characteristics, modifiers, and partial composites may be incomplete; requires SME-reviewed test set.
 - Calculator assumptions (measurement inputs, gage conditions) may not match user setups; documentation and input collection need clarity to avoid misinterpretation.
 - Limited composite support and absence of stack-up/geometry parsing could disappoint advanced users; manage expectations in UI/marketing.

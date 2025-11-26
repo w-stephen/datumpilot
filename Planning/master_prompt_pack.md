@@ -559,24 +559,22 @@ Output code I can paste into `lib/calc/position.ts` and tests.
 
 ---
 
-## Phase 4 - AI Multi-Agent Orchestration (Epic E4)
+## Phase 4 - AI Orchestration (2-Agent, GPT-5.1)
 
-### Prompt 4.1 - Multi-agent architecture and I/O specs
+### Prompt 4.1 - 2-agent architecture and I/O specs
 
 **Prompt**
 
 ```text
 You are ChatGPT 5.1 Codex Max acting as an AI systems designer.
 
-I need to design a multi-agent orchestration layer for my "GD&T FCF Builder & Interpreter" app, consisting of:
+I need to design a 2-agent orchestration layer for my "GD&T FCF Builder & Interpreter" app, consisting of:
 - Extraction Agent,
-- Interpretation Agent,
-- Combined Extract+Interpret Agent,
-- QA/Adjudicator Agent.
+- Explanation Agent.
 
 In your first response, ask me to paste:
 - The PRD sections describing the AI agents and orchestrator,
-- My current FcfJson type and ValidationResult type.
+- My current FcfJson type, ValidationResult type, and CalcResult type.
 
 Wait for that context.
 
@@ -586,7 +584,7 @@ After I provide it, respond once with:
 
 2) TypeScript Interfaces - TypeScript interfaces for each agent's request and response payloads.
 
-3) Orchestration Flow - a step-by-step description of how `/api/fcf/interpret` should call the agents and the deterministic rules/calculation engine, including how to handle failures and low confidence.
+3) Orchestration Flow - a step-by-step description of how `/api/fcf/interpret` should call extraction (if image), deterministic validation/calculation, and the Explanation Agent, including how to handle failures and low confidence (derived from parseConfidence + validation).
 
 4) Sequence Diagram Description - a textual sequence diagram (steps) that I can later draw or document visually.
 
@@ -606,22 +604,20 @@ Write in implementation-ready language so I can create `lib/ai` modules based on
 **Assumptions & inputs**
 
 * PRD defines high-level agent behaviors.
-* You have FcfJson and validation types ready.
+* You have FcfJson, validation, and calculation types ready.
 
 ---
 
-### Prompt 4.2 - System prompts and templates for all agents
+### Prompt 4.2 - System prompts for Extraction + Explanation
 
 **Prompt**
 
 ```text
-You are ChatGPT 5.1 Codex Max acting as a prompt engineer for a multi-agent AI system.
+You are ChatGPT 5.1 Codex Max acting as a prompt engineer for a 2-agent AI system.
 
-I have four agents for my "GD&T FCF Builder & Interpreter" app:
+I have two agents for my "GD&T FCF Builder & Interpreter" app:
 - Extraction,
-- Interpretation,
-- Combined Extract+Interpret,
-- QA/Adjudicator.
+- Explanation.
 
 In your first response, ask me to paste:
 - The PRD sections about these agents,
@@ -633,11 +629,11 @@ After I provide it, respond once with:
 
 1) System Prompts - a full system prompt for each agent, emphasizing:
    - role,
-   - constraints (e.g., do not contradict rules engine),
+   - constraints (e.g., do not contradict rules/calcs; use exact CalcResult numbers),
    - expected JSON structure or explanation style,
    - behavior on uncertainty.
 
-2) User Prompt Templates - one template per agent that my backend can use, with clear placeholders for fields (e.g., image URL, raw text, FcfJson).
+2) User Prompt Templates - one template per agent that my backend can use, with clear placeholders for fields (e.g., image URL, raw text, FcfJson, CalcResult, ValidationResult).
 
 3) Failure/Uncertainty Instructions - specific instructions for how agents should respond when information is ambiguous or assumptions are required.
 
@@ -681,10 +677,7 @@ After I provide it, respond once with:
 
 1) API Design - confirm the shape of these endpoints:
    - `/api/ai/extract-fcf`
-   - `/api/ai/interpret-fcf`
-   - `/api/ai/combined-fcf`
-   - `/api/ai/qa-fcf`
-   - `/api/fcf/interpret` (orchestrator).
+   - `/api/fcf/interpret` (orchestrator: extraction → validation → calculation → explanation with derived confidence).
 
 2) Route Implementation - example Next.js route handlers or server actions for each endpoint, including:
    - input validation,
@@ -693,9 +686,10 @@ After I provide it, respond once with:
    - returning typed JSON responses.
 
 3) Orchestrator Implementation - a complete example implementation for `/api/fcf/interpret` that:
-   - orchestrates the agents,
+   - orchestrates extraction when imageUrl is provided,
    - calls the rules/calculation engine,
-   - reconciles results based on the QA agent.
+   - invokes the Explanation Agent with authoritative CalcResult,
+   - derives confidence from parseConfidence + validation results.
 
 4) Logging & Metrics - suggestions on how to log key events and measure latency/cost per request.
 
@@ -721,7 +715,7 @@ Provide code I can paste into `app/api/.../route.ts` files and then adjust.
 ```text
 You are ChatGPT 5.1 Codex Max acting as an AI evaluation engineer.
 
-I want an evaluation harness to test the quality of my multi-agent FCF interpretation pipeline for "GD&T FCF Builder & Interpreter."
+I want an evaluation harness to test the quality of my 2-agent FCF interpretation pipeline for "GD&T FCF Builder & Interpreter."
 
 In your first response, ask me to paste:
 - A few example FcfJson objects and their expected interpretations,
@@ -732,7 +726,7 @@ Wait for that context.
 
 After I provide it, respond once with:
 
-1) Evaluation Plan - describe how to evaluate the agents and orchestrator (metrics such as correctness of FcfJson fields, explanation quality, adherence to rules).
+1) Evaluation Plan - describe how to evaluate the agents and orchestrator (metrics such as correctness of FcfJson fields, explanation quality, adherence to rules, and confidence derivation).
 
 2) Test Harness Design - propose a simple TypeScript test harness (could be a script or test file) that:
    - defines evaluation cases,
@@ -759,6 +753,7 @@ Write in a way that I can create `tools/ai_evaluation.ts` and start experimentin
 * You are prepared to refine metrics as you see real results.
 
 ---
+
 
 ## Phase 5 - Core Application Features (Epics E5 & E6)
 

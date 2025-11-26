@@ -38,17 +38,16 @@ All flows converge on a **canonical FCF JSON schema** that acts as the system’
     - Canonical FCF schema.
     - Rules/validation engine.
     - Calculation engine.
-    - AI multi‑agent orchestration.
+    - AI orchestration (Extraction + Explanation agents).
 - **Data**
   - Postgres (e.g., Supabase) with Row‑Level Security (RLS).
   - Object storage for images, exports, and uploads.
   - Tables for projects, FCF records, measurements, user settings. 
 - **AI Layer**
-  - Multi‑agent ChatGPT pipeline:
-    - Extraction Agent.
-    - Interpretation Agent.
-    - Combined Extract+Interpret Agent.
-    - QA/Adjudicator Agent.
+  - 2-agent GPT-5.1 pipeline:
+    - Extraction Agent (images/PDFs → FCF JSON + parseConfidence).
+    - Explanation Agent (validated FCF + CalcResult → constrained explanation).
+  - Confidence derived from parseConfidence + validation cleanliness; deterministic rules/calcs remain authoritative; prompt caching for symbol/schema context.
 - **Auth & Security**
   - Supabase auth (OAuth or magic link).
   - RLS on all tables.
@@ -163,16 +162,14 @@ A realistic target is **~6 sprints (~12 weeks)** to reach a robust v1 internal p
 
 ---
 
-### Phase 4 – AI Multi‑Agent Orchestration Layer
+### Phase 4 – AI Integration (2-Agent)
 
 **Goals**
 
-- Implement the four logical agents:
-  - Extraction.
-  - Interpretation.
-  - Combined Extract+Interpret.
-  - QA/Adjudicator.fileciteturn0file0  
-- Provide stable backend endpoints and orchestration for `/api/fcf/interpret`.
+- Implement the two agents with GPT-5.1 and prompt caching:
+  - Extraction Agent (images/PDFs → FCF JSON + parseConfidence).
+  - Explanation Agent (validated FCF + CalcResult → constrained explanation).
+- Provide stable backend endpoints `/api/ai/extract-fcf` and `/api/fcf/interpret` (extraction → validation → calculation → explanation) with derived confidence logic.
 - Ensure AI outputs are consistent with deterministic rules.
 
 **Entry criteria**
@@ -184,17 +181,15 @@ A realistic target is **~6 sprints (~12 weeks)** to reach a robust v1 internal p
 
 - Functional AI endpoints:
   - `/api/ai/extract-fcf`
-  - `/api/ai/interpret-fcf`
-  - `/api/ai/combined-fcf`
-  - `/api/ai/qa-fcf`
-  - `/api/fcf/interpret` as orchestrator.fileciteturn0file0  
-- Prompt templates for each agent, versioned and documented.
-- Initial latency and cost profile for AI endpoints.
+  - `/api/fcf/interpret` orchestrating validation/calculation + Explanation Agent with derived confidence.  
+- Prompt templates for Extraction + Explanation agents, versioned and documented.
+- Confidence derivation from parseConfidence + validation implemented.
 
 **Key deliverables**
 
-- Prompt library with system and user prompts for each agent.
-- Orchestrator module with structured logging and correlation IDs.
+- Prompt library for Extraction Agent and Explanation Agent (GPT-5.1 + caching).
+- Confidence derivation utility (parseConfidence + validation cleanliness).
+- End-to-end `/api/fcf/interpret` orchestration with structured logging and correlation IDs.
 - Evaluation harness with golden FCF examples.
 
 ---
@@ -696,8 +691,8 @@ Assume 2‑week sprints.
    - Used by both UI and backend.
 
 4. **AI Orchestration Layer**
-   - Multi‑agent pipeline (Extraction, Interpretation, Combined, QA).fileciteturn0file0  
-   - Orchestrator endpoint `/api/fcf/interpret` coordinates them, ensuring consistency with deterministic engine.
+   - 2-agent pipeline (Extraction + Explanation) using GPT-5.1 with prompt caching.fileciteturn0file0  
+   - Orchestrator endpoint `/api/fcf/interpret` coordinates extraction (if image), deterministic validation/calcs, Explanation Agent, and derived confidence.
 
 5. **Data Storage & File Handling**
    - Postgres tables:
@@ -730,7 +725,7 @@ Assume 2‑week sprints.
 ### Risk areas & technical spikes
 
 - **AI correctness vs standards**  
-  Spike: Evaluate prompt strategies for Interpretation and QA to minimize hallucinations.
+  Spike: Evaluate prompt strategies for Extraction + Explanation (constrained to deterministic outputs) to minimize hallucinations and drift.
 
 - **Image quality and parsing accuracy**  
   Spike: Measure performance on noisy drawings and evaluate pre‑processing steps.
@@ -818,7 +813,7 @@ Below are reusable prompt templates designed for ChatGPT Codex Max. Paste the PR
 
 **ARCH‑P3 – AI multi‑agent orchestration**
 
-> We must implement four logical agents (Extraction, Interpretation, Combined, QA/Adjudicator) and an `/api/fcf/interpret` orchestrator.  
+> We must implement two agents (Extraction + Explanation) and an `/api/fcf/interpret` orchestrator that routes through deterministic validation/calculation with derived confidence.  
 > Context: [PASTE PRD AI SECTIONS]  
 >  
 > Please outline:  
@@ -928,20 +923,16 @@ Below are reusable prompt templates designed for ChatGPT Codex Max. Paste the PR
 
 ---
 
-**AI‑P2 – QA/Adjudicator prompt**
+**AI‑P2 – Explanation Agent prompt**
 
-> The QA/Adjudicator receives:  
-> - Extraction Agent output (JSON + notes).  
-> - Interpretation Agent explanation.  
-> - Combined Agent output (JSON + explanation).  
-> - Rules engine errors (if any).  
-> - Calculation engine summary.  
-> Context: [PASTE PRD AI SECTION 9]  
+> The Explanation Agent receives validated FcfJson, CalcResult (authoritative numbers), and optional ValidationResult warnings.  
+> Context: [PASTE PRD AI SECTION 9 / docs/06_ai_architecture.md Section 5.2]  
 >  
-> Please produce a QA/Adjudicator prompt that:  
-> - Chooses or synthesizes a final FcfJson.  
-> - Produces a final explanation consistent with deterministic results.  
-> - Outputs a confidence score and warnings for the UI.  
+> Please produce a constrained Explanation Agent prompt that:  
+> - Uses the exact numeric values from CalcResult (no recomputation).  
+> - Outputs an engineering-format explanation.  
+> - Mirrors validation warnings where relevant.  
+> - Avoids any changes to FcfJson structure or numbers.  
 
 ---
 
@@ -1106,4 +1097,3 @@ This structure keeps domain logic (`lib/fcf`, `lib/rules`, `lib/calc`) decoupled
    - Use QA prompts to enumerate test cases, then refine and automate in the repo.
 
 By following this project plan and integrating ChatGPT Codex Max into each discipline’s workflow inside VS Code, the team can deliver a rigorous, standards‑aligned GD&T FCF Builder & Interpreter with strong velocity and quality.
-

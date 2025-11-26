@@ -31,11 +31,11 @@ The app provides:
 1. A modern **FCF Builder UI** (web version of the classic “Geometric Tolerance” dialog).
 2. **Image / screenshot‑based FCF extraction** and interpretation (including from PDF snippets).
 3. **Text/JSON‑based interpretation and calculators** for key tolerances.
-4. A **multi‑agent ChatGPT pipeline** that:
-   - Extracts FCF data from user inputs.
-   - Interprets the FCF into plain‑language explanations.
-   - Cross‑checks outputs via a combined extract+interpret agent.
-   - Uses a QA/adjudicator agent to reconcile differences and return a single vetted result.
+4. A **2-agent GPT-5.1 pipeline** that:
+   - Extracts FCF data from user inputs (Extraction Agent).
+   - Validates and computes authoritative results via the deterministic rules/calculation engine after user confirmation.
+   - Generates a constrained explanation using those results (Explanation Agent).
+   - Derives confidence from parseConfidence + validation cleanliness (no arbitration agent).
 5. A **canonical FCF JSON schema** as the backbone for previews, calculations, storage, and exports.
 
 The system’s numerical logic and standards constraints are enforced by a **deterministic rules and calculation engine**; AI explanations must align with those results.
@@ -51,10 +51,10 @@ The system’s numerical logic and standards constraints are enforced by a **det
    - Mode 1: **Image / screenshot interpretation** (including drawing/PDF snippets).
    - Mode 2: **Form‑based FCF Builder** with live preview.
 3. Normalize all inputs into a **canonical FCF JSON** structure.
-4. Use **ChatGPT multi‑agent orchestration** for:
-   - FCF extraction from image/text.
-   - Interpretation into human‑readable explanations.
-   - Cross‑checking via a combined agent and a QA/adjudicator agent.
+4. Use **GPT-5.1 2-agent orchestration** for:
+   - FCF extraction from image/text (Extraction Agent).
+   - Deterministic validation/calculation as authority before AI explanation.
+   - Constrained Explanation Agent outputs with confidence derived from parseConfidence + validation.
 5. Maintain a **deterministic rules & calculation engine** as the source of truth for:
    - Standards constraints (what is allowed or required per ASME Y14.5).
    - Numeric results (bonus tolerance, virtual condition, pass/fail).
@@ -131,10 +131,9 @@ Product success should be measurable via:
    - Normalized FCF JSON generated and stored.
 
 3. **FCF Interpretation**
-   - Interpretation Agent converts FCF JSON (plus optional size/measurement info) into plain‑language explanations.
-   - Deterministic engine computes numeric values (bonus tolerance, virtual condition, etc.) and feeds them into the LLM.
-   - Combined Extract+Interpret Agent runs in parallel for image/text inputs.
-   - QA/Adjudicator Agent reconciles outputs and produces the final JSON + explanation.
+   - Explanation Agent converts FCF JSON (plus optional size/measurement info) into plain‑language explanations using deterministic calculation outputs.
+   - Deterministic engine computes numeric values (bonus tolerance, virtual condition, etc.) and is authoritative.
+   - Confidence derived from parseConfidence (extraction) + validation cleanliness; no arbitration agent.
 
 4. **Calculators**
    - Position at MMC (including bonus tolerance and virtual condition).
@@ -168,8 +167,8 @@ Product success should be measurable via:
    - Row‑Level Security (RLS) on all user data.
    - Private buckets with signed URLs only.
 
-10. **Multi‑Agent Orchestration**
-    - Orchestrator service that manages multiple ChatGPT calls (agents), combines outputs, and returns final results to the frontend.
+10. **2‑Agent AI Orchestration**
+    - Orchestrator service that manages GPT‑5.1 calls for Extraction + Explanation, routes through deterministic validation/calculations, derives confidence from parseConfidence + validation, and returns final results to the frontend.
 
 ### 3.2 Out of Scope (v1)
 
@@ -189,8 +188,8 @@ Product success should be measurable via:
 2. **FCF Builder**
    - As a GD&T‑literate user, I can use a guided dialog to build an FCF that is standards‑correct, with live preview and error feedback, so I can specify tolerances confidently.
 
-3. **Validation & QA**
-   - As a quality engineer, I can rely on the system to run multiple AI “opinions” and reconcile them before giving me a result, so I can trust the interpretation more.
+3. **Validation & Confidence**
+   - As a quality engineer, I can rely on deterministic validation/calculation, a constrained Explanation Agent, and derived confidence (parseConfidence + validation) so I can trust the interpretation.
 
 4. **Projects & Reporting**
    - As a project lead, I can save FCFs into projects, associate them with measurement runs, and export graphics and JSON for use in reports and downstream tools.
@@ -284,12 +283,12 @@ Notes:
 6. Once the user confirms:
    - Canonical FCF JSON is finalized and stored.
    - Calculation engine computes numeric values.
-   - Interpretation and Combined Agents are triggered.
-   - QA Agent reconciles final outputs.
+   - Explanation Agent is triggered with validated FCF + calc results.
+   - Confidence derived from parseConfidence + validation cleanliness.
 
 ### 6.2 User‑Facing Output
 
-The final explanation (after multi‑agent QA) must cover:
+The final explanation (constrained by deterministic calculations) must cover:
 
 - Controlled characteristic and feature(s).
 - Tolerance zone shape and size, with units.
@@ -429,73 +428,34 @@ All calculators share:
 
 ---
 
-## 9. Multi‑Agent ChatGPT Architecture
+## 9. AI Architecture
 
-### 9.1 Agent Roles
+### 9.1 Overview
 
-The AI layer uses **four logical agents** (implemented as separate ChatGPT calls with distinct prompts):
+DatumPilot uses a 2-agent architecture where AI assists with extraction and explanation,
+while deterministic engines maintain authority over validation and calculations.
 
-1. **Extraction Agent**
-   - Input: raw user input (image URL and/or transcribed text).
-   - Task: produce candidate FCF JSON + notes + `parseConfidence`.
-   - Primary use: Mode 1 (image), also capable of text‑only FCF strings.
+### 9.2 Agents
 
-2. **Interpretation Agent**
-   - Input:
-     - Validated FCF JSON.
-     - Deterministic calculation outputs.
-   - Task: generate the main explanation and calculator narrative, consistent with numeric results.
+| Agent | Model | Purpose |
+|-------|-------|---------|
+| Extraction Agent | GPT-5.1 | Parse FCF from images → JSON |
+| Explanation Agent | GPT-5.1 | Generate plain English explanation |
 
-3. **Combined Extract+Interpret Agent**
-   - Input: same as Extraction Agent.
-   - Task:
-     - Infer FCF JSON.
-     - Produce explanation in a single pass.
-   - Purpose: independent second opinion against the extraction → interpretation pipeline.
+### 9.3 Deterministic Core (Authoritative)
 
-4. **QA / Adjudicator Agent**
-   - Inputs:
-     - Extraction Agent output (JSON + notes).
-     - Interpretation Agent output.
-     - Combined Agent output (JSON + explanation).
-     - Validation errors (if any) from rules engine.
-     - Numeric results from calculation engine.
-   - Tasks:
-     - Compare Extraction vs Combined JSON.
-     - Check explanations against rules engine and numeric results.
-     - Decide:
-       - Final canonical FCF JSON (or flag uncertainty).
-       - Final explanation text.
-       - Confidence score (e.g., high/medium/low).
-       - Warning notes for the user.
+- **Rules Engine**: ASME Y14.5-2018 validation, error codes E001-E0xx
+- **Calculation Engine**: Bonus tolerance, virtual condition, pass/fail
 
-### 9.2 Orchestration Flow – Image Case (Mode 1)
+### 9.4 Key Principle
 
-1. User submits image.
-2. Backend triggers in parallel:
-   - Extraction Agent.
-   - Combined Agent.
-3. Backend runs rules engine on Extraction Agent’s JSON.
-4. Interpretation Agent runs on validated Extraction JSON + calc outputs.
-5. QA Agent receives all outputs + deterministic checks and produces:
-   - Final FCF JSON.
-   - Final explanation.
-   - Confidence + warnings.
-6. UI shows:
-   - Final answer with confidence indicator.
-   - Summary of reasoning (high‑level).
-   - Option to edit JSON/fields or override.
+AI cannot override deterministic results. The Explanation Agent receives
+CalcResult as input and must use those exact values in its output.
 
-### 9.3 Orchestration Flow – Builder Case (Mode 2)
+### 9.5 Cost Estimate
 
-1. User builds FCF via Builder form.
-2. Rules engine validates FCF JSON.
-3. Calculation engine computes numeric results.
-4. Interpretation Agent generates explanation.
-5. QA Agent:
-   - Optionally runs Combined Agent on a synthetic text rendering of the FCF.
-   - Validates Interpretation output against rules/calcs.
-   - Returns final explanation + confidence.
+~$0.003-0.008 per request with GPT-5.1 and prompt caching.
+Monthly estimate: $30-80 at 10K requests.
 
 ---
 
@@ -517,7 +477,7 @@ A deterministic engine is responsible for:
     - `radial_location_error ≤ T_eff / 2`.
   - Additional computations for flatness, perpendicularity, profile, etc.
 
-All numeric outputs are treated as **ground truth**. LLM‑generated content must not contradict these; QA Agent flags and resolves inconsistencies.
+All numeric outputs are treated as **ground truth**. LLM‑generated content must not contradict these; the Explanation Agent prompt enforces these values and confidence derives from validation results.
 
 ### 10.2 Error Codes
 
@@ -575,20 +535,8 @@ UI must display:
   - Input: `{ imageUrl?: string, text?: string, hints?: { featureType?: string, standard?: 'ASME_Y14_5_2018' } }`
   - Output: `{ fcf: FcfJson, parseConfidence: number, notes?: string[] }`
 
-- `POST /api/ai/interpret-fcf`
-  - Input: `{ fcf: FcfJson, measurements?: any }`
-  - Output: `{ explanation: string, calculations: any, passFail?: boolean }`
-
-- `POST /api/ai/combined-fcf`
-  - Input: `{ imageUrl?: string, text?: string }`
-  - Output: `{ fcf: FcfJson, explanation: string, parseConfidence: number }`
-
-- `POST /api/ai/qa-fcf`
-  - Input: outputs of the three agents + rules/calcs summary.
-  - Output: `{ finalFcf: FcfJson, explanation: string, confidence: 'high' | 'medium' | 'low', warnings?: string[] }`
-
 - `POST /api/fcf/interpret`
-  - Public app endpoint orchestrating the above and returning QA Agent result.
+  - Public app endpoint orchestrating extraction (if image), deterministic validation, calculation, Explanation Agent, and derived confidence.
 
 - `POST /api/fcf/export`
   - Input: `{ fcf: FcfJson, format: 'png' | 'svg' }`
@@ -692,7 +640,7 @@ RLS policies restrict all tables to `auth.uid()`.
 ## 14. Risks & Mitigations
 
 - **Risk: AI Hallucinations / Standards Violations**
-  - Mitigation: Deterministic rules & computation engine is the single source of truth; QA agent checks all text against numeric and rules context.
+  - Mitigation: Deterministic rules & computation engine is the single source of truth; Explanation Agent is constrained to calc outputs and confidence derives from validation + parseConfidence.
 
 - **Risk: Ambiguous or Poor‑Quality Images**
   - Mitigation: Confidence scoring, clear user warnings, and strong manual editing flows.

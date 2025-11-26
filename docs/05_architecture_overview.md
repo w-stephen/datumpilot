@@ -4,7 +4,7 @@
 - Web frontend (Next.js 15 App Router, React, Tailwind/shadcn/ui) for builder, interpreter, image interpreter, projects, settings.
 - API layer (Next.js route handlers + server actions) exposing `/api/fcf/*`, `/api/ai/*`, project CRUD, uploads, exports.
 - Deterministic core (canonical FcfJson schema, Zod validation, rules engine, calculation engine, units/formatting utilities).
-- AI orchestration (multi-agent OpenAI calls: Extraction, Combined, Interpretation, QA/adjudicator) with guardrails using deterministic results.
+- AI architecture (2-agent GPT-5.1 calls: Extraction + Explanation) with deterministic rules/calcs as authority and confidence derived from parseConfidence + validation.
 - Data layer (Supabase Postgres with RLS) for projects, fcf_records, measurements, user_settings, uploads metadata.
 - Auth and access control (Supabase Auth + RLS + signed URLs).
 - Object/file storage (Supabase Storage private buckets for images/PDFs/exports; signed URL generation).
@@ -30,11 +30,18 @@
   - Outputs: `ValidationResult` (codes E001–E005...), calculation outputs (bonus, T_eff, pass/fail), formatted values.
   - Interactions: consumed by API and frontend; fed into AI prompts; blocks finalize/export on invalid data.
 
-- AI orchestration
-  - Responsibilities: manage agent prompts/calls (Extraction, Combined, Interpretation, QA), reconcile outputs, attach confidence/warnings.
-  - Inputs: signed image URL or text, validated FcfJson, deterministic calculations, validation issues, correlation ID.
-  - Outputs: final FcfJson, explanation, confidence level, warnings/notes.
-  - Interactions: called from `/api/fcf/interpret`; logs per-agent traces; uses deterministic outputs as ground truth.
+- AI architecture (2-agent)
+  - Responsibilities: manage prompts/calls for Extraction and Explanation agents; orchestrate `/api/ai/extract-fcf` + explanation generation; derive confidence from parseConfidence + validation; apply prompt caching.
+  - Inputs: signed image URL or builder-provided FcfJson, validation results, deterministic calculations, correlation ID.
+  - Outputs: candidate FcfJson + parseConfidence, engineering-format explanation bound to calc results, derived confidence/warnings.
+  - Interactions: invoked by `/api/fcf/interpret`; logs per-agent traces; uses deterministic outputs as ground truth; only calls explanation after validation passes.
+
+- Agent responsibilities
+
+| Agent | Purpose | Model |
+|-------|---------|-------|
+| Extraction Agent | Parse FCF from images/PDFs → JSON | GPT-5.1 |
+| Explanation Agent | Generate engineering-format explanation | GPT-5.1 |
 
 - Data layer (Supabase Postgres + RLS)
   - Responsibilities: persist projects, fcf_records, measurement runs, user_settings, uploads metadata; enforce per-user isolation with RLS.
@@ -69,7 +76,7 @@
 ## 3) Boundaries
 - Rules/calculation engine vs AI layer
   - Deterministic engine is authoritative for schema validity and numeric outputs (bonus, T_eff, pass/fail); AI cannot override, only explain.
-  - AI prompts always receive deterministic outputs and validation issues; QA agent must reject contradictions.
+  - AI prompts always receive deterministic outputs and validation issues; the Explanation Agent must mirror authoritative numbers, and confidence is derived from parseConfidence + validation cleanliness rather than QA adjudication.
   - Any AI-generated FcfJson is revalidated; invalid results trigger repair or user correction before finalize/export.
 
 - Backend vs frontend
@@ -86,7 +93,7 @@
 - Web/app: Next.js 15 App Router + TypeScript; Tailwind + shadcn/ui; React Server Components where possible; client components for interactive forms/previews.
 - API layer: Next.js route handlers (`app/api/*`) and server actions; Supabase server client for DB/storage/auth; `fetch` for OpenAI; consider `zod` for input parsing.
 - Deterministic core: TypeScript modules under `lib/fcf`, `lib/rules`, `lib/calc`, `lib/format`; Zod schemas; Vitest for unit tests.
-- AI orchestration: OpenAI GPT-4.1/GPT-4o for Extraction/Combined/Interpretation/QA; correlation IDs; optional streaming explanations; rate limiting via middleware.
+- AI architecture: OpenAI GPT-5.1 for Extraction + Explanation; prompt caching for symbol definitions/schema; derived confidence from parseConfidence + validation; correlation IDs; optional streaming explanations; rate limiting via middleware.
   - Alternative: fallback provider abstraction (e.g., Azure OpenAI) behind a `providers/llm` interface.
 - Data/auth: Supabase Postgres + Auth + RLS; `jsonb` for FcfJson storage; indexes on `user_id`, `project_id`, `created_at`.
   - Alternative: Prisma for type-safe queries (optional) vs direct Supabase client.
@@ -101,10 +108,11 @@
 - Choose Next.js App Router with server actions for app and API boundaries.
 - Use Supabase (Auth, Postgres with RLS, Storage) as primary backend platform; no separate backend service.
 - Canonical `FcfJson` schema stored as `jsonb`; deterministic rules/calcs are authoritative over AI outputs.
-- Multi-agent orchestration pattern (Extraction, Combined, Interpretation, QA) with QA as final arbiter.
+- 2-agent architecture (Extraction + Explanation) with deterministic authority and derived confidence (ADR-007).
+- GPT-5.1 model selection for both agents with prompt caching (ADR-008).
 - Private storage with signed URLs; no public blobs; uploads limited to image/PDF/STEP/CSV metadata.
 - Export pipeline uses server-side SVG + `sharp` PNG; no client-side export for persistence reasons.
-- Error codes (`E001`–`E00x`) standardized in rules engine and surfaced to AI for repair/QA.
+- Error codes (`E001`–`E00x`) standardized in rules engine and surfaced to AI for repair/explanation.
 - Units/precision as user settings persisted in `user_settings`; all calculators/exports derive from this, not ad-hoc props.
 - Observability stack: Sentry for errors + PostHog for product metrics; correlation IDs required on AI/API calls.
 - Performance budget: live preview ≤50 ms P90; `/api/fcf/interpret` ≤400 ms P90 at 1 rps; retries/backoff on AI calls.
@@ -115,7 +123,7 @@
 - Vercel (or preferred Next.js host)
   - Link repo; env vars for Supabase keys/URL, OpenAI keys, SENTRY_DSN/POSTHOG keys; set serverless function region; configure protected preview envs.
 - OpenAI
-  - API key(s), org ID, model choices (GPT-4o/4.1); spend limits; note base URL if using Azure OpenAI.
+  - API key(s), org ID, model choices (GPT-5.1 with prompt caching); spend limits; note base URL if using Azure OpenAI.
 - Sentry (errors)
   - DSN for frontend and server; release/env naming convention; sampling rates.
 - PostHog (analytics/feature flags)
