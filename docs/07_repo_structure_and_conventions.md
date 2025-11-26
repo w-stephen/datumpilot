@@ -28,9 +28,6 @@
             export/route.ts
           ai/
             extract-fcf/route.ts
-            interpret-fcf/route.ts
-            combined-fcf/route.ts
-            qa-fcf/route.ts
           projects/route.ts
           uploads/route.ts
         (styles)/globals.css
@@ -63,12 +60,10 @@
           flatness.ts
           perpendicularity.ts
           profile.ts
-        ai/         # agent prompts and orchestration
+        ai/         # agent prompts and orchestration (2-agent GPT-5.1)
           extractionAgent.ts
-          interpretationAgent.ts
-          combinedAgent.ts
-          qaAgent.ts
-          orchestrator.ts
+          explanationAgent.ts
+          orchestrator.server.ts
         supabase/   # server/client helpers
           client.ts
           storage.ts
