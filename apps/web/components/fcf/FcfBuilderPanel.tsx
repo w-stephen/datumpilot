@@ -9,6 +9,8 @@ import { DatumSelector, DatumList, DATUM_LETTERS } from "@/components/gdt/DatumB
 import { ToleranceInput } from "@/components/gdt/ToleranceDisplay";
 import { MaterialConditionSelector } from "@/components/gdt/MaterialConditionBadge";
 import { ValidationPanel } from "@/components/gdt/ValidationMessage";
+import SizeDimensionInput from "@/components/gdt/SizeDimensionInput";
+import type { SizeDimensionInput as SizeDimensionType } from "@/lib/calc/types";
 import type { ValidationResult } from "@/lib/rules/validateFcf";
 import {
   CHARACTERISTIC_DESCRIPTIONS,
@@ -33,6 +35,9 @@ const defaultFcf: Partial<FcfJson> = {
 
 // Cylindrical features that should have diametral tolerance zones
 const CYLINDRICAL_FEATURES: FeatureType[] = ["hole", "pin"];
+
+// Features of Size that can have MMC/LMC and require size dimension
+const FEATURES_OF_SIZE: FeatureType[] = ["hole", "pin", "boss", "slot"];
 
 export default function FcfBuilderPanel({
   initialFcf,
@@ -107,6 +112,28 @@ export default function FcfBuilderPanel({
 
   // Check if feature is cylindrical (should have diametral zone)
   const isCylindricalFeature = fcf.featureType && CYLINDRICAL_FEATURES.includes(fcf.featureType);
+
+  // Check if feature is a Feature of Size (can have MMC/LMC)
+  const isFeatureOfSize = fcf.featureType && FEATURES_OF_SIZE.includes(fcf.featureType);
+
+  // Size dimension is relevant for Features of Size
+  // Required when MMC/LMC is selected, optional otherwise
+  const showSizeDimension = isFeatureOfSize;
+  const sizeDimensionRequired = isFeatureOfSize && fcf.tolerance?.materialCondition;
+
+  // Update size dimension
+  const updateSizeDimension = useCallback(
+    (updates: Partial<Omit<SizeDimensionType, "featureType">>) => {
+      updateFcf({
+        sizeDimension: {
+          ...fcf.sizeDimension,
+          ...updates,
+          featureType: fcf.featureType!,
+        } as any,
+      });
+    },
+    [fcf.sizeDimension, fcf.featureType, updateFcf]
+  );
 
   // Auto-set/unset diameter zone based on feature type
   useEffect(() => {
@@ -215,7 +242,34 @@ export default function FcfBuilderPanel({
         </div>
       </section>
 
-      {/* Section 4: Datum References */}
+      {/* Section 4: Size Dimension (for Features of Size) */}
+      {showSizeDimension && (
+        <section className="panel">
+          <div className="panel-header">
+            <h3 className="panel-title">Size Dimension</h3>
+            {sizeDimensionRequired ? (
+              <span className="text-xs text-warning-400">Required for {fcf.tolerance?.materialCondition}</span>
+            ) : (
+              <span className="text-xs text-slate-500">Optional</span>
+            )}
+          </div>
+          <div className="p-4">
+            <p className="text-xs text-slate-500 mb-4">
+              {sizeDimensionRequired
+                ? "Enter the size dimension to calculate bonus tolerance and virtual/resultant conditions."
+                : "Enter size dimension if you want to calculate MMC/LMC boundaries. Required when using material condition modifiers."}
+            </p>
+            <SizeDimensionInput
+              value={fcf.sizeDimension}
+              onChange={updateSizeDimension}
+              featureType={fcf.featureType}
+              unit={fcf.sourceUnit || "mm"}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Section 5: Datum References */}
       {allowsDatums && (
         <section className="panel">
           <div className="panel-header">
@@ -280,7 +334,7 @@ export default function FcfBuilderPanel({
         </section>
       )}
 
-      {/* Section 5: Frame Modifiers (Advanced) */}
+      {/* Section 6: Frame Modifiers (Advanced) */}
       <section className="panel">
         <div className="panel-header">
           <h3 className="panel-title">Frame Modifiers</h3>
@@ -315,7 +369,7 @@ export default function FcfBuilderPanel({
         </div>
       </section>
 
-      {/* Section 6: Name & Notes */}
+      {/* Section 7: Name & Notes */}
       <section className="panel">
         <div className="panel-header">
           <h3 className="panel-title">Name & Notes</h3>
