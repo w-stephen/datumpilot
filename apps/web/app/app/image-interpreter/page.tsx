@@ -7,19 +7,16 @@ import {
   FileImage,
   X,
   Sparkles,
-  Check,
   RefreshCw,
   ZoomIn,
   ZoomOut,
-  Download,
-  Copy,
   Target,
-  Plus,
   Crosshair,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { FcfJson } from "@/lib/fcf/schema";
 import FcfPreview from "@/components/fcf/FcfPreview";
+import InterpretationPanel from "@/components/fcf/InterpretationPanel";
 import { ConfidenceBar } from "@/components/gdt/ConfidenceIndicator";
 
 interface ExtractedFcf {
@@ -84,7 +81,6 @@ export default function ImageInterpreterPage() {
   const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null);
   const [selectedFcfIndex, setSelectedFcfIndex] = useState<number | null>(null);
   const [zoom, setZoom] = useState(100);
-  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle file selection
@@ -216,30 +212,6 @@ export default function ImageInterpreterPage() {
     setIsProcessing(false);
   }, [image]);
 
-  // Copy all FCFs as JSON
-  const handleCopyAll = useCallback(() => {
-    if (!extractionResult) return;
-    const json = extractionResult.fcfs.map((f) => f.fcf);
-    navigator.clipboard.writeText(JSON.stringify(json, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [extractionResult]);
-
-  // Download all FCFs as JSON
-  const handleDownloadAll = useCallback(() => {
-    if (!extractionResult) return;
-    const json = extractionResult.fcfs.map((f) => f.fcf);
-    const blob = new Blob([JSON.stringify(json, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `extracted-fcfs-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [extractionResult]);
-
   const selectedFcf = selectedFcfIndex !== null ? extractionResult?.fcfs[selectedFcfIndex] : null;
 
   return (
@@ -261,26 +233,9 @@ export default function ImageInterpreterPage() {
 
         {extractionResult && (
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopyAll}
-              className="flex items-center gap-2 px-3 py-2 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 font-mono text-xs transition-colors"
-              title="Copy all FCFs"
-            >
-              {copied ? (
-                <Check className="w-3.5 h-3.5 text-accent-500" />
-              ) : (
-                <Copy className="w-3.5 h-3.5" />
-              )}
-              COPY ALL
-            </button>
-            <button
-              onClick={handleDownloadAll}
-              className="flex items-center gap-2 px-3 py-2 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 font-mono text-xs transition-colors"
-              title="Download all FCFs"
-            >
-              <Download className="w-3.5 h-3.5" />
-              EXPORT
-            </button>
+            <span className="font-mono text-xs text-slate-500">
+              {extractionResult.fcfs.length} FCF{extractionResult.fcfs.length !== 1 ? 'S' : ''} FOUND
+            </span>
           </div>
         )}
       </div>
@@ -627,45 +582,22 @@ export default function ImageInterpreterPage() {
                   </div>
                 </TechnicalPanel>
 
-                {/* Selected FCF details */}
+                {/* Selected FCF Actions */}
                 {selectedFcf && (
-                  <TechnicalPanel
-                    label="FCF.DETAIL"
-                    headerRight={
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            JSON.stringify(selectedFcf.fcf, null, 2)
-                          );
-                        }}
-                        className="font-mono text-[10px] text-slate-500 hover:text-accent-500 transition-colors flex items-center gap-1"
-                      >
-                        <Copy className="w-3 h-3" />
-                        COPY JSON
-                      </button>
-                    }
-                  >
-                    <div className="p-4">
-                      <pre className="font-mono text-xs text-slate-300 bg-slate-950/50 p-4 overflow-auto max-h-[200px] scrollbar-hide">
-                        {JSON.stringify(selectedFcf.fcf, null, 2)}
-                      </pre>
-                      <div className="flex items-center gap-2 mt-4">
-                        <button
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-accent-500 text-slate-950 font-mono text-xs font-semibold hover:bg-accent-400 transition-colors"
-                          style={{
-                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
-                          }}
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          ADD TO PROJECT
-                        </button>
-                        <button className="flex items-center gap-2 px-4 py-2 border border-slate-700 text-slate-300 font-mono text-xs hover:border-slate-600 transition-colors">
-                          <Target className="w-3.5 h-3.5" />
-                          OPEN IN BUILDER
-                        </button>
-                      </div>
-                    </div>
-                  </TechnicalPanel>
+                  <div className="flex items-center gap-2 px-4 py-3 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+                    <span className="font-mono text-[10px] text-slate-500 flex-1">
+                      FCF.{String((selectedFcfIndex ?? 0) + 1).padStart(2, '0')} SELECTED
+                    </span>
+                    <button className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-mono text-[10px] hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+                      <Target className="w-3 h-3" />
+                      EDIT IN BUILDER
+                    </button>
+                  </div>
+                )}
+
+                {/* Interpretation Panel - Always visible when FCF selected */}
+                {selectedFcf && (
+                  <InterpretationPanel fcf={selectedFcf.fcf} />
                 )}
               </>
             )}

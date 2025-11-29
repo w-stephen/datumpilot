@@ -13,7 +13,7 @@ export async function runExplanationAgent(
 
   const userPrompt = buildExplanationUserPrompt({
     fcfJson: JSON.stringify(fcf, null, 2),
-    calcResult: JSON.stringify(calcResult, null, 2),
+    calcResult: calcResult ? JSON.stringify(calcResult, null, 2) : undefined,
     validationResult: JSON.stringify(validation, null, 2),
     parseConfidence,
     format

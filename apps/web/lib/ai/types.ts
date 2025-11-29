@@ -44,7 +44,7 @@ export interface ExtractionAgentResponse {
 
 export interface ExplanationAgentRequest {
   fcf: FcfJson;
-  calcResult: CalcResult;
+  calcResult?: CalcResult;
   validation: ValidationResult;
   parseConfidence?: number;
   format?: "markdown" | "plain";

@@ -131,18 +131,7 @@ export async function orchestrateFcfInterpretation(
   const warnings = validation.warnings.map((issue) => `${issue.code}: ${issue.message}`);
   const confidence = deriveConfidence(parseConfidence, validation);
 
-  if (!calcResult) {
-    return {
-      status: "ok",
-      fcf,
-      parseConfidence,
-      validation,
-      confidence,
-      warnings: warnings.length ? warnings : undefined,
-      correlationId
-    };
-  }
-
+  // Always run explanation agent (with or without calcResult)
   try {
     const explanation = await runExplanationAgent({
       fcf,

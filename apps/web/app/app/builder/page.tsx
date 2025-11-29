@@ -2,9 +2,6 @@
 
 import { useState, useCallback, useEffect } from "react";
 import {
-  Download,
-  Copy,
-  Check,
   Save,
   RotateCcw,
   Code,
@@ -13,13 +10,13 @@ import {
   Sparkles,
   AlertCircle,
   CheckCircle2,
-  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { FcfJson } from "@/lib/fcf/schema";
 import type { ValidationResult } from "@/lib/rules/validateFcf";
 import FcfBuilderPanel from "@/components/fcf/FcfBuilderPanel";
 import FcfPreview from "@/components/fcf/FcfPreview";
+import InterpretationPanel from "@/components/fcf/InterpretationPanel";
 
 type ViewMode = "split" | "builder" | "preview";
 
@@ -66,8 +63,6 @@ export default function BuilderPage() {
 
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("split");
-  const [copied, setCopied] = useState(false);
-  const [showJson, setShowJson] = useState(false);
 
   // Mock validation
   const handleValidate = useCallback(async (fcfData: Partial<FcfJson>) => {
@@ -164,12 +159,6 @@ export default function BuilderPage() {
     handleValidate(fcf);
   }, [fcf, handleValidate]);
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(JSON.stringify(fcf, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [fcf]);
-
   const handleReset = useCallback(() => {
     setFcf({
       sourceUnit: "mm",
@@ -179,18 +168,6 @@ export default function BuilderPage() {
     });
     setValidationResult(null);
   }, []);
-
-  const handleDownload = useCallback(() => {
-    const blob = new Blob([JSON.stringify(fcf, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `fcf-${fcf.name || "untitled"}-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [fcf]);
 
   return (
     <div className="h-full flex flex-col">
@@ -243,24 +220,6 @@ export default function BuilderPage() {
               title="Reset"
             >
               <RotateCcw className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleCopy}
-              className="p-2 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
-              title="Copy JSON"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 text-accent-500" />
-              ) : (
-                <Copy className="w-4 h-4" />
-              )}
-            </button>
-            <button
-              onClick={handleDownload}
-              className="p-2 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
-              title="Download JSON"
-            >
-              <Download className="w-4 h-4" />
             </button>
             <button
               className={cn(
@@ -370,42 +329,8 @@ export default function BuilderPage() {
                 </div>
               </TechnicalPanel>
 
-              {/* JSON Output */}
-              <TechnicalPanel
-                label="OUTPUT.JSON"
-                headerRight={
-                  <button
-                    onClick={() => setShowJson(!showJson)}
-                    className="font-mono text-[10px] text-slate-500 hover:text-accent-500 transition-colors flex items-center gap-1"
-                  >
-                    {showJson ? "COLLAPSE" : "EXPAND"}
-                    <ChevronRight className={cn("w-3 h-3 transition-transform", showJson && "rotate-90")} />
-                  </button>
-                }
-              >
-                {showJson ? (
-                  <div className="relative">
-                    <pre className="text-xs font-mono text-slate-600 dark:text-slate-400 p-4 overflow-auto max-h-[400px] scrollbar-hide">
-                      {JSON.stringify(fcf, null, 2)}
-                    </pre>
-                    <button
-                      onClick={handleCopy}
-                      className="absolute top-2 right-2 p-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
-                      title="Copy JSON"
-                    >
-                      {copied ? (
-                        <Check className="w-3.5 h-3.5 text-accent-500" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-                      )}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-600">
-                    Click EXPAND to view FCF JSON output
-                  </div>
-                )}
-              </TechnicalPanel>
+              {/* Interpretation Panel - Always visible */}
+              <InterpretationPanel fcf={fcf} />
 
               {/* Quick Reference */}
               <TechnicalPanel label="REF.SYMBOLS">
