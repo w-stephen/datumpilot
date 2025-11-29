@@ -31,6 +31,9 @@ const defaultFcf: Partial<FcfJson> = {
   datums: [],
 };
 
+// Cylindrical features that should have diametral tolerance zones
+const CYLINDRICAL_FEATURES: FeatureType[] = ["hole", "pin"];
+
 export default function FcfBuilderPanel({
   initialFcf,
   onChange,
@@ -102,12 +105,54 @@ export default function FcfBuilderPanel({
   const requiresDatums = fcf.characteristic === "position" || fcf.characteristic === "perpendicularity";
   const allowsDatums = fcf.characteristic !== "flatness";
 
+  // Check if feature is cylindrical (should have diametral zone)
+  const isCylindricalFeature = fcf.featureType && CYLINDRICAL_FEATURES.includes(fcf.featureType);
+
+  // Auto-set/unset diameter zone based on feature type
+  useEffect(() => {
+    if (fcf.characteristic === "position") {
+      if (isCylindricalFeature && !fcf.tolerance?.diameter) {
+        // Auto-enable diameter for cylindrical features
+        updateTolerance({ diameter: true });
+      } else if (!isCylindricalFeature && fcf.tolerance?.diameter) {
+        // Auto-disable diameter for non-cylindrical features
+        updateTolerance({ diameter: false });
+      }
+    }
+  }, [fcf.featureType, fcf.characteristic, fcf.tolerance?.diameter, isCylindricalFeature, updateTolerance]);
+
   return (
     <div className={cn("space-y-6", className)}>
-      {/* Section 1: Characteristic Selection */}
+      {/* Section 1: Feature Type - Identify the feature first */}
+      <section className="panel">
+        <div className="panel-header">
+          <h3 className="panel-title">Feature Type</h3>
+          <span className="text-xs text-slate-500">What are you tolerancing?</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {(Object.keys(FEATURE_TYPE_LABELS) as FeatureType[]).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => updateFcf({ featureType: type })}
+              className={cn(
+                "px-3 py-2 text-sm rounded-md border transition-colors text-left",
+                fcf.featureType === type
+                  ? "bg-primary-500/20 border-primary-500 text-primary-400"
+                  : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
+              )}
+            >
+              {FEATURE_TYPE_LABELS[type]}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Section 2: Characteristic Selection */}
       <section className="panel">
         <div className="panel-header">
           <h3 className="panel-title">Characteristic</h3>
+          <span className="text-xs text-slate-500">Geometric control type</span>
         </div>
         <div className="space-y-4">
           <CharacteristicPicker
@@ -124,7 +169,7 @@ export default function FcfBuilderPanel({
         </div>
       </section>
 
-      {/* Section 2: Tolerance Zone */}
+      {/* Section 3: Tolerance Zone */}
       <section className="panel">
         <div className="panel-header">
           <h3 className="panel-title">Tolerance Zone</h3>
@@ -134,9 +179,17 @@ export default function FcfBuilderPanel({
             value={fcf.tolerance || {}}
             onChange={updateTolerance}
             unit={fcf.sourceUnit || "mm"}
-            showDiameter={fcf.characteristic === "position"}
+            showDiameter={fcf.characteristic === "position" || fcf.characteristic === "perpendicularity"}
             showMaterialCondition={fcf.characteristic !== "flatness"}
           />
+
+          {/* Hint when diameter is auto-selected for cylindrical features */}
+          {isCylindricalFeature && fcf.tolerance?.diameter && fcf.characteristic === "position" && (
+            <p className="text-xs text-accent-400 flex items-center gap-2">
+              <Info className="w-3 h-3" />
+              Diameter zone auto-selected for {fcf.featureType} feature
+            </p>
+          )}
 
           {/* Unit Selection */}
           <div className="flex items-center gap-4">
@@ -162,7 +215,7 @@ export default function FcfBuilderPanel({
         </div>
       </section>
 
-      {/* Section 3: Datum References */}
+      {/* Section 4: Datum References */}
       {allowsDatums && (
         <section className="panel">
           <div className="panel-header">
@@ -226,30 +279,6 @@ export default function FcfBuilderPanel({
           </div>
         </section>
       )}
-
-      {/* Section 4: Feature Type */}
-      <section className="panel">
-        <div className="panel-header">
-          <h3 className="panel-title">Feature Type</h3>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {(Object.keys(FEATURE_TYPE_LABELS) as FeatureType[]).map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => updateFcf({ featureType: type })}
-              className={cn(
-                "px-3 py-2 text-sm rounded-md border transition-colors text-left",
-                fcf.featureType === type
-                  ? "bg-primary-500/20 border-primary-500 text-primary-400"
-                  : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
-              )}
-            >
-              {FEATURE_TYPE_LABELS[type]}
-            </button>
-          ))}
-        </div>
-      </section>
 
       {/* Section 5: Frame Modifiers (Advanced) */}
       <section className="panel">
