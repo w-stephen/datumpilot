@@ -1,0 +1,660 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   DatumPilot Design System - Precision Engineering Aesthetic (Tailwind v4)
+   ============================================================================ */
+
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Extended slate colors for dark backgrounds */
+  --color-slate-950: #0F1419;
+  --color-slate-925: #1A2332;
+  --color-slate-900: #1E293B;
+  --color-slate-850: #243244;
+  --color-slate-800: #2A3B4D;
+  --color-slate-700: #334155;
+  --color-slate-600: #475569;
+  --color-slate-500: #64748B;
+  --color-slate-400: #94A3B8;
+  --color-slate-300: #CBD5E1;
+  --color-slate-200: #E2E8F0;
+  --color-slate-100: #F1F5F9;
+  --color-slate-50: #F8FAFC;
+
+  /* Primary - Electric blue */
+  --color-primary-50: #EBF5FF;
+  --color-primary-100: #DBEAFE;
+  --color-primary-200: #BFDBFE;
+  --color-primary-300: #93C5FD;
+  --color-primary-400: #60A5FA;
+  --color-primary-500: #3B82F6;
+  --color-primary-600: #2563EB;
+  --color-primary-700: #1D4ED8;
+  --color-primary-800: #1E40AF;
+  --color-primary-900: #1E3A8A;
+
+  /* Accent - Cyan-teal */
+  --color-accent-50: #E5FFF9;
+  --color-accent-100: #B3FFED;
+  --color-accent-200: #66FFD9;
+  --color-accent-300: #33FFCC;
+  --color-accent-400: #00FFB8;
+  --color-accent-500: #00D4AA;
+  --color-accent-600: #00B894;
+  --color-accent-700: #009C7D;
+  --color-accent-800: #007F66;
+  --color-accent-900: #00634F;
+
+  /* Success */
+  --color-success-50: #ECFDF5;
+  --color-success-100: #D1FAE5;
+  --color-success-500: #10B981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+
+  /* Warning */
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D97706;
+  --color-warning-700: #B45309;
+
+  /* Error */
+  --color-error-50: #FEF2F2;
+  --color-error-100: #FEE2E2;
+  --color-error-400: #F87171;
+  --color-error-500: #EF4444;
+  --color-error-600: #DC2626;
+  --color-error-700: #B91C1C;
+
+  /* Purple for profile characteristic */
+  --color-purple-400: #A78BFA;
+  --color-purple-500: #8B5CF6;
+
+  /* Amber for MMC */
+  --color-amber-400: #FBBF24;
+  --color-amber-500: #F59E0B;
+
+  /* Cyan for LMC */
+  --color-cyan-400: #22D3EE;
+  --color-cyan-500: #06B6D4;
+
+  /* Typography */
+  --font-family-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-family-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Font size 2xs */
+  --font-size-2xs: 0.625rem;
+  --line-height-2xs: 0.875rem;
+
+  /* Custom spacing */
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+  --spacing-128: 32rem;
+
+  /* Custom shadows */
+  --shadow-glow: 0 0 20px rgba(0, 212, 170, 0.3);
+  --shadow-glow-lg: 0 0 40px rgba(0, 212, 170, 0.4);
+  --shadow-glow-blue: 0 0 20px rgba(59, 130, 246, 0.3);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.2s ease-in-out;
+  --animate-fade-in-up: fadeInUp 0.3s ease-out;
+  --animate-spin-slow: spin 3s linear infinite;
+
+  /* Keyframes */
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 170, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(0, 212, 170, 0.3); }
+  }
+}
+
+/* CSS Variables for dynamic values */
+:root {
+  /* Background Colors */
+  --color-bg-primary: #0F1419;
+  --color-bg-secondary: #1A2332;
+  --color-bg-tertiary: #243244;
+  --color-bg-elevated: #2A3B4D;
+
+  /* Accent Colors */
+  --color-accent-cyan: #00D4AA;
+  --color-accent-cyan-glow: rgba(0, 212, 170, 0.3);
+  --color-accent-blue: #3B82F6;
+  --color-accent-blue-glow: rgba(59, 130, 246, 0.3);
+
+  /* Characteristic Colors */
+  --color-char-position: #3B82F6;
+  --color-char-flatness: #10B981;
+  --color-char-perpendicularity: #F59E0B;
+  --color-char-profile: #8B5CF6;
+  --color-char-other: #6B7280;
+
+  /* Spacing */
+  --spacing-sidebar: 16rem;
+  --spacing-topnav: 4rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-default: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* ============================================================================
+   Base Styles
+   ============================================================================ */
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-slate-950);
+  color: var(--color-slate-100);
+  font-family: var(--font-family-sans);
+  background-image:
+    radial-gradient(ellipse at top, rgba(59, 130, 246, 0.03), transparent 50%),
+    linear-gradient(to bottom, #0F1419, #0F1419);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography defaults */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-mono);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--color-slate-50);
+}
+
+h1 { font-size: 1.875rem; line-height: 2.25rem; }
+h2 { font-size: 1.5rem; line-height: 2rem; }
+h3 { font-size: 1.25rem; line-height: 1.75rem; }
+h4 { font-size: 1.125rem; line-height: 1.75rem; }
+h5 { font-size: 1rem; line-height: 1.5rem; }
+h6 { font-size: 0.875rem; line-height: 1.25rem; }
+
+/* Numeric data should use monospace */
+.numeric, [data-numeric] {
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Code blocks */
+code, pre {
+  font-family: var(--font-family-mono);
+  font-size: 0.875rem;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-slate-950), 0 0 0 4px var(--color-primary-500);
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-slate-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-slate-700);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-slate-600);
+}
+
+/* ============================================================================
+   Component Styles
+   ============================================================================ */
+
+/* Card component */
+.card {
+  background-color: rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--color-slate-800);
+  border-radius: 0.5rem;
+  backdrop-filter: blur(4px);
+}
+
+.card-elevated {
+  background-color: rgba(30, 41, 59, 0.8);
+  border: 1px solid var(--color-slate-700);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(4px);
+}
+
+/* Button variants */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: all 200ms;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-slate-950), 0 0 0 4px var(--color-primary-500);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--color-primary-600);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-500);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: var(--color-primary-700);
+}
+
+.btn-secondary {
+  background-color: var(--color-slate-800);
+  color: var(--color-slate-100);
+  border: 1px solid var(--color-slate-700);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-slate-700);
+  border-color: var(--color-slate-600);
+}
+
+.btn-accent {
+  background-color: var(--color-accent-600);
+  color: var(--color-slate-950);
+}
+
+.btn-accent:hover:not(:disabled) {
+  background-color: var(--color-accent-500);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-slate-300);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-slate-800);
+  color: var(--color-slate-100);
+}
+
+.btn-icon {
+  padding: 0.5rem;
+  aspect-ratio: 1;
+}
+
+/* Input styles */
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  background-color: var(--color-slate-900);
+  border: 1px solid var(--color-slate-700);
+  border-radius: 0.375rem;
+  color: var(--color-slate-100);
+  transition: border-color 200ms, box-shadow 200ms;
+}
+
+.input::placeholder {
+  color: var(--color-slate-500);
+}
+
+.input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 1px var(--color-primary-500);
+  outline: none;
+}
+
+.input-error {
+  border-color: var(--color-error-500);
+}
+
+.input-error:focus {
+  border-color: var(--color-error-500);
+  box-shadow: 0 0 0 1px var(--color-error-500);
+}
+
+/* Select styles */
+.select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 2.5rem;
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236B7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E');
+  background-size: 1.25rem 1.25rem;
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+}
+
+/* Badge styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+
+.badge-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--color-success-500);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning-500);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-error-500);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-info {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--color-primary-500);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.badge-neutral {
+  background-color: rgba(51, 65, 85, 0.5);
+  color: var(--color-slate-300);
+  border: 1px solid var(--color-slate-600);
+}
+
+/* GD&T Symbol container */
+.gdt-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  background-color: var(--color-slate-800);
+  border: 1px solid var(--color-slate-700);
+  font-size: 1.125rem;
+  font-family: var(--font-family-mono);
+}
+
+.gdt-symbol-lg {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.25rem;
+}
+
+.gdt-symbol-sm {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.875rem;
+}
+
+/* Datum badge */
+.datum-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  background-color: var(--color-slate-800);
+  border: 2px solid var(--color-slate-600);
+  border-radius: 0.25rem;
+  font-family: var(--font-family-mono);
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--color-accent-500);
+}
+
+/* Validation message */
+.validation-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--color-error-400);
+}
+
+.validation-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--color-warning-500);
+}
+
+/* Confidence indicators */
+.confidence-high {
+  color: var(--color-success-500);
+}
+
+.confidence-medium {
+  color: var(--color-warning-500);
+}
+
+.confidence-low {
+  color: var(--color-error-500);
+}
+
+/* Grid pattern overlay */
+.grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Skeleton loading */
+.skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: var(--color-slate-800);
+  border-radius: 0.25rem;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-slate-700), transparent);
+}
+
+/* Panel */
+.panel {
+  background-color: rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--color-slate-800);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-slate-800);
+}
+
+.panel-title {
+  font-family: var(--font-family-mono);
+  font-weight: 600;
+  color: var(--color-slate-200);
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  z-index: 50;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background-color: var(--color-slate-800);
+  border: 1px solid var(--color-slate-700);
+  border-radius: 0.25rem;
+  box-shadow: var(--shadow-lg);
+  color: var(--color-slate-200);
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   Utility Styles
+   ============================================================================ */
+
+/* Text gradient */
+.text-gradient {
+  background: linear-gradient(to right, var(--color-accent-400), var(--color-primary-400));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Glow effects */
+.glow-accent {
+  box-shadow: 0 0 20px var(--color-accent-cyan-glow);
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px var(--color-accent-blue-glow);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animate on hover */
+.hover-lift {
+  transition: transform 200ms;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Number formatting */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Truncate with ellipsis */
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   GD&T Symbol Styles
+   ============================================================================ */
+
+/* Position symbol */
+.char-position {
+  color: var(--color-char-position);
+}
+
+/* Flatness symbol */
+.char-flatness {
+  color: var(--color-char-flatness);
+}
+
+/* Perpendicularity symbol */
+.char-perpendicularity {
+  color: var(--color-char-perpendicularity);
+}
+
+/* Profile symbol */
+.char-profile {
+  color: var(--color-char-profile);
+}
+
+/* Other characteristic */
+.char-other {
+  color: var(--color-char-other);
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+/* Staggered fade-in for lists */
+.stagger-fade-in > * {
+  animation: fadeInUp 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.stagger-fade-in > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-fade-in > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-fade-in > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-fade-in > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-fade-in > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-fade-in > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-fade-in > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-fade-in > *:nth-child(8) { animation-delay: 350ms; }
+
+/* Pulse glow for active states */
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
