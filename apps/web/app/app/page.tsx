@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   PenTool,
   FileJson,
@@ -11,156 +12,210 @@ import {
   Target,
   CheckCircle2,
   Clock,
-  Zap,
+  Crosshair,
+  ChevronRight,
+  AlertTriangle,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 // Quick action cards data
 const quickActions = [
   {
-    title: "FCF Builder",
+    title: "FCF BUILDER",
     description: "Build feature control frames with live preview and ASME Y14.5 validation",
     href: "/app/builder",
     icon: PenTool,
-    color: "#3B82F6",
-    bgGradient: "from-primary-500/10 to-primary-500/5",
+    shortcut: "01",
   },
   {
-    title: "Interpreter",
+    title: "INTERPRETER",
     description: "Interpret FCF JSON and run tolerance calculations",
     href: "/app/interpreter",
     icon: FileJson,
-    color: "#10B981",
-    bgGradient: "from-success-500/10 to-success-500/5",
+    shortcut: "02",
   },
   {
-    title: "Image Mode",
+    title: "IMAGE MODE",
     description: "Extract FCF data from engineering drawings using AI",
     href: "/app/image-interpreter",
     icon: ImagePlus,
-    color: "#8B5CF6",
-    bgGradient: "from-purple-500/10 to-purple-500/5",
+    shortcut: "03",
   },
   {
-    title: "Projects",
+    title: "PROJECTS",
     description: "Manage your FCF collections and measurement runs",
     href: "/app/projects",
     icon: FolderKanban,
-    color: "#F59E0B",
-    bgGradient: "from-warning-500/10 to-warning-500/5",
+    shortcut: "04",
   },
 ];
 
-// Mock stats data - would come from API in production
+// Mock stats data
 const stats = [
-  { label: "Total FCFs", value: "24", icon: Target, trend: "+3 this week" },
-  { label: "Projects", value: "6", icon: FolderKanban, trend: "2 active" },
-  { label: "Validations", value: "142", icon: CheckCircle2, trend: "98% pass rate" },
-  { label: "Calculations", value: "89", icon: Activity, trend: "12 today" },
+  { label: "TOTAL FCFs", value: 24, icon: Target, change: "+3", period: "this week" },
+  { label: "PROJECTS", value: 6, icon: FolderKanban, change: "2", period: "active" },
+  { label: "VALIDATIONS", value: 142, icon: CheckCircle2, change: "98%", period: "pass rate" },
+  { label: "CALCULATIONS", value: 89, icon: Activity, change: "+12", period: "today" },
 ];
 
 // Mock recent activity
 const recentActivity = [
-  { action: "Created FCF", item: "Position @ MMC - Mounting Hole", time: "2 hours ago", status: "valid" },
-  { action: "Ran calculation", item: "Flatness - Top Surface", time: "4 hours ago", status: "pass" },
-  { action: "Extracted FCF", item: "Perpendicularity - Slot", time: "1 day ago", status: "warning" },
-  { action: "Created project", item: "Assembly QA - Phase 2", time: "2 days ago", status: "valid" },
+  { action: "Created FCF", item: "Position @ MMC - Mounting Hole", time: "2h ago", status: "valid" },
+  { action: "Ran calculation", item: "Flatness - Top Surface", time: "4h ago", status: "pass" },
+  { action: "Extracted FCF", item: "Perpendicularity - Slot", time: "1d ago", status: "warning" },
+  { action: "Created project", item: "Assembly QA - Phase 2", time: "2d ago", status: "valid" },
 ];
 
-export default function DashboardPage() {
+// Animated counter
+function AnimatedCounter({ target }: { target: number }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const duration = 1500;
+    const steps = 40;
+    const increment = target / steps;
+    let current = 0;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
+  }, [target]);
+
+  return <span>{count}</span>;
+}
+
+// Technical panel wrapper
+function TechnicalPanel({
+  children,
+  label,
+  className,
+}: {
+  children: React.ReactNode;
+  label?: string;
+  className?: string;
+}) {
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className={cn("relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800", className)}>
+      {/* Corner accents */}
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-slate-300 dark:border-slate-700" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-slate-300 dark:border-slate-700" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-slate-300 dark:border-slate-700" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-300 dark:border-slate-700" />
+
+      {label && (
+        <div className="absolute -top-2.5 left-4 px-2 bg-slate-50 dark:bg-[#0D1117] font-mono text-[10px] text-slate-500 tracking-widest">
+          {label}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  return (
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-mono font-bold text-slate-50 tracking-tight">
-            Dashboard
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-px bg-accent-500" />
+            <span className="font-mono text-xs text-accent-500 tracking-widest">DASHBOARD</span>
+          </div>
+          <h1 className="font-mono text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+            WORKSPACE OVERVIEW
           </h1>
-          <p className="text-slate-400 mt-1">
-            Welcome back. Here&apos;s your GD&T workspace overview.
+          <p className="text-slate-500 mt-1 font-mono text-sm">
+            GD&T Feature Control Frame Management System
           </p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <Clock className="w-4 h-4" />
-          <span>Last updated: Just now</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <div className="w-1.5 h-1.5 rounded-full bg-accent-500 animate-pulse" />
+          <Clock className="w-3.5 h-3.5 text-slate-500" />
+          <span className="font-mono text-xs text-slate-500">LIVE</span>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 hover:border-slate-700 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <stat.icon className="w-5 h-5 text-slate-500" />
-              <span className="text-2xs text-slate-500">{stat.trend}</span>
+        {stats.map((stat, index) => (
+          <TechnicalPanel key={stat.label} label={`STAT.${String(index + 1).padStart(2, '0')}`}>
+            <div className="p-5">
+              <div className="flex items-start justify-between mb-4">
+                <stat.icon className="w-5 h-5 text-slate-400 dark:text-slate-600" />
+                <div className="flex items-center gap-1 text-accent-500">
+                  <TrendingUp className="w-3 h-3" />
+                  <span className="font-mono text-xs">{stat.change}</span>
+                </div>
+              </div>
+              <div className="font-mono text-4xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                {mounted && <AnimatedCounter target={stat.value} />}
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="font-mono text-xs text-slate-500 tracking-wide">{stat.label}</span>
+                <span className="font-mono text-[10px] text-slate-400 dark:text-slate-600">{stat.period}</span>
+              </div>
             </div>
-            <div className="mt-3">
-              <p className="text-3xl font-mono font-bold text-slate-100">
-                {stat.value}
-              </p>
-              <p className="text-sm text-slate-400 mt-1">{stat.label}</p>
-            </div>
-          </div>
+          </TechnicalPanel>
         ))}
       </div>
 
       {/* Quick Actions */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-mono font-semibold text-slate-200">
-            Quick Actions
+        <div className="flex items-center gap-3 mb-6">
+          <Crosshair className="w-4 h-4 text-accent-500" />
+          <h2 className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-300 tracking-wide">
+            QUICK ACTIONS
           </h2>
-          <Zap className="w-4 h-4 text-accent-500" />
+          <div className="flex-1 h-px bg-gradient-to-r from-slate-300 dark:from-slate-800 to-transparent" />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {quickActions.map((action) => (
             <Link
               key={action.href}
               href={action.href}
-              className={cn(
-                "group relative overflow-hidden",
-                "bg-gradient-to-br border border-slate-800 rounded-lg p-5",
-                "hover:border-slate-700 hover:-translate-y-0.5",
-                "transition-all duration-300",
-                action.bgGradient
-              )}
+              className="group relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-accent-500/30 transition-all duration-300"
+              style={{
+                clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
+              }}
             >
-              {/* Background pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 100% 0%, ${action.color}40 0%, transparent 50%)`,
-                  }}
-                />
-              </div>
+              {/* Corner cuts visual */}
+              <div className="absolute top-0 right-0 w-4 h-4 border-l border-b border-slate-200 dark:border-slate-800 group-hover:border-accent-500/30 transition-colors" style={{ transform: 'translate(0, 0) rotate(45deg)', transformOrigin: 'top right' }} />
 
-              <div className="relative flex items-start gap-4">
-                <div
-                  className="flex items-center justify-center w-12 h-12 rounded-lg"
-                  style={{ backgroundColor: `${action.color}15` }}
-                >
-                  <action.icon
-                    className="w-6 h-6"
-                    style={{ color: action.color }}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-mono font-semibold text-slate-100">
-                      {action.title}
-                    </h3>
-                    <ArrowRight
-                      className="w-4 h-4 text-slate-600 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all"
-                    />
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 border border-slate-300 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center group-hover:border-accent-500/50 group-hover:bg-accent-500/5 transition-all">
+                    <action.icon className="w-5 h-5 text-slate-500 dark:text-slate-400 group-hover:text-accent-500 transition-colors" />
                   </div>
-                  <p className="text-sm text-slate-400 mt-1">
-                    {action.description}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs text-slate-400 dark:text-slate-700 group-hover:text-accent-500/50 transition-colors">
+                      {action.shortcut}
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-700 group-hover:text-accent-500 group-hover:translate-x-1 transition-all" />
+                  </div>
                 </div>
+                <h3 className="font-mono text-base font-semibold text-slate-900 dark:text-slate-100 tracking-wide mb-2">
+                  {action.title}
+                </h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  {action.description}
+                </p>
               </div>
             </Link>
           ))}
@@ -169,80 +224,120 @@ export default function DashboardPage() {
 
       {/* Recent Activity */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-mono font-semibold text-slate-200">
-            Recent Activity
-          </h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Activity className="w-4 h-4 text-accent-500" />
+            <h2 className="font-mono text-sm font-semibold text-slate-700 dark:text-slate-300 tracking-wide">
+              RECENT ACTIVITY
+            </h2>
+            <div className="flex-1 h-px bg-gradient-to-r from-slate-300 dark:from-slate-800 to-transparent" />
+          </div>
           <Link
             href="/app/projects"
-            className="text-sm text-primary-400 hover:text-primary-300 transition-colors"
+            className="font-mono text-xs text-slate-500 hover:text-accent-500 transition-colors flex items-center gap-1"
           >
-            View all
+            VIEW ALL
+            <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
-        <div className="bg-slate-900/50 border border-slate-800 rounded-lg overflow-hidden">
-          <div className="divide-y divide-slate-800">
+
+        <TechnicalPanel label="ACTIVITY.LOG">
+          <div className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
             {recentActivity.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between px-4 py-3 hover:bg-slate-800/30 transition-colors"
+                className="flex items-center justify-between px-5 py-4 hover:bg-slate-100/50 dark:hover:bg-slate-800/20 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div
-                    className={cn(
-                      "w-2 h-2 rounded-full",
-                      item.status === "valid" && "bg-success-500",
-                      item.status === "pass" && "bg-accent-500",
-                      item.status === "warning" && "bg-warning-500"
-                    )}
-                  />
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "w-2 h-2",
+                        item.status === "valid" && "bg-accent-500",
+                        item.status === "pass" && "bg-success-500",
+                        item.status === "warning" && "bg-warning-500"
+                      )}
+                    />
+                    <span className="font-mono text-[10px] text-slate-400 dark:text-slate-600 w-16">
+                      {String(index + 1).padStart(2, '0')}.LOG
+                    </span>
+                  </div>
                   <div>
-                    <p className="text-sm text-slate-300">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                       <span className="text-slate-500">{item.action}:</span>{" "}
-                      {item.item}
+                      <span className="font-medium">{item.item}</span>
                     </p>
                   </div>
                 </div>
-                <span className="text-xs text-slate-500">{item.time}</span>
+                <div className="flex items-center gap-4">
+                  <span
+                    className={cn(
+                      "font-mono text-[10px] px-2 py-0.5 border",
+                      item.status === "valid" && "text-accent-500 border-accent-500/30 bg-accent-500/5",
+                      item.status === "pass" && "text-success-500 border-success-500/30 bg-success-500/5",
+                      item.status === "warning" && "text-warning-500 border-warning-500/30 bg-warning-500/5"
+                    )}
+                  >
+                    {item.status.toUpperCase()}
+                  </span>
+                  <span className="font-mono text-xs text-slate-400 dark:text-slate-600 w-12 text-right">{item.time}</span>
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        </TechnicalPanel>
       </section>
 
-      {/* Getting Started (for new users) */}
-      <section className="bg-gradient-to-br from-primary-500/5 via-accent-500/5 to-transparent border border-slate-800 rounded-lg p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary-500/10">
-            <Target className="w-5 h-5 text-primary-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-mono font-semibold text-slate-100">
-              Getting Started with DatumPilot
-            </h3>
-            <p className="text-sm text-slate-400 mt-1 mb-4">
-              New to GD&T interpretation? Start by building your first Feature Control Frame
-              or upload an engineering drawing to extract FCF data automatically.
-            </p>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/app/builder"
-                className="btn-primary text-sm"
-              >
-                <PenTool className="w-4 h-4" />
-                Build FCF
-              </Link>
-              <Link
-                href="/app/image-interpreter"
-                className="btn-secondary text-sm"
-              >
-                <ImagePlus className="w-4 h-4" />
-                Upload Drawing
-              </Link>
+      {/* Getting Started */}
+      <TechnicalPanel label="INIT.GUIDE" className="overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-start gap-5">
+            <div className="w-14 h-14 border border-accent-500/30 bg-accent-500/5 flex items-center justify-center flex-shrink-0">
+              <Target className="w-6 h-6 text-accent-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-mono text-base font-semibold text-slate-900 dark:text-slate-100 tracking-wide mb-2">
+                GETTING STARTED
+              </h3>
+              <p className="text-sm text-slate-500 mb-5 leading-relaxed">
+                New to GD&T interpretation? Start by building your first Feature Control Frame
+                or upload an engineering drawing to extract FCF data automatically.
+              </p>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/app/builder"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-accent-500 text-slate-950 font-mono text-xs font-semibold hover:bg-accent-400 transition-colors"
+                  style={{
+                    clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
+                  }}
+                >
+                  <PenTool className="w-3.5 h-3.5" />
+                  BUILD FCF
+                </Link>
+                <Link
+                  href="/app/image-interpreter"
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono text-xs font-medium hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                >
+                  <ImagePlus className="w-3.5 h-3.5" />
+                  UPLOAD DRAWING
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+
+        {/* Decorative grid */}
+        <div
+          className="absolute bottom-0 right-0 w-32 h-32 opacity-[0.08] dark:opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #00D4AA 1px, transparent 1px),
+              linear-gradient(to bottom, #00D4AA 1px, transparent 1px)
+            `,
+            backgroundSize: '8px 8px',
+          }}
+        />
+      </TechnicalPanel>
     </div>
   );
 }

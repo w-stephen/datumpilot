@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { FcfJson } from "@/lib/fcf/schema";
@@ -49,6 +50,39 @@ interface CalculationResult {
   unit: string;
   description: string;
   formula?: string;
+}
+
+// Technical panel wrapper
+function TechnicalPanel({
+  children,
+  label,
+  className,
+  headerRight,
+}: {
+  children: React.ReactNode;
+  label?: string;
+  className?: string;
+  headerRight?: React.ReactNode;
+}) {
+  return (
+    <div className={cn("relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800", className)}>
+      {/* Corner accents */}
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-slate-300 dark:border-slate-700" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-slate-300 dark:border-slate-700" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-slate-300 dark:border-slate-700" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-300 dark:border-slate-700" />
+
+      {(label || headerRight) && (
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200/50 dark:border-slate-800/50">
+          {label && (
+            <span className="font-mono text-[10px] text-slate-500 tracking-widest">{label}</span>
+          )}
+          {headerRight}
+        </div>
+      )}
+      {children}
+    </div>
+  );
 }
 
 export default function InterpreterPage() {
@@ -237,56 +271,89 @@ The axis of the controlled feature must fall within a cylindrical tolerance zone
   }, [jsonInput]);
 
   return (
-    <div className="h-full flex flex-col animate-fade-in">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-6 border-b border-slate-200/50 dark:border-slate-800/50">
         <div>
-          <h1 className="text-2xl font-mono font-bold text-slate-50 tracking-tight">
-            FCF Interpreter
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-px bg-accent-500" />
+            <span className="font-mono text-xs text-accent-500 tracking-widest">INTERPRET.FCF</span>
+          </div>
+          <h1 className="font-mono text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+            FCF INTERPRETER
           </h1>
-          <p className="text-slate-400 mt-1">
-            Paste or load FCF JSON for validation, calculation, and AI-powered explanation
+          <p className="text-slate-500 mt-1 font-mono text-sm">
+            Parse, validate, and calculate with AI-powered explanations
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-3">
           <button
             onClick={handleLoadSample}
-            className="btn-secondary text-sm"
+            className="flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 font-mono text-xs transition-colors"
           >
-            <FileJson className="w-4 h-4" />
-            Load Sample
+            <FileJson className="w-3.5 h-3.5" />
+            LOAD SAMPLE
           </button>
         </div>
+      </div>
+
+      {/* Status Bar */}
+      <div className="flex items-center gap-4 py-3 px-4 bg-slate-100/50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50">
+        <div className="flex items-center gap-2">
+          {fcf ? (
+            <>
+              <CheckCircle2 className="w-4 h-4 text-accent-500" />
+              <span className="font-mono text-xs text-accent-500">PARSED</span>
+            </>
+          ) : (
+            <>
+              <Info className="w-4 h-4 text-slate-600" />
+              <span className="font-mono text-xs text-slate-600">AWAITING INPUT</span>
+            </>
+          )}
+        </div>
+        <div className="h-4 w-px bg-slate-300 dark:bg-slate-700" />
+        <span className="font-mono text-[10px] text-slate-500">
+          REF: ASME Y14.5-2018
+        </span>
+        {fcf?.characteristic && (
+          <>
+            <div className="h-4 w-px bg-slate-300 dark:bg-slate-700" />
+            <span className="font-mono text-[10px] text-slate-600 dark:text-slate-400">
+              CHAR: {fcf.characteristic.toUpperCase()}
+            </span>
+          </>
+        )}
       </div>
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden pt-6">
         <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Input Panel */}
-          <div className="flex flex-col gap-4 overflow-auto">
+          <div className="flex flex-col gap-6 overflow-auto scrollbar-hide">
             {/* JSON Input */}
-            <div className="panel flex-1">
-              <div className="panel-header">
-                <h3 className="panel-title">JSON Input</h3>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleCopy}
-                    className="p-1.5 rounded hover:bg-slate-700 transition-colors"
-                    title="Copy"
-                  >
-                    {copied ? (
-                      <Check className="w-4 h-4 text-success-500" />
-                    ) : (
-                      <Copy className="w-4 h-4 text-slate-400" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              <div className="relative flex-1">
+            <TechnicalPanel
+              label="INPUT.JSON"
+              headerRight={
+                <button
+                  onClick={handleCopy}
+                  className="p-1.5 hover:bg-slate-800 transition-colors"
+                  title="Copy"
+                >
+                  {copied ? (
+                    <Check className="w-3.5 h-3.5 text-accent-500" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5 text-slate-500" />
+                  )}
+                </button>
+              }
+            >
+              <div className="p-4">
                 <textarea
                   value={jsonInput}
                   onChange={(e) => setJsonInput(e.target.value)}
-                  placeholder={`Paste FCF JSON here or click "Load Sample" to see an example...
+                  placeholder={`// Paste FCF JSON here or click "LOAD SAMPLE"
 
 {
   "characteristic": "position",
@@ -294,182 +361,232 @@ The axis of the controlled feature must fall within a cylindrical tolerance zone
   "datums": [{ "id": "A" }],
   ...
 }`}
-                  className="w-full h-[300px] bg-slate-950/50 border border-slate-700 rounded-lg p-4 font-mono text-sm text-slate-300 placeholder-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
+                  className="w-full h-[250px] bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 p-4 font-mono text-sm text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-600 resize-none focus:outline-none focus:ring-1 focus:ring-accent-500/50 focus:border-accent-500/50"
                   spellCheck={false}
                 />
-              </div>
 
-              {/* Parse error */}
-              {parseError && (
-                <div className="flex items-center gap-2 mt-3 p-3 bg-error-500/10 border border-error-500/20 rounded-lg">
-                  <AlertCircle className="w-4 h-4 text-error-400" />
-                  <span className="text-sm text-error-400">{parseError}</span>
+                {/* Parse error */}
+                {parseError && (
+                  <div className="flex items-center gap-2 mt-4 p-3 bg-error-500/10 border border-error-500/30">
+                    <AlertCircle className="w-4 h-4 text-error-500" />
+                    <span className="font-mono text-xs text-error-400">{parseError}</span>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 mt-4">
+                  <button
+                    onClick={handleParse}
+                    disabled={!jsonInput.trim()}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 font-mono text-xs transition-all",
+                      jsonInput.trim()
+                        ? "border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-slate-100"
+                        : "border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed"
+                    )}
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    PARSE
+                  </button>
+                  <button
+                    onClick={handleInterpret}
+                    disabled={!fcf || isProcessing}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 font-mono text-xs font-semibold transition-all",
+                      fcf && !isProcessing
+                        ? "bg-accent-500 text-slate-950 hover:bg-accent-400"
+                        : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                    )}
+                    style={{
+                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
+                    }}
+                  >
+                    {isProcessing ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5" />
+                    )}
+                    {isProcessing ? "PROCESSING..." : "INTERPRET"}
+                  </button>
                 </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex items-center gap-3 mt-4">
-                <button
-                  onClick={handleParse}
-                  disabled={!jsonInput.trim()}
-                  className="btn-secondary"
-                >
-                  <Upload className="w-4 h-4" />
-                  Parse JSON
-                </button>
-                <button
-                  onClick={handleInterpret}
-                  disabled={!fcf || isProcessing}
-                  className="btn-primary"
-                >
-                  {isProcessing ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Play className="w-4 h-4" />
-                  )}
-                  {isProcessing ? "Processing..." : "Interpret"}
-                </button>
               </div>
-            </div>
+            </TechnicalPanel>
 
             {/* Parsed FCF Preview */}
             {fcf && (
-              <div className="panel">
-                <div className="panel-header">
-                  <h3 className="panel-title">Parsed FCF</h3>
-                </div>
-                <div className="space-y-4">
+              <TechnicalPanel label="PARSED.PREVIEW">
+                <div className="p-4 space-y-4">
                   {/* Visual preview */}
-                  <div className="p-6 bg-slate-950/50 rounded-lg flex items-center justify-center">
+                  <div className="p-6 bg-slate-950/50 flex items-center justify-center relative">
+                    {/* Grid background */}
+                    <div
+                      className="absolute inset-0 opacity-[0.03]"
+                      style={{
+                        backgroundImage: `
+                          linear-gradient(to right, #00D4AA 1px, transparent 1px),
+                          linear-gradient(to bottom, #00D4AA 1px, transparent 1px)
+                        `,
+                        backgroundSize: '20px 20px',
+                      }}
+                    />
                     <FcfPreview fcf={fcf} scale={1.5} />
                   </div>
 
                   {/* FCF details */}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-500">Characteristic:</span>
-                      <CharacteristicIcon
-                        characteristic={fcf.characteristic}
-                        size="sm"
-                        showLabel
-                      />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-slate-900/50 border border-slate-800">
+                      <span className="font-mono text-[10px] text-slate-600 tracking-widest">CHARACTERISTIC</span>
+                      <div className="mt-2 flex items-center gap-2">
+                        <CharacteristicIcon
+                          characteristic={fcf.characteristic}
+                          size="sm"
+                        />
+                        <span className="font-mono text-xs text-slate-300 uppercase">
+                          {fcf.characteristic}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-500">Feature:</span>
-                      <span className="text-slate-300 capitalize">
-                        {fcf.featureType || "Not specified"}
-                      </span>
+                    <div className="p-3 bg-slate-900/50 border border-slate-800">
+                      <span className="font-mono text-[10px] text-slate-600 tracking-widest">FEATURE</span>
+                      <div className="mt-2">
+                        <span className="font-mono text-xs text-slate-300 uppercase">
+                          {fcf.featureType || "NOT SPECIFIED"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-500">Tolerance:</span>
-                      <ToleranceDisplay
-                        tolerance={fcf.tolerance}
-                        sourceUnit={fcf.sourceUnit}
-                        size="sm"
-                      />
+                    <div className="p-3 bg-slate-900/50 border border-slate-800">
+                      <span className="font-mono text-[10px] text-slate-600 tracking-widest">TOLERANCE</span>
+                      <div className="mt-2">
+                        <ToleranceDisplay
+                          tolerance={fcf.tolerance}
+                          sourceUnit={fcf.sourceUnit}
+                          size="sm"
+                        />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-500">Datums:</span>
-                      {fcf.datums && fcf.datums.length > 0 ? (
-                        <DatumList datums={fcf.datums} size="sm" />
-                      ) : (
-                        <span className="text-slate-400">None</span>
-                      )}
+                    <div className="p-3 bg-slate-900/50 border border-slate-800">
+                      <span className="font-mono text-[10px] text-slate-600 tracking-widest">DATUMS</span>
+                      <div className="mt-2">
+                        {fcf.datums && fcf.datums.length > 0 ? (
+                          <DatumList datums={fcf.datums} size="sm" />
+                        ) : (
+                          <span className="font-mono text-xs text-slate-500">NONE</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </TechnicalPanel>
             )}
           </div>
 
           {/* Results Panel */}
-          <div className="flex flex-col gap-4 overflow-auto scrollbar-hide">
+          <div className="flex flex-col gap-6 overflow-auto scrollbar-hide">
             {/* Validation Results */}
             {validationResult && (
-              <ValidationPanel
-                issues={validationResult.issues}
-                title="Validation Results"
-                defaultExpanded
-              />
+              <TechnicalPanel
+                label="VALIDATION.RESULT"
+                headerRight={
+                  <div className="flex items-center gap-2">
+                    {validationResult.valid ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-accent-500" />
+                        <span className="font-mono text-[10px] text-accent-500">VALID</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="w-3.5 h-3.5 text-error-500" />
+                        <span className="font-mono text-[10px] text-error-500">INVALID</span>
+                      </>
+                    )}
+                  </div>
+                }
+              >
+                <div className="p-4">
+                  <ValidationPanel
+                    issues={validationResult.issues}
+                    defaultExpanded
+                  />
+                </div>
+              </TechnicalPanel>
             )}
 
             {/* Calculations */}
             {calculations.length > 0 && (
-              <div className="panel">
-                <div className="panel-header">
-                  <div className="flex items-center gap-2">
-                    <Calculator className="w-4 h-4 text-accent-500" />
-                    <h3 className="panel-title">Calculations</h3>
-                  </div>
+              <TechnicalPanel
+                label="CALC.OUTPUT"
+                headerRight={
                   <button
                     onClick={() => setShowCalculationDetails(!showCalculationDetails)}
-                    className="text-xs text-slate-400 hover:text-slate-300 transition-colors flex items-center gap-1"
+                    className="font-mono text-[10px] text-slate-500 hover:text-accent-500 transition-colors flex items-center gap-1"
                   >
+                    {showCalculationDetails ? "COLLAPSE" : "EXPAND"}
                     {showCalculationDetails ? (
-                      <>
-                        <ChevronUp className="w-3 h-3" />
-                        Less
-                      </>
+                      <ChevronUp className="w-3 h-3" />
                     ) : (
-                      <>
-                        <ChevronDown className="w-3 h-3" />
-                        Details
-                      </>
+                      <ChevronDown className="w-3 h-3" />
                     )}
                   </button>
-                </div>
-                <div className="space-y-3">
+                }
+              >
+                <div className="p-4 space-y-2">
                   {calculations.map((calc, index) => (
                     <div
                       key={index}
-                      className="flex items-start justify-between p-3 bg-slate-900/50 border border-slate-800 rounded-lg"
+                      className="flex items-start justify-between p-3 bg-slate-950/50 border border-slate-800"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-slate-200">
-                            {calc.name}
+                          <span className="font-mono text-[10px] text-slate-600">
+                            {String(index + 1).padStart(2, '0')}
                           </span>
-                          {showCalculationDetails && calc.formula && (
-                            <span className="text-xs text-slate-500 font-mono">
-                              ({calc.formula})
-                            </span>
-                          )}
+                          <span className="font-mono text-xs text-slate-200">
+                            {calc.name.toUpperCase()}
+                          </span>
                         </div>
                         {showCalculationDetails && (
-                          <p className="text-xs text-slate-500 mt-1">
-                            {calc.description}
-                          </p>
+                          <>
+                            {calc.formula && (
+                              <span className="font-mono text-[10px] text-slate-500 mt-1 block ml-6">
+                                {calc.formula}
+                              </span>
+                            )}
+                            <p className="font-mono text-[10px] text-slate-600 mt-1 ml-6">
+                              {calc.description}
+                            </p>
+                          </>
                         )}
                       </div>
                       <div className="text-right">
-                        <span className="font-mono font-bold text-accent-400">
+                        <span className="font-mono text-sm font-bold text-accent-400">
                           {calc.value.toFixed(3)}
                         </span>
-                        <span className="text-sm text-slate-500 ml-1">
+                        <span className="font-mono text-[10px] text-slate-500 ml-1">
                           {calc.unit}
                         </span>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              </TechnicalPanel>
             )}
 
             {/* AI Explanation */}
             {aiExplanation && (
-              <div className="panel">
-                <div className="panel-header">
+              <TechnicalPanel
+                label="AI.EXPLANATION"
+                headerRight={
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                    <h3 className="panel-title">AI Explanation</h3>
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <span className="font-mono text-[10px] text-slate-500">GPT-5.1</span>
                   </div>
-                  <span className="text-xs text-slate-500">GPT-5.1</span>
-                </div>
-                <div className="prose prose-sm prose-invert max-w-none">
-                  <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+                }
+              >
+                <div className="p-4">
+                  <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap font-mono">
                     {aiExplanation.split("**").map((part, i) =>
                       i % 2 === 1 ? (
-                        <strong key={i} className="text-slate-100">
+                        <strong key={i} className="text-accent-400">
                           {part}
                         </strong>
                       ) : (
@@ -478,24 +595,28 @@ The axis of the controlled feature must fall within a cylindrical tolerance zone
                     )}
                   </div>
                 </div>
-              </div>
+              </TechnicalPanel>
             )}
 
             {/* Empty state */}
             {!validationResult && !calculations.length && !aiExplanation && (
-              <div className="panel flex-1 flex items-center justify-center">
-                <div className="text-center py-12">
-                  <Info className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-slate-400 mb-2">
-                    No Results Yet
-                  </h3>
-                  <p className="text-sm text-slate-500 max-w-sm">
-                    Paste FCF JSON in the input panel and click{" "}
-                    <span className="text-primary-400">Interpret</span> to see
-                    validation results, calculations, and AI-powered explanations.
-                  </p>
+              <TechnicalPanel label="OUTPUT.PENDING" className="flex-1">
+                <div className="flex items-center justify-center h-full min-h-[300px]">
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 border border-slate-800 mx-auto mb-4 flex items-center justify-center">
+                      <Calculator className="w-6 h-6 text-slate-700" />
+                    </div>
+                    <h3 className="font-mono text-sm text-slate-500 mb-2">
+                      AWAITING INPUT
+                    </h3>
+                    <p className="font-mono text-xs text-slate-600 max-w-xs">
+                      Paste FCF JSON and click{" "}
+                      <span className="text-accent-500">INTERPRET</span> to see
+                      validation, calculations, and AI explanations.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </TechnicalPanel>
             )}
           </div>
         </div>

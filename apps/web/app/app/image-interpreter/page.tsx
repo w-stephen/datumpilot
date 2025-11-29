@@ -8,7 +8,6 @@ import {
   X,
   Sparkles,
   Check,
-  AlertCircle,
   RefreshCw,
   ZoomIn,
   ZoomOut,
@@ -16,13 +15,12 @@ import {
   Copy,
   Target,
   Plus,
+  Crosshair,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { FcfJson } from "@/lib/fcf/schema";
 import FcfPreview from "@/components/fcf/FcfPreview";
 import { ConfidenceBar } from "@/components/gdt/ConfidenceIndicator";
-import { ValidationPanel } from "@/components/gdt/ValidationMessage";
-import type { ValidationResult } from "@/lib/rules/validateFcf";
 
 interface ExtractedFcf {
   fcf: Partial<FcfJson>;
@@ -43,6 +41,39 @@ interface ExtractionResult {
     scale?: string;
   };
   processingTime: number;
+}
+
+// Technical panel wrapper
+function TechnicalPanel({
+  children,
+  label,
+  className,
+  headerRight,
+}: {
+  children: React.ReactNode;
+  label?: string;
+  className?: string;
+  headerRight?: React.ReactNode;
+}) {
+  return (
+    <div className={cn("relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800", className)}>
+      {/* Corner accents */}
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-slate-300 dark:border-slate-700" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-slate-300 dark:border-slate-700" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-slate-300 dark:border-slate-700" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-300 dark:border-slate-700" />
+
+      {(label || headerRight) && (
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200/50 dark:border-slate-800/50">
+          {label && (
+            <span className="font-mono text-[10px] text-slate-500 tracking-widest">{label}</span>
+          )}
+          {headerRight}
+        </div>
+      )}
+      {children}
+    </div>
+  );
 }
 
 export default function ImageInterpreterPage() {
@@ -212,40 +243,81 @@ export default function ImageInterpreterPage() {
   const selectedFcf = selectedFcfIndex !== null ? extractionResult?.fcfs[selectedFcfIndex] : null;
 
   return (
-    <div className="h-full flex flex-col animate-fade-in">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-6 border-b border-slate-200/50 dark:border-slate-800/50">
         <div>
-          <h1 className="text-2xl font-mono font-bold text-slate-50 tracking-tight">
-            Image Interpreter
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-px bg-accent-500" />
+            <span className="font-mono text-xs text-accent-500 tracking-widest">EXTRACT.AI</span>
+          </div>
+          <h1 className="font-mono text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+            IMAGE INTERPRETER
           </h1>
-          <p className="text-slate-400 mt-1">
-            Upload engineering drawings or screenshots to extract FCF data using AI
+          <p className="text-slate-500 mt-1 font-mono text-sm">
+            Extract FCF data from engineering drawings using AI vision
           </p>
         </div>
+
         {extractionResult && (
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyAll}
-              className="btn-secondary text-sm"
+              className="flex items-center gap-2 px-3 py-2 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 font-mono text-xs transition-colors"
               title="Copy all FCFs"
             >
               {copied ? (
-                <Check className="w-4 h-4 text-success-500" />
+                <Check className="w-3.5 h-3.5 text-accent-500" />
               ) : (
-                <Copy className="w-4 h-4" />
+                <Copy className="w-3.5 h-3.5" />
               )}
-              Copy All
+              COPY ALL
             </button>
             <button
               onClick={handleDownloadAll}
-              className="btn-secondary text-sm"
+              className="flex items-center gap-2 px-3 py-2 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 font-mono text-xs transition-colors"
               title="Download all FCFs"
             >
-              <Download className="w-4 h-4" />
-              Export
+              <Download className="w-3.5 h-3.5" />
+              EXPORT
             </button>
           </div>
+        )}
+      </div>
+
+      {/* Status Bar */}
+      <div className="flex items-center gap-4 py-3 px-4 bg-slate-100/50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50">
+        <div className="flex items-center gap-2">
+          {extractionResult ? (
+            <>
+              <div className="w-1.5 h-1.5 bg-accent-500 animate-pulse" />
+              <span className="font-mono text-xs text-accent-500">
+                {extractionResult.fcfs.length} FCF{extractionResult.fcfs.length !== 1 ? 'S' : ''} EXTRACTED
+              </span>
+            </>
+          ) : image ? (
+            <>
+              <div className="w-1.5 h-1.5 bg-warning-500" />
+              <span className="font-mono text-xs text-warning-500">IMAGE LOADED</span>
+            </>
+          ) : (
+            <>
+              <div className="w-1.5 h-1.5 bg-slate-600" />
+              <span className="font-mono text-xs text-slate-600">AWAITING IMAGE</span>
+            </>
+          )}
+        </div>
+        <div className="h-4 w-px bg-slate-300 dark:bg-slate-700" />
+        <span className="font-mono text-[10px] text-slate-500">
+          MODEL: GPT-5.1-VISION
+        </span>
+        {extractionResult && (
+          <>
+            <div className="h-4 w-px bg-slate-300 dark:bg-slate-700" />
+            <span className="font-mono text-[10px] text-slate-600 dark:text-slate-400">
+              TIME: {extractionResult.processingTime.toFixed(1)}s
+            </span>
+          </>
         )}
       </div>
 
@@ -256,151 +328,184 @@ export default function ImageInterpreterPage() {
           <div className="flex flex-col gap-4 overflow-hidden">
             {/* Upload area or image preview */}
             {!image ? (
-              <div
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={handleClickUpload}
-                className={cn(
-                  "flex-1 flex flex-col items-center justify-center",
-                  "border-2 border-dashed rounded-lg cursor-pointer",
-                  "transition-all duration-200",
-                  isDragging
-                    ? "border-primary-500 bg-primary-500/10"
-                    : "border-slate-700 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-900"
-                )}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={handleFileInputChange}
-                  className="hidden"
-                />
+              <TechnicalPanel label="INPUT.IMAGE" className="flex-1">
                 <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={handleClickUpload}
                   className={cn(
-                    "flex items-center justify-center w-16 h-16 rounded-full mb-4",
-                    isDragging ? "bg-primary-500/20" : "bg-slate-800"
+                    "flex flex-col items-center justify-center min-h-[400px] cursor-pointer",
+                    "transition-all duration-200 m-4",
+                    isDragging
+                      ? "border-2 border-dashed border-accent-500 bg-accent-500/5"
+                      : "border-2 border-dashed border-slate-800 hover:border-slate-700"
                   )}
                 >
-                  <Upload
-                    className={cn(
-                      "w-8 h-8",
-                      isDragging ? "text-primary-400" : "text-slate-500"
-                    )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={handleFileInputChange}
+                    className="hidden"
                   />
-                </div>
-                <h3 className="text-lg font-medium text-slate-300 mb-2">
-                  {isDragging ? "Drop to upload" : "Upload Drawing"}
-                </h3>
-                <p className="text-sm text-slate-500 text-center max-w-xs">
-                  Drag and drop an engineering drawing or screenshot, or click to browse.
-                  <br />
-                  <span className="text-slate-600">
-                    Supports PNG, JPG, PDF
-                  </span>
-                </p>
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col min-h-0">
-                {/* Image header */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-sm text-slate-400">
-                    <FileImage className="w-4 h-4" />
-                    <span className="truncate max-w-[200px]">{fileName}</span>
+                  <div className="relative mb-6">
+                    <div className="w-20 h-20 border border-slate-700 flex items-center justify-center">
+                      {/* Corner accents */}
+                      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-slate-600" />
+                      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-slate-600" />
+                      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-slate-600" />
+                      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-600" />
+                      <Upload
+                        className={cn(
+                          "w-8 h-8",
+                          isDragging ? "text-accent-500" : "text-slate-600"
+                        )}
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {/* Zoom controls */}
-                    <div className="flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1">
-                      <button
-                        onClick={() => setZoom(Math.max(25, zoom - 25))}
-                        className="p-1 hover:bg-slate-700 rounded transition-colors"
+                  <h3 className="font-mono text-sm text-slate-300 mb-2">
+                    {isDragging ? "DROP TO UPLOAD" : "UPLOAD DRAWING"}
+                  </h3>
+                  <p className="font-mono text-xs text-slate-600 text-center max-w-xs">
+                    Drag and drop an engineering drawing or click to browse
+                  </p>
+                  <div className="flex items-center gap-4 mt-4">
+                    {["PNG", "JPG", "PDF"].map((format) => (
+                      <span
+                        key={format}
+                        className="font-mono text-[10px] text-slate-700 px-2 py-1 border border-slate-800"
                       >
-                        <ZoomOut className="w-4 h-4 text-slate-400" />
-                      </button>
-                      <span className="text-xs text-slate-400 w-12 text-center">
-                        {zoom}%
+                        {format}
                       </span>
+                    ))}
+                  </div>
+                </div>
+              </TechnicalPanel>
+            ) : (
+              <div className="flex-1 flex flex-col min-h-0 gap-4">
+                <TechnicalPanel
+                  label="INPUT.IMAGE"
+                  className="flex-1 flex flex-col"
+                  headerRight={
+                    <div className="flex items-center gap-2">
+                      {/* Zoom controls */}
+                      <div className="flex items-center gap-1 border border-slate-800 px-2 py-1">
+                        <button
+                          onClick={() => setZoom(Math.max(25, zoom - 25))}
+                          className="p-1 hover:bg-slate-800 transition-colors"
+                        >
+                          <ZoomOut className="w-3 h-3 text-slate-500" />
+                        </button>
+                        <span className="font-mono text-[10px] text-slate-500 w-10 text-center">
+                          {zoom}%
+                        </span>
+                        <button
+                          onClick={() => setZoom(Math.min(200, zoom + 25))}
+                          className="p-1 hover:bg-slate-800 transition-colors"
+                        >
+                          <ZoomIn className="w-3 h-3 text-slate-500" />
+                        </button>
+                      </div>
                       <button
-                        onClick={() => setZoom(Math.min(200, zoom + 25))}
-                        className="p-1 hover:bg-slate-700 rounded transition-colors"
+                        onClick={handleClear}
+                        className="p-1.5 hover:bg-slate-800 transition-colors"
+                        title="Remove image"
                       >
-                        <ZoomIn className="w-4 h-4 text-slate-400" />
+                        <X className="w-3.5 h-3.5 text-slate-500" />
                       </button>
                     </div>
-                    <button
-                      onClick={handleClear}
-                      className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
-                      title="Remove image"
-                    >
-                      <X className="w-4 h-4 text-slate-400" />
-                    </button>
+                  }
+                >
+                  {/* File info */}
+                  <div className="px-4 py-2 border-b border-slate-800/50 flex items-center gap-2">
+                    <FileImage className="w-3.5 h-3.5 text-slate-600" />
+                    <span className="font-mono text-[10px] text-slate-500 truncate max-w-[300px]">
+                      {fileName}
+                    </span>
                   </div>
-                </div>
 
-                {/* Image container */}
-                <div className="flex-1 relative overflow-auto bg-slate-950 rounded-lg border border-slate-800">
-                  <div
-                    className="absolute inset-0 flex items-center justify-center p-4"
-                    style={{
-                      transform: `scale(${zoom / 100})`,
-                      transformOrigin: "center center",
-                    }}
-                  >
-                    <img
-                      src={image}
-                      alt="Uploaded drawing"
-                      className="max-w-full max-h-full object-contain"
+                  {/* Image container */}
+                  <div className="flex-1 relative overflow-auto bg-slate-950/50 m-4">
+                    {/* Grid background */}
+                    <div
+                      className="absolute inset-0 opacity-[0.03]"
+                      style={{
+                        backgroundImage: `
+                          linear-gradient(to right, #00D4AA 1px, transparent 1px),
+                          linear-gradient(to bottom, #00D4AA 1px, transparent 1px)
+                        `,
+                        backgroundSize: '20px 20px',
+                      }}
                     />
+                    <div
+                      className="absolute inset-0 flex items-center justify-center p-4"
+                      style={{
+                        transform: `scale(${zoom / 100})`,
+                        transformOrigin: "center center",
+                      }}
+                    >
+                      <img
+                        src={image}
+                        alt="Uploaded drawing"
+                        className="max-w-full max-h-full object-contain"
+                      />
 
-                    {/* Bounding boxes for extracted FCFs */}
-                    {extractionResult?.fcfs.map((fcf, index) =>
-                      fcf.boundingBox ? (
-                        <div
-                          key={index}
-                          onClick={() => setSelectedFcfIndex(index)}
-                          className={cn(
-                            "absolute border-2 rounded cursor-pointer transition-all",
-                            selectedFcfIndex === index
-                              ? "border-primary-500 bg-primary-500/10"
-                              : "border-accent-500/50 hover:border-accent-500 hover:bg-accent-500/10"
-                          )}
-                          style={{
-                            left: fcf.boundingBox.x,
-                            top: fcf.boundingBox.y,
-                            width: fcf.boundingBox.width,
-                            height: fcf.boundingBox.height,
-                          }}
-                        >
-                          <span className="absolute -top-5 left-0 text-xs font-mono text-accent-400">
-                            #{index + 1}
-                          </span>
-                        </div>
-                      ) : null
-                    )}
+                      {/* Bounding boxes for extracted FCFs */}
+                      {extractionResult?.fcfs.map((fcf, index) =>
+                        fcf.boundingBox ? (
+                          <div
+                            key={index}
+                            onClick={() => setSelectedFcfIndex(index)}
+                            className={cn(
+                              "absolute border-2 cursor-pointer transition-all",
+                              selectedFcfIndex === index
+                                ? "border-accent-500 bg-accent-500/20"
+                                : "border-accent-500/50 hover:border-accent-500 hover:bg-accent-500/10"
+                            )}
+                            style={{
+                              left: fcf.boundingBox.x,
+                              top: fcf.boundingBox.y,
+                              width: fcf.boundingBox.width,
+                              height: fcf.boundingBox.height,
+                            }}
+                          >
+                            <span className="absolute -top-5 left-0 font-mono text-[10px] text-accent-400">
+                              FCF.{String(index + 1).padStart(2, '0')}
+                            </span>
+                          </div>
+                        ) : null
+                      )}
+                    </div>
                   </div>
-                </div>
+                </TechnicalPanel>
 
                 {/* Extract button */}
-                <div className="mt-4">
-                  <button
-                    onClick={handleExtract}
-                    disabled={isProcessing}
-                    className="btn-primary w-full"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        Extracting FCFs...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        Extract FCFs with AI
-                      </>
-                    )}
-                  </button>
-                </div>
+                <button
+                  onClick={handleExtract}
+                  disabled={isProcessing}
+                  className={cn(
+                    "flex items-center justify-center gap-2 px-4 py-3 font-mono text-xs font-semibold transition-all",
+                    isProcessing
+                      ? "bg-slate-800 text-slate-500 cursor-not-allowed"
+                      : "bg-accent-500 text-slate-950 hover:bg-accent-400"
+                  )}
+                  style={{
+                    clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+                  }}
+                >
+                  {isProcessing ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      EXTRACTING...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      EXTRACT FCFs WITH AI
+                    </>
+                  )}
+                </button>
               </div>
             )}
           </div>
@@ -409,62 +514,64 @@ export default function ImageInterpreterPage() {
           <div className="flex flex-col gap-4 overflow-auto scrollbar-hide">
             {/* Processing state */}
             {isProcessing && (
-              <div className="panel flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="relative w-16 h-16 mx-auto mb-4">
-                    <div className="absolute inset-0 border-4 border-slate-700 rounded-full" />
-                    <div className="absolute inset-0 border-4 border-primary-500 rounded-full border-t-transparent animate-spin" />
-                    <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-primary-400" />
+              <TechnicalPanel label="PROCESSING" className="flex-1">
+                <div className="flex items-center justify-center min-h-[400px]">
+                  <div className="text-center">
+                    <div className="relative w-20 h-20 mx-auto mb-6">
+                      <div className="absolute inset-0 border border-slate-700" />
+                      <div className="absolute inset-2 border border-accent-500/30 animate-pulse" />
+                      <Crosshair className="absolute inset-0 m-auto w-8 h-8 text-accent-500 animate-pulse" />
+                    </div>
+                    <h3 className="font-mono text-sm text-slate-300 mb-2">
+                      ANALYZING DRAWING
+                    </h3>
+                    <p className="font-mono text-xs text-slate-600">
+                      AI is extracting feature control frames...
+                    </p>
+                    <div className="flex items-center justify-center gap-1 mt-4">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="w-2 h-2 bg-accent-500 animate-pulse"
+                          style={{ animationDelay: `${i * 200}ms` }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <h3 className="text-lg font-medium text-slate-300 mb-2">
-                    Analyzing Drawing
-                  </h3>
-                  <p className="text-sm text-slate-500">
-                    AI is extracting feature control frames...
-                  </p>
                 </div>
-              </div>
+              </TechnicalPanel>
             )}
 
             {/* Extraction results */}
             {!isProcessing && extractionResult && (
               <>
                 {/* Metadata */}
-                <div className="panel">
-                  <div className="panel-header">
-                    <h3 className="panel-title">Extraction Results</h3>
-                    <span className="text-xs text-slate-500">
-                      {extractionResult.processingTime.toFixed(1)}s
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-6 text-sm">
+                <TechnicalPanel label="EXTRACT.META">
+                  <div className="p-4 grid grid-cols-3 gap-4">
                     <div>
-                      <span className="text-slate-500">Type:</span>{" "}
-                      <span className="text-slate-300">
-                        {extractionResult.metadata.drawingType}
-                      </span>
+                      <span className="font-mono text-[10px] text-slate-600 tracking-widest">TYPE</span>
+                      <p className="font-mono text-xs text-slate-300 mt-1">
+                        {extractionResult.metadata.drawingType.toUpperCase()}
+                      </p>
                     </div>
                     <div>
-                      <span className="text-slate-500">Units:</span>{" "}
-                      <span className="text-slate-300 font-mono">
-                        {extractionResult.metadata.unit}
-                      </span>
+                      <span className="font-mono text-[10px] text-slate-600 tracking-widest">UNITS</span>
+                      <p className="font-mono text-xs text-slate-300 mt-1">
+                        {extractionResult.metadata.unit.toUpperCase()}
+                      </p>
                     </div>
                     <div>
-                      <span className="text-slate-500">FCFs Found:</span>{" "}
-                      <span className="text-accent-400 font-bold">
+                      <span className="font-mono text-[10px] text-slate-600 tracking-widest">FOUND</span>
+                      <p className="font-mono text-sm text-accent-400 font-bold mt-1">
                         {extractionResult.fcfs.length}
-                      </span>
+                      </p>
                     </div>
                   </div>
-                </div>
+                </TechnicalPanel>
 
                 {/* FCF list */}
-                <div className="panel flex-1">
-                  <div className="panel-header">
-                    <h3 className="panel-title">Extracted FCFs</h3>
-                  </div>
-                  <div className="space-y-3">
+                <TechnicalPanel label="EXTRACT.RESULTS" className="flex-1">
+                  <div className="p-4 space-y-3">
                     {extractionResult.fcfs.map((item, index) => (
                       <div
                         key={index}
@@ -474,24 +581,23 @@ export default function ImageInterpreterPage() {
                           )
                         }
                         className={cn(
-                          "p-4 rounded-lg border cursor-pointer transition-all",
+                          "p-4 border cursor-pointer transition-all",
                           selectedFcfIndex === index
-                            ? "border-primary-500 bg-primary-500/10"
+                            ? "border-accent-500 bg-accent-500/10"
                             : "border-slate-800 bg-slate-900/50 hover:border-slate-700"
                         )}
                       >
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <span className="flex items-center justify-center w-6 h-6 rounded bg-slate-800 text-xs font-mono text-slate-400">
-                              #{index + 1}
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono text-[10px] text-slate-600">
+                              {String(index + 1).padStart(2, '0')}
                             </span>
                             <div>
-                              <h4 className="font-medium text-slate-200">
-                                {item.fcf.name || `FCF ${index + 1}`}
+                              <h4 className="font-mono text-xs text-slate-200">
+                                {(item.fcf.name || `FCF ${index + 1}`).toUpperCase()}
                               </h4>
-                              <p className="text-xs text-slate-500 capitalize">
-                                {item.fcf.characteristic} -{" "}
-                                {item.fcf.featureType || "unspecified"}
+                              <p className="font-mono text-[10px] text-slate-500 uppercase mt-0.5">
+                                {item.fcf.characteristic} / {item.fcf.featureType || "UNSPECIFIED"}
                               </p>
                             </div>
                           </div>
@@ -503,63 +609,85 @@ export default function ImageInterpreterPage() {
                         </div>
 
                         {/* FCF Preview */}
-                        <div className="flex items-center justify-center p-4 bg-slate-950/50 rounded-lg">
+                        <div className="flex items-center justify-center p-4 bg-slate-950/50 relative">
+                          <div
+                            className="absolute inset-0 opacity-[0.02]"
+                            style={{
+                              backgroundImage: `
+                                linear-gradient(to right, #00D4AA 1px, transparent 1px),
+                                linear-gradient(to bottom, #00D4AA 1px, transparent 1px)
+                              `,
+                              backgroundSize: '10px 10px',
+                            }}
+                          />
                           <FcfPreview fcf={item.fcf} scale={1.2} />
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
+                </TechnicalPanel>
 
                 {/* Selected FCF details */}
                 {selectedFcf && (
-                  <div className="panel">
-                    <div className="panel-header">
-                      <h3 className="panel-title">FCF Details</h3>
+                  <TechnicalPanel
+                    label="FCF.DETAIL"
+                    headerRight={
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(
                             JSON.stringify(selectedFcf.fcf, null, 2)
                           );
                         }}
-                        className="text-xs text-slate-400 hover:text-slate-300 transition-colors flex items-center gap-1"
+                        className="font-mono text-[10px] text-slate-500 hover:text-accent-500 transition-colors flex items-center gap-1"
                       >
                         <Copy className="w-3 h-3" />
-                        Copy JSON
+                        COPY JSON
                       </button>
+                    }
+                  >
+                    <div className="p-4">
+                      <pre className="font-mono text-xs text-slate-300 bg-slate-950/50 p-4 overflow-auto max-h-[200px] scrollbar-hide">
+                        {JSON.stringify(selectedFcf.fcf, null, 2)}
+                      </pre>
+                      <div className="flex items-center gap-2 mt-4">
+                        <button
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-accent-500 text-slate-950 font-mono text-xs font-semibold hover:bg-accent-400 transition-colors"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
+                          }}
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          ADD TO PROJECT
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2 border border-slate-700 text-slate-300 font-mono text-xs hover:border-slate-600 transition-colors">
+                          <Target className="w-3.5 h-3.5" />
+                          OPEN IN BUILDER
+                        </button>
+                      </div>
                     </div>
-                    <pre className="text-xs font-mono text-slate-300 bg-slate-950/50 p-4 rounded-lg overflow-auto max-h-[200px]">
-                      {JSON.stringify(selectedFcf.fcf, null, 2)}
-                    </pre>
-                    <div className="flex items-center gap-2 mt-3">
-                      <button className="btn-primary text-sm flex-1">
-                        <Plus className="w-4 h-4" />
-                        Add to Project
-                      </button>
-                      <button className="btn-secondary text-sm">
-                        <Target className="w-4 h-4" />
-                        Open in Builder
-                      </button>
-                    </div>
-                  </div>
+                  </TechnicalPanel>
                 )}
               </>
             )}
 
             {/* Empty state */}
             {!isProcessing && !extractionResult && (
-              <div className="panel flex-1 flex items-center justify-center">
-                <div className="text-center py-12">
-                  <ImageIcon className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-slate-400 mb-2">
-                    No Image Uploaded
-                  </h3>
-                  <p className="text-sm text-slate-500 max-w-sm">
-                    Upload an engineering drawing to extract feature control
-                    frames using AI-powered image recognition.
-                  </p>
+              <TechnicalPanel label="OUTPUT.PENDING" className="flex-1">
+                <div className="flex items-center justify-center min-h-[400px]">
+                  <div className="text-center">
+                    <div className="w-20 h-20 border border-slate-800 mx-auto mb-6 flex items-center justify-center">
+                      <ImageIcon className="w-8 h-8 text-slate-700" />
+                    </div>
+                    <h3 className="font-mono text-sm text-slate-500 mb-2">
+                      NO IMAGE UPLOADED
+                    </h3>
+                    <p className="font-mono text-xs text-slate-600 max-w-xs">
+                      Upload an engineering drawing to extract feature control
+                      frames using AI-powered image recognition.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </TechnicalPanel>
             )}
           </div>
         </div>
