@@ -2,7 +2,7 @@
 
 ## 1) Information Architecture (App Routes)
 - `/app` – Authenticated shell dashboard; quick links to builder, interpreter modes, recent projects; status/toast area.
-- `/app/builder` – Mode 2 form-based FCF Builder; sections: characteristic selection, tolerance/modifiers, datums, feature type, advanced options (projected zone/composite placeholder), live SVG preview, validation hints, save/export bar.
+- `/app/builder` – Mode 2 form-based FCF Builder; sections: feature type selection, characteristic selection, tolerance zone (with auto-diameter for cylindrical features), size dimension input (symmetric/asymmetric/limits notation), datums, frame modifiers, name & notes, live SVG preview, validation hints, save/export bar.
 - `/app/interpreter` – JSON interpreter + calculators; sections: JSON input/loader, validation results, explanation, calculators (position @ MMC, flatness, perpendicularity, profile), export/copy panel.
 - `/app/image-interpreter` – Mode 1 image/PDF interpretation; sections: upload/paste area with status, extracted fields form, validation errors, confidence/warnings, final explanation, save/export controls.
 - `/app/projects` – Project list; search/filter by name/tag, cards with counts (FCFs, measurement runs, uploads), create project CTA.
@@ -24,14 +24,17 @@
 
 ### Mode 2 – FCF Builder
 1. Navigate to `/app/builder`.
-2. Select characteristic icon; UI enables relevant fields (datums, diameter, modifiers).
-3. Enter tolerance value/diameter toggle; choose material condition; validation hints appear in real time.
-4. Select datums (primary/secondary/tertiary) with material conditions; prevent duplicates/invalid combos.
-5. Choose feature type; optionally enable projected zone (height) or composite placeholder (constrained).
-6. Live SVG preview updates per change; errors block save/export.
-7. Save FCF to project (select/create); persisted with `source=inputType:builder`.
-8. Export PNG/SVG/JSON when valid; toasts confirm success.
-9. Navigate away/back retains current draft until cleared or saved.
+2. **Select Feature Type first** (hole, pin, slot, boss, plane, surface, edge); this identifies what is being toleranced.
+3. Select characteristic icon (position, flatness, perpendicularity, etc.); UI enables relevant fields.
+4. Enter tolerance value; for cylindrical features (hole, pin), diameter zone is auto-selected for position tolerance.
+5. Choose material condition (MMC, LMC, RFS) if applicable; validation hints appear in real time.
+6. For Features of Size (hole, pin, boss, slot): enter size dimension using symmetric (±), asymmetric (+/-), or limits notation; MMC/LMC values are correctly calculated based on feature type (internal vs external).
+7. Select datums (primary/secondary/tertiary) with material conditions; prevent duplicates/invalid combos.
+8. Optionally enable frame modifiers (projected zone, composite, etc.).
+9. Live SVG preview updates per change; errors block save/export.
+10. Save FCF to project (select/create); persisted with `source=inputType:builder`.
+11. Export PNG/SVG/JSON when valid; toasts confirm success.
+12. Navigate away/back retains current draft until cleared or saved.
 
 ### JSON Interpreter + Calculators
 1. Navigate to `/app/interpreter`.
@@ -59,7 +62,7 @@
 
 ## 3) State & Navigation Notes
 - Global state: auth/session; units (mm/inch), decimals, dual display; active project selection (optional); correlation ID for AI runs.
-- FCF draft state (builder/image): characteristic, tolerance, diameter, modifiers, datums, feature type, pattern, size, advanced options; retain on route change until saved/cleared.
+- FCF draft state (builder/image): feature type, characteristic, tolerance (value, diameter zone, material condition), size dimension (nominal, tolerancePlus, toleranceMinus, notation mode), modifiers, datums, pattern, advanced options; retain on route change until saved/cleared.
 - Validation state: error codes and messages; should block finalize/export; displayed inline near offending fields.
 - Confidence state: derived from parseConfidence (image mode) + validation cleanliness (`high|medium|low`); drives warnings/UI emphasis.
 - Measurement state: inputs, computed results, pass/fail, linked FCF/project; warn on unsaved changes when navigating away.
@@ -71,9 +74,11 @@
   - Exports and uploads use signed URLs; ensure download actions don’t break history.
 
 ## 4) UX Risks / Hot Spots
-- Low-confidence or conflicting AI outputs: need clear warnings, editable fields, and a trusted “finalize” step tied to deterministic validation.
+- Low-confidence or conflicting AI outputs: need clear warnings, editable fields, and a trusted "finalize" step tied to deterministic validation.
 - Validation UX: complex GD&T rules (datums, modifiers, diameter) may confuse; inline hints and examples may be necessary.
+- Size dimension notation: users may be familiar with different conventions (symmetric ±, asymmetric +/-, limits); the toggle accommodates all styles but conversions between notations need clear feedback.
+- MMC/LMC interpretation: internal features (holes, slots) have opposite MMC/LMC from external features (pins, bosses); the UI must clearly show which applies and auto-calculate correctly.
 - Performance expectations: live preview ~50 ms and `/api/fcf/interpret` P90 400 ms—prototype to ensure responsiveness with AI in the loop.
 - Units/precision propagation: risk of mismatched displays between UI and exports; require consistent formatting utilities.
 - File upload edge cases: PDF/image clarity, supported MIME types, retries, and private URL handling need clear feedback.
-- State retention: drafts across routes risk stale or unintended persistence; define explicit “clear/reset” behaviors.
+- State retention: drafts across routes risk stale or unintended persistence; define explicit "clear/reset" behaviors.

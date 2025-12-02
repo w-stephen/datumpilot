@@ -3,7 +3,7 @@
 ## 1) Architecture Overview (Major Components)
 - Web frontend (Next.js 15 App Router, React, Tailwind/shadcn/ui) for builder, interpreter, image interpreter, projects, settings.
 - API layer (Next.js route handlers + server actions) exposing `/api/fcf/*`, `/api/ai/*`, project CRUD, uploads, exports.
-- Deterministic core (canonical FcfJson schema, Zod validation, rules engine, calculation engine, units/formatting utilities).
+- Deterministic core (canonical FcfJson schema, Zod validation, rules engine, calculation engine including size dimension/MMC/LMC calculations, units/formatting utilities).
 - AI architecture (2-agent GPT-5.1 calls: Extraction + Explanation) with deterministic rules/calcs as authority and confidence derived from parseConfidence + validation.
 - Data layer (Supabase Postgres with RLS) for projects, fcf_records, measurements, user_settings, uploads metadata.
 - Auth and access control (Supabase Auth + RLS + signed URLs).
@@ -25,16 +25,17 @@
   - Interactions: invokes deterministic core modules, Supabase DB/storage SDKs, OpenAI API, logging/metrics.
 
 - Deterministic core (schema + rules + calculations)
-  - Responsibilities: define `FcfJson` type/schema, validate against ASME rules, compute numeric results (bonus, virtual condition, pass/fail), format units/precision.
-  - Inputs: candidate FcfJson, measurement inputs, user settings (units/decimals/dual display).
-  - Outputs: `ValidationResult` (codes E001–E005...), calculation outputs (bonus, T_eff, pass/fail), formatted values.
+  - Responsibilities: define `FcfJson` type/schema, validate against ASME rules, compute numeric results (bonus, virtual condition, pass/fail, size limits, MMC/LMC), format units/precision.
+  - Inputs: candidate FcfJson, measurement inputs, size dimensions with tolerances, user settings (units/decimals/dual display).
+  - Outputs: `ValidationResult` (codes E001–E005...), calculation outputs (bonus, T_eff, pass/fail, size limits with MMC/LMC per feature type), formatted values.
   - Interactions: consumed by API and frontend; fed into AI prompts; blocks finalize/export on invalid data.
+  - Size calculations: correctly handles internal features (hole, slot) where MMC = smallest size and external features (pin, boss) where MMC = largest size.
 
 - AI architecture (2-agent)
   - Responsibilities: manage prompts/calls for Extraction and Explanation agents; orchestrate `/api/ai/extract-fcf` + explanation generation; derive confidence from parseConfidence + validation; apply prompt caching.
-  - Inputs: signed image URL or builder-provided FcfJson, validation results, deterministic calculations, correlation ID.
-  - Outputs: candidate FcfJson + parseConfidence, engineering-format explanation bound to calc results, derived confidence/warnings.
-  - Interactions: invoked by `/api/fcf/interpret`; logs per-agent traces; uses deterministic outputs as ground truth; only calls explanation after validation passes.
+  - Inputs: signed image URL or builder-provided FcfJson, validation results, deterministic calculations (optional), correlation ID.
+  - Outputs: candidate FcfJson + parseConfidence, engineering-format explanation (with or without calc results), derived confidence/warnings.
+  - Interactions: invoked by `/api/fcf/interpret`; logs per-agent traces; uses deterministic outputs as ground truth; explanation always runs after validation passes (in specification-only mode if no measurements provided).
 
 - Agent responsibilities
 

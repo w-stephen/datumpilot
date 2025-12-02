@@ -1,8 +1,8 @@
 # DatumPilot - AI Architecture & Model Selection
 
 ## Document Info
-- **Version**: 1.0
-- **Last Updated**: November 25, 2025
+- **Version**: 1.1
+- **Last Updated**: November 29, 2025
 - **Status**: Approved
 
 ---
@@ -73,12 +73,18 @@ DatumPilot uses a **2-agent AI architecture** with **GPT-5.1** as the recommende
                             │                                     │
                             │  Input:                             │
                             │   • Validated FCF JSON              │
-                            │   • CalcResult (authoritative)      │
+                            │   • CalcResult (optional)           │
                             │   • ValidationResult (if warnings)  │
+                            │                                     │
+                            │  Modes:                             │
+                            │   • With CalcResult: explains       │
+                            │     results using exact numbers     │
+                            │   • Specification-only: explains    │
+                            │     meaning and measurement approach│
                             │                                     │
                             │  Output:                            │
                             │   • Engineering-format explanation  │
-                            │   • References the calc numbers     │
+                            │   • References calc numbers (if any)│
                             └─────────────────────────┬───────────┘
                                                       │
                                                       ▼
@@ -97,7 +103,9 @@ DatumPilot uses a **2-agent AI architecture** with **GPT-5.1** as the recommende
 | Agent | Purpose | Input | Output |
 |-------|---------|-------|--------|
 | **Extraction Agent** | Parse FCF data from images/PDFs | Image URL, GD&T symbol definitions | Candidate FCF JSON + parseConfidence |
-| **Explanation Agent** | Generate engineering-format explanation | Validated FCF JSON + CalcResult | Plain English explanation with variable breakdown |
+| **Explanation Agent** | Generate engineering-format explanation | Validated FCF JSON + CalcResult (optional) | Plain English explanation with variable breakdown |
+
+**Note on Specification-Only Mode**: The Explanation Agent can operate without CalcResult. When CalcResult is not provided, it explains what the FCF specification means and how it would be measured, rather than explaining specific calculation results. This allows users to get meaningful interpretations before providing measurement data.
 
 ### 2.3 What Was Removed (from original 4-agent design)
 
@@ -198,10 +206,15 @@ async function interpretFcf(input: InterpretRequest): Promise<InterpretResponse>
     return { errors: validation.errors }; // HARD STOP
   }
 
-  // Step 3: Deterministic calculation (AUTHORITATIVE)
-  const calcResult = calculationEngine.compute(fcfJson, input.measurements);
+  // Step 3: Deterministic calculation (OPTIONAL - requires measurements)
+  let calcResult: CalcResult | undefined;
+  if (input.measurements) {
+    calcResult = calculationEngine.compute(fcfJson, input.measurements);
+  }
 
-  // Step 4: Generate explanation (constrained by calc results)
+  // Step 4: Generate explanation (always runs, adapts to presence of calcResult)
+  // - With calcResult: explains calculation results using exact numbers
+  // - Without calcResult: explains specification meaning and measurement approach
   const explanation = await explanationAgent.explain(fcfJson, calcResult, validation);
 
   // Step 5: Derive confidence
@@ -209,7 +222,7 @@ async function interpretFcf(input: InterpretRequest): Promise<InterpretResponse>
 
   return {
     fcfJson,
-    calcResult,
+    calcResult,    // undefined if no measurements provided
     explanation,
     confidence,
     warnings: validation.warnings
@@ -260,25 +273,41 @@ ${JSON.stringify(fcfJsonSchema, null, 2)}
 const explanationSystemPrompt = `
 You are explaining a GD&T Feature Control Frame to an engineer.
 
-CRITICAL CONSTRAINT: You MUST use the exact numeric values provided in the CalcResult.
-DO NOT compute your own values. The calculation engine is authoritative.
+MODES OF OPERATION:
+1. With CalcResult: You MUST use the exact numeric values provided.
+   DO NOT compute your own values. The calculation engine is authoritative.
+2. Without CalcResult (Specification-Only Mode): Explain what the FCF means
+   and how it would be measured, without referencing specific numeric results.
 
-OUTPUT FORMAT: Engineering-style variable breakdown
+OUTPUT FORMAT: Engineering-style explanation
 
-GIVEN (FCF Definition)
+When CalcResult IS provided:
 ──────────────────────────────────────────────────────────────────
-  Characteristic       : [from FCF JSON]
-  Tolerance Zone       : [from FCF JSON]
-  ...
+  GIVEN (FCF Definition)
+    Characteristic, Tolerance Zone, Datums, Material Conditions...
 
-DERIVED VALUES
-──────────────────────────────────────────────────────────────────
-  T_geo    = [from CalcResult] mm    Stated geometric tolerance
-  ...
+  DERIVED VALUES (from CalcResult - use exact numbers)
+    T_geo, bonus tolerance, virtual condition, etc.
 
-INTERPRETATION
+  INTERPRETATION
+    Plain English explanation with calculation results
+
+When CalcResult is NOT provided:
 ──────────────────────────────────────────────────────────────────
-  [Plain English explanation of what the FCF means]
+  SUMMARY
+    What geometric characteristic is controlled and tolerance zone shape
+
+  DATUMS & PRECEDENCE
+    How the Datum Reference Frame constrains the part
+
+  MATERIAL CONDITION EFFECTS
+    MMC/LMC/RFS effects and bonus tolerance potential (if applicable)
+
+  MEASUREMENT GUIDANCE
+    How this tolerance would be measured/verified
+
+  PRACTICAL INTERPRETATION
+    What this tolerance means for manufacturing and inspection
 `;
 ```
 
