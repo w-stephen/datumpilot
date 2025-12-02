@@ -39,7 +39,7 @@ export const errorCodes = {
   E024: "Multiple single segments require consistent primary datum",
 
   // === Tolerance Zone & Value Constraints (E031-E040) ===
-  E031: "Tolerance value must be greater than zero",
+  E031: "Tolerance value cannot be negative (zero is valid with MMC for bonus tolerance)",
   E032: "Cylindrical (diameter) zone only valid for position of axis/center plane features",
   E033: "Spherical zone only valid for position of spherical features",
   E034: "Projected zone height must be greater than zero",

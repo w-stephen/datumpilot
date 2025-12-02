@@ -109,35 +109,42 @@ export default function ToleranceDisplay({
 }
 
 /**
- * Tolerance input component for forms
+ * Tolerance input component for forms - compact horizontal layout
  */
 export function ToleranceInput({
   value,
   onChange,
   unit = "mm",
+  onUnitChange,
   decimals = 3,
   showDiameter = true,
   showMaterialCondition = true,
+  showUnitSelector = false,
+  compact = false,
   className,
 }: {
   value: Partial<ToleranceZone>;
   onChange: (tolerance: Partial<ToleranceZone>) => void;
   unit?: Unit;
+  onUnitChange?: (unit: Unit) => void;
   decimals?: number;
   showDiameter?: boolean;
   showMaterialCondition?: boolean;
+  showUnitSelector?: boolean;
+  compact?: boolean;
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       {/* Diameter toggle */}
       {showDiameter && (
         <button
           type="button"
           onClick={() => onChange({ ...value, diameter: !value.diameter })}
           className={cn(
-            "w-8 h-8 flex items-center justify-center rounded-md border font-mono text-lg",
+            "flex items-center justify-center rounded-md border font-mono",
             "transition-all duration-200",
+            compact ? "w-7 h-7 text-base" : "w-8 h-8 text-lg",
             value.diameter
               ? "bg-accent-500/20 border-accent-500 text-accent-400"
               : "bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600"
@@ -151,7 +158,7 @@ export function ToleranceInput({
       )}
 
       {/* Value input */}
-      <div className="relative flex-1">
+      <div className={cn("relative", compact ? "w-28" : "flex-1 min-w-[120px]")}>
         <input
           type="number"
           value={value.value ?? ""}
@@ -164,16 +171,43 @@ export function ToleranceInput({
           step={Math.pow(10, -decimals)}
           min={0}
           className={cn(
-            "input pr-12 font-mono tabular-nums",
-            "text-lg font-semibold"
+            "input font-mono tabular-nums w-full",
+            compact ? "text-sm py-1.5 pr-2" : "text-lg font-semibold pr-12"
           )}
           placeholder="0.000"
           aria-label="Tolerance value"
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-          {unit}
-        </span>
+        {!showUnitSelector && !compact && (
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+            {unit}
+          </span>
+        )}
       </div>
+
+      {/* Unit selector dropdown */}
+      {showUnitSelector && onUnitChange && (
+        <select
+          value={unit}
+          onChange={(e) => onUnitChange(e.target.value as Unit)}
+          className={cn(
+            "bg-slate-800 border border-slate-700 rounded-md font-mono text-slate-300",
+            "hover:border-slate-600 focus:border-accent-500 focus:outline-none",
+            "cursor-pointer appearance-none",
+            compact ? "px-2 py-1.5 text-xs w-14" : "px-3 py-2 text-sm w-16"
+          )}
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 4px center',
+            backgroundSize: '16px',
+            paddingRight: compact ? '20px' : '24px',
+          }}
+          aria-label="Unit"
+        >
+          <option value="mm">mm</option>
+          <option value="inch">in</option>
+        </select>
+      )}
 
       {/* Material condition selector */}
       {showMaterialCondition && (
@@ -189,8 +223,9 @@ export function ToleranceInput({
                 })
               }
               className={cn(
-                "w-10 h-8 flex items-center justify-center rounded-md border font-mono text-sm",
+                "flex items-center justify-center rounded-md border font-mono",
                 "transition-all duration-200",
+                compact ? "w-9 h-7 text-xs" : "w-10 h-8 text-sm",
                 value.materialCondition === mc
                   ? mc === "MMC"
                     ? "bg-amber-500/20 border-amber-500 text-amber-400"

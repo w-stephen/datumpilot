@@ -10,12 +10,13 @@ import {
 
 interface MaterialConditionBadgeProps {
   condition: MaterialConditionSymbol;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   variant?: "symbol" | "text" | "full";
   className?: string;
 }
 
 const sizeClasses = {
+  xs: "h-4 px-1 text-[10px]",
   sm: "h-5 px-1.5 text-xs",
   md: "h-6 px-2 text-sm",
   lg: "h-7 px-2.5 text-base",
@@ -100,7 +101,7 @@ export function MaterialConditionSelector({
   value: MaterialConditionSymbol | undefined;
   onChange: (condition: MaterialConditionSymbol | undefined) => void;
   allowRFS?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   className?: string;
 }) {
   const conditions: MaterialConditionSymbol[] = allowRFS

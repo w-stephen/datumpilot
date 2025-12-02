@@ -513,16 +513,17 @@ describe("validateFcf", () => {
   });
 
   // --------------------------------------------------------------------------
-  // E031: Tolerance value must be positive
+  // E031: Tolerance value must be non-negative (zero allowed with MMC)
   // --------------------------------------------------------------------------
-  describe("E031: Positive tolerance value", () => {
-    it("rejects zero tolerance value", () => {
+  describe("E031: Non-negative tolerance value", () => {
+    it("accepts zero tolerance value (valid for zero at MMC)", () => {
       const fcf: FcfJson = {
         ...validFlatness,
         tolerance: { value: 0 }
       };
       const result = validateFcf(fcf);
-      expect(hasError(result, "E031")).toBe(true);
+      // Zero tolerance is valid per ASME Y14.5 (zero at MMC concept)
+      expect(hasError(result, "E031")).toBe(false);
     });
 
     it("rejects negative tolerance value", () => {
@@ -539,19 +540,19 @@ describe("validateFcf", () => {
       expect(hasError(result, "E031")).toBe(false);
     });
 
-    it("rejects zero tolerance in composite segment", () => {
+    it("accepts zero tolerance in composite segment (valid for bonus tolerance)", () => {
       const fcf: FcfJson = {
         ...validCompositePosition,
         composite: {
           type: "composite",
           segments: [
             { tolerance: { value: 0.25 }, datums: [{ id: "A" }, { id: "B" }] },
-            { tolerance: { value: 0 }, datums: [{ id: "A" }] } // Invalid
+            { tolerance: { value: 0 }, datums: [{ id: "A" }] } // Valid with bonus tolerance
           ]
         }
       };
       const result = validateFcf(fcf);
-      expect(hasError(result, "E031")).toBe(true);
+      expect(hasError(result, "E031")).toBe(false);
     });
   });
 
@@ -778,7 +779,7 @@ describe("validateFcf", () => {
       const fcf: FcfJson = {
         ...validFlatness,
         datums: [{ id: "A" }], // datum-requirements
-        tolerance: { value: 0 } // tolerance-zone
+        tolerance: { value: -0.1 } // tolerance-zone - negative triggers E031
       };
       const datumIssues = validateByCategory(fcf, "datum-requirements");
       const toleranceIssues = validateByCategory(fcf, "tolerance-zone");
@@ -842,7 +843,7 @@ describe("validateFcf", () => {
           segments: [
             { tolerance: { value: 0.5 }, datums: [{ id: "A" }, { id: "B" }, { id: "C" }] },
             { tolerance: { value: 0.3 }, datums: [{ id: "A" }, { id: "B" }] },
-            { tolerance: { value: 0 }, datums: [{ id: "A" }] } // Invalid: zero tolerance
+            { tolerance: { value: -0.1 }, datums: [{ id: "A" }] } // Invalid: negative tolerance
           ]
         }
       };

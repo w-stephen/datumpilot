@@ -117,115 +117,97 @@ export default function SizeDimensionInput({
   const step = Math.pow(10, -decimals);
 
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* Notation selector */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-slate-400 w-20">Notation:</span>
-        <div className="flex items-center gap-1">
-          {(
-            [
-              { key: "symmetric", label: "± Symmetric" },
-              { key: "asymmetric", label: "+/- Asymmetric" },
-              { key: "limits", label: "Limits" },
-            ] as const
-          ).map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handleNotationChange(key)}
-              className={cn(
-                "px-3 py-1.5 text-xs font-mono rounded-md border transition-colors",
-                notation === key
-                  ? "bg-primary-500/20 border-primary-500 text-primary-400"
-                  : "bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600"
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
+    <div className={cn("space-y-3", className)}>
+      {/* Compact row: Notation dropdown + inputs */}
+      <div className="flex items-center gap-3">
+        {/* Notation selector dropdown */}
+        <select
+          value={notation}
+          onChange={(e) => handleNotationChange(e.target.value as ToleranceNotation)}
+          className={cn(
+            "bg-slate-800 border border-slate-700 rounded-md font-mono text-slate-300 text-xs",
+            "hover:border-slate-600 focus:border-primary-500 focus:outline-none",
+            "cursor-pointer appearance-none px-2 py-1.5 w-32"
+          )}
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 4px center',
+            backgroundSize: '14px',
+            paddingRight: '20px',
+          }}
+          aria-label="Tolerance notation"
+        >
+          <option value="symmetric">± Symmetric</option>
+          <option value="asymmetric">+/- Asymmetric</option>
+          <option value="limits">Limits</option>
+        </select>
 
-      {/* Symmetric mode */}
-      {notation === "symmetric" && (
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <label className="text-xs text-slate-500 mb-1 block">Nominal</label>
-            <div className="relative">
-              <input
-                type="number"
-                value={value?.nominal ?? ""}
-                onChange={(e) =>
-                  onChange({
-                    ...value,
-                    nominal: e.target.value ? parseFloat(e.target.value) : undefined,
-                  })
-                }
-                step={step}
-                className="input pr-12 font-mono tabular-nums"
-                placeholder="0.000"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                {unit}
-              </span>
-            </div>
-          </div>
-          <div className="flex-1">
-            <label className="text-xs text-slate-500 mb-1 block">Tolerance (±)</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">
-                ±
-              </span>
-              <input
-                type="number"
-                value={symmetricTolerance || ""}
-                onChange={(e) =>
-                  handleSymmetricChange(
-                    e.target.value ? parseFloat(e.target.value) : undefined
-                  )
-                }
-                step={step}
-                min={0}
-                className="input pl-8 pr-12 font-mono tabular-nums"
-                placeholder="0.000"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                {unit}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Asymmetric mode */}
-      {notation === "asymmetric" && (
-        <div className="space-y-3">
-          <div>
-            <label className="text-xs text-slate-500 mb-1 block">Nominal</label>
-            <div className="relative max-w-[200px]">
-              <input
-                type="number"
-                value={value?.nominal ?? ""}
-                onChange={(e) =>
-                  onChange({
-                    ...value,
-                    nominal: e.target.value ? parseFloat(e.target.value) : undefined,
-                  })
-                }
-                step={step}
-                className="input pr-12 font-mono tabular-nums"
-                placeholder="0.000"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                {unit}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <label className="text-xs text-slate-500 mb-1 block">Upper (+)</label>
+        {/* Symmetric mode - inline inputs */}
+        {notation === "symmetric" && (
+          <>
+            <div className="flex-1 min-w-0">
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-accent-400 font-mono">
+                <input
+                  type="number"
+                  value={value?.nominal ?? ""}
+                  onChange={(e) =>
+                    onChange({
+                      ...value,
+                      nominal: e.target.value ? parseFloat(e.target.value) : undefined,
+                    })
+                  }
+                  step={step}
+                  className="input w-full text-sm py-1.5 font-mono tabular-nums"
+                  placeholder="Nominal"
+                />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-sm">
+                  ±
+                </span>
+                <input
+                  type="number"
+                  value={symmetricTolerance || ""}
+                  onChange={(e) =>
+                    handleSymmetricChange(
+                      e.target.value ? parseFloat(e.target.value) : undefined
+                    )
+                  }
+                  step={step}
+                  min={0}
+                  className="input w-full pl-6 text-sm py-1.5 font-mono tabular-nums"
+                  placeholder="Tol"
+                />
+              </div>
+            </div>
+            <span className="text-xs text-slate-500 font-mono">{unit}</span>
+          </>
+        )}
+
+        {/* Asymmetric mode - inline inputs */}
+        {notation === "asymmetric" && (
+          <>
+            <div className="w-24">
+              <input
+                type="number"
+                value={value?.nominal ?? ""}
+                onChange={(e) =>
+                  onChange({
+                    ...value,
+                    nominal: e.target.value ? parseFloat(e.target.value) : undefined,
+                  })
+                }
+                step={step}
+                className="input w-full text-sm py-1.5 font-mono tabular-nums"
+                placeholder="Nom"
+              />
+            </div>
+            <div className="w-20">
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-accent-400 font-mono text-sm">
                   +
                 </span>
                 <input
@@ -239,18 +221,14 @@ export default function SizeDimensionInput({
                   }
                   step={step}
                   min={0}
-                  className="input pl-8 pr-12 font-mono tabular-nums"
-                  placeholder="0.000"
+                  className="input w-full pl-5 text-sm py-1.5 font-mono tabular-nums"
+                  placeholder="+"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                  {unit}
-                </span>
               </div>
             </div>
-            <div className="flex-1">
-              <label className="text-xs text-slate-500 mb-1 block">Lower (-)</label>
+            <div className="w-20">
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-error-400 font-mono">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-error-400 font-mono text-sm">
                   -
                 </span>
                 <input
@@ -264,86 +242,68 @@ export default function SizeDimensionInput({
                   }
                   step={step}
                   min={0}
-                  className="input pl-8 pr-12 font-mono tabular-nums"
-                  placeholder="0.000"
+                  className="input w-full pl-5 text-sm py-1.5 font-mono tabular-nums"
+                  placeholder="-"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                  {unit}
-                </span>
               </div>
             </div>
+            <span className="text-xs text-slate-500 font-mono">{unit}</span>
+          </>
+        )}
+
+        {/* Limits mode - inline inputs */}
+        {notation === "limits" && (
+          <>
+            <div className="flex-1 min-w-0">
+              <input
+                type="number"
+                value={upperLimit ?? ""}
+                onChange={(e) =>
+                  handleLimitsChange(
+                    e.target.value ? parseFloat(e.target.value) : undefined,
+                    lowerLimit
+                  )
+                }
+                step={step}
+                className="input w-full text-sm py-1.5 font-mono tabular-nums"
+                placeholder="Max"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <input
+                type="number"
+                value={lowerLimit ?? ""}
+                onChange={(e) =>
+                  handleLimitsChange(
+                    upperLimit,
+                    e.target.value ? parseFloat(e.target.value) : undefined
+                  )
+                }
+                step={step}
+                className="input w-full text-sm py-1.5 font-mono tabular-nums"
+                placeholder="Min"
+              />
+            </div>
+            <span className="text-xs text-slate-500 font-mono">{unit}</span>
+          </>
+        )}
+      </div>
+
+      {/* Limits mode - error/info display */}
+      {notation === "limits" && upperLimit !== undefined && lowerLimit !== undefined && (
+        upperLimit >= lowerLimit ? (
+          <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+            <Info className="w-3 h-3 text-slate-500" />
+            <span>
+              → {((upperLimit + lowerLimit) / 2).toFixed(decimals)} ±{((upperLimit - lowerLimit) / 2).toFixed(decimals)} {unit}
+            </span>
           </div>
-        </div>
-      )}
-
-      {/* Limits mode */}
-      {notation === "limits" && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <label className="text-xs text-slate-500 mb-1 block">Upper Limit (Max)</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={upperLimit ?? ""}
-                  onChange={(e) =>
-                    handleLimitsChange(
-                      e.target.value ? parseFloat(e.target.value) : undefined,
-                      lowerLimit
-                    )
-                  }
-                  step={step}
-                  className="input pr-12 font-mono tabular-nums"
-                  placeholder="0.000"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                  {unit}
-                </span>
-              </div>
-            </div>
-            <div className="flex-1">
-              <label className="text-xs text-slate-500 mb-1 block">Lower Limit (Min)</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={lowerLimit ?? ""}
-                  onChange={(e) =>
-                    handleLimitsChange(
-                      upperLimit,
-                      e.target.value ? parseFloat(e.target.value) : undefined
-                    )
-                  }
-                  step={step}
-                  className="input pr-12 font-mono tabular-nums"
-                  placeholder="0.000"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                  {unit}
-                </span>
-              </div>
-            </div>
+        ) : (
+          <div className="flex items-center gap-2 text-xs text-error-400">
+            <Info className="w-3 h-3" />
+            <span>Upper must be ≥ lower</span>
           </div>
-
-          {/* Calculated values display */}
-          {upperLimit !== undefined && lowerLimit !== undefined && upperLimit >= lowerLimit && (
-            <div className="flex items-center gap-2 p-2 bg-slate-800/50 border border-slate-700 rounded">
-              <Info className="w-3 h-3 text-slate-500" />
-              <span className="text-xs text-slate-400 font-mono">
-                Calculated: {((upperLimit + lowerLimit) / 2).toFixed(decimals)} ±
-                {((upperLimit - lowerLimit) / 2).toFixed(decimals)} {unit}
-              </span>
-            </div>
-          )}
-
-          {upperLimit !== undefined && lowerLimit !== undefined && upperLimit < lowerLimit && (
-            <div className="flex items-center gap-2 p-2 bg-error-500/10 border border-error-500/30 rounded">
-              <Info className="w-3 h-3 text-error-400" />
-              <span className="text-xs text-error-400">
-                Upper limit must be greater than or equal to lower limit
-              </span>
-            </div>
-          )}
-        </div>
+        )
       )}
 
       {/* Size summary - use calculateSizeLimits for correct MMC/LMC based on feature type */}
@@ -362,7 +322,7 @@ export default function SizeDimensionInput({
 }
 
 /**
- * Size summary component that correctly calculates MMC/LMC based on feature type.
+ * Size summary component - compact version showing limits and MMC/LMC
  */
 function SizeSummary({
   nominal,
@@ -386,42 +346,23 @@ function SizeSummary({
     );
   }, [nominal, tolerancePlus, toleranceMinus, featureType, decimals]);
 
-  // Determine if internal or external for display text
   const isInternal = featureType === "hole" || featureType === "slot";
 
   return (
-    <div className="pt-3 border-t border-slate-800 space-y-2">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-slate-500">Size Limits:</span>
-        <div className="font-mono text-slate-300">
-          <span className="text-slate-400">
-            Max: {sizeLimits.upperLimit.toFixed(decimals)}
-          </span>
-          <span className="text-slate-600 mx-2">|</span>
-          <span className="text-slate-400">
-            Min: {sizeLimits.lowerLimit.toFixed(decimals)}
-          </span>
-          <span className="text-slate-500 ml-1">{unit}</span>
-        </div>
-      </div>
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-slate-500">Material Conditions:</span>
-        <div className="font-mono text-slate-300">
-          <span className="text-amber-400" title={isInternal ? "Smallest size (max material)" : "Largest size (max material)"}>
-            MMC: {sizeLimits.mmc.toFixed(decimals)}
-          </span>
-          <span className="text-slate-600 mx-2">|</span>
-          <span className="text-cyan-400" title={isInternal ? "Largest size (least material)" : "Smallest size (least material)"}>
-            LMC: {sizeLimits.lmc.toFixed(decimals)}
-          </span>
-          <span className="text-slate-500 ml-1">{unit}</span>
-        </div>
-      </div>
-      <p className="text-[10px] text-slate-600 italic">
-        {isInternal
-          ? `For ${featureType}: MMC = smallest (${sizeLimits.mmc.toFixed(decimals)}), LMC = largest (${sizeLimits.lmc.toFixed(decimals)})`
-          : `For ${featureType}: MMC = largest (${sizeLimits.mmc.toFixed(decimals)}), LMC = smallest (${sizeLimits.lmc.toFixed(decimals)})`}
-      </p>
+    <div className="pt-2 border-t border-slate-800/50 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono">
+      <span className="text-slate-500">
+        Limits: <span className="text-slate-400">{sizeLimits.lowerLimit.toFixed(decimals)}–{sizeLimits.upperLimit.toFixed(decimals)}</span>
+      </span>
+      <span className="text-slate-500">
+        <span className="text-amber-400" title={isInternal ? "Smallest (max material)" : "Largest (max material)"}>
+          MMC {sizeLimits.mmc.toFixed(decimals)}
+        </span>
+        {" / "}
+        <span className="text-cyan-400" title={isInternal ? "Largest (least material)" : "Smallest (least material)"}>
+          LMC {sizeLimits.lmc.toFixed(decimals)}
+        </span>
+        <span className="text-slate-600 ml-1">{unit}</span>
+      </span>
     </div>
   );
 }

@@ -528,10 +528,24 @@ describe("calculatePosition", () => {
   });
 
   describe("Input Validation", () => {
-    it("rejects zero tolerance", () => {
+    it("accepts zero tolerance with MMC (bonus tolerance concept)", () => {
+      const zeroTolInput: PositionInput = {
+        ...holeAtMmcInput,
+        geometricTolerance: 0,
+        materialCondition: "MMC"
+      };
+
+      const response = calculatePosition(zeroTolInput);
+
+      // Zero tolerance at MMC is valid - bonus tolerance provides the actual tolerance
+      expect(response.success).toBe(true);
+    });
+
+    it("rejects zero tolerance with RFS (no bonus tolerance)", () => {
       const invalidInput: PositionInput = {
         ...holeAtMmcInput,
-        geometricTolerance: 0
+        geometricTolerance: 0,
+        materialCondition: "RFS"
       };
 
       const response = calculatePosition(invalidInput);

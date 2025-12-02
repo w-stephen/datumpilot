@@ -127,26 +127,37 @@ export function CharacteristicPicker({
   value,
   onChange,
   size = "lg",
+  compact = false,
+  showLabels = true,
+  equallySpaced = false,
   className,
 }: {
   value: Characteristic | null;
   onChange: (characteristic: Characteristic) => void;
   size?: "sm" | "md" | "lg" | "xl";
+  compact?: boolean;
+  showLabels?: boolean;
+  equallySpaced?: boolean;
   className?: string;
 }) {
   const characteristics: Characteristic[] = ["position", "flatness", "perpendicularity", "profile"];
+  const effectiveSize = compact ? "sm" : size;
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn(
+      "flex items-center",
+      equallySpaced ? "justify-evenly flex-1" : compact ? "gap-1.5" : "gap-2",
+      className
+    )}>
       {characteristics.map((char) => (
         <CharacteristicIcon
           key={char}
           characteristic={char}
-          size={size}
+          size={effectiveSize}
           variant={value === char ? "filled" : "default"}
           active={value === char}
           interactive
-          showLabel
+          showLabel={showLabels}
           onClick={() => onChange(char)}
         />
       ))}

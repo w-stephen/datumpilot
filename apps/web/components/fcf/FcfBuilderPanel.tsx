@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Plus, Trash2, Info, AlertCircle } from "lucide-react";
+import { Info, FileText, X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { FcfJson, Characteristic, FeatureType, Unit, DatumReference, ToleranceZone, FrameModifier } from "@/lib/fcf/schema";
 import { CharacteristicPicker } from "@/components/gdt/CharacteristicIcon";
-import { DatumSelector, DatumList, DATUM_LETTERS } from "@/components/gdt/DatumBadge";
+import { DatumSelector, DatumList } from "@/components/gdt/DatumBadge";
 import { ToleranceInput } from "@/components/gdt/ToleranceDisplay";
 import { MaterialConditionSelector } from "@/components/gdt/MaterialConditionBadge";
 import { ValidationPanel } from "@/components/gdt/ValidationMessage";
@@ -148,262 +148,279 @@ export default function FcfBuilderPanel({
     }
   }, [fcf.featureType, fcf.characteristic, fcf.tolerance?.diameter, isCylindricalFeature, updateTolerance]);
 
+  // Notes popover state
+  const [showNotesPopover, setShowNotesPopover] = useState(false);
+
+  // Simple step label component - large number with label
+  const StepLabel = ({ step, label }: { step: number; label: string }) => (
+    <div className="flex items-center gap-2">
+      <span className="text-lg font-mono font-bold text-accent-500">{step}</span>
+      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">{label}</span>
+    </div>
+  );
+
   return (
-    <div className={cn("space-y-6", className)}>
-      {/* Section 1: Feature Type - Identify the feature first */}
-      <section className="panel">
-        <div className="panel-header">
-          <h3 className="panel-title">Feature Type</h3>
-          <span className="text-xs text-slate-500">What are you tolerancing?</span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {(Object.keys(FEATURE_TYPE_LABELS) as FeatureType[]).map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => updateFcf({ featureType: type })}
-              className={cn(
-                "px-3 py-2 text-sm rounded-md border transition-colors text-left",
-                fcf.featureType === type
-                  ? "bg-primary-500/20 border-primary-500 text-primary-400"
-                  : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
-              )}
-            >
-              {FEATURE_TYPE_LABELS[type]}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Section 2: Characteristic Selection */}
-      <section className="panel">
-        <div className="panel-header">
-          <h3 className="panel-title">Characteristic</h3>
-          <span className="text-xs text-slate-500">Geometric control type</span>
-        </div>
-        <div className="space-y-4">
-          <CharacteristicPicker
-            value={fcf.characteristic || null}
-            onChange={(char) => updateFcf({ characteristic: char })}
-            size="lg"
-          />
-          {fcf.characteristic && (
-            <p className="text-sm text-slate-400 flex items-center gap-2">
-              <Info className="w-4 h-4" />
-              {CHARACTERISTIC_DESCRIPTIONS[fcf.characteristic]}
-            </p>
-          )}
-        </div>
-      </section>
-
-      {/* Section 3: Tolerance Zone */}
-      <section className="panel">
-        <div className="panel-header">
-          <h3 className="panel-title">Tolerance Zone</h3>
-        </div>
-        <div className="space-y-4">
-          <ToleranceInput
-            value={fcf.tolerance || {}}
-            onChange={updateTolerance}
-            unit={fcf.sourceUnit || "mm"}
-            showDiameter={fcf.characteristic === "position" || fcf.characteristic === "perpendicularity"}
-            showMaterialCondition={fcf.characteristic !== "flatness"}
-          />
-
-          {/* Hint when diameter is auto-selected for cylindrical features */}
-          {isCylindricalFeature && fcf.tolerance?.diameter && fcf.characteristic === "position" && (
-            <p className="text-xs text-accent-400 flex items-center gap-2">
-              <Info className="w-3 h-3" />
-              Diameter zone auto-selected for {fcf.featureType} feature
-            </p>
-          )}
-
-          {/* Unit Selection */}
-          <div className="flex items-center gap-4">
-            <label className="text-sm text-slate-400">Units:</label>
-            <div className="flex items-center gap-1">
-              {(["mm", "inch"] as Unit[]).map((unit) => (
-                <button
-                  key={unit}
-                  type="button"
-                  onClick={() => updateFcf({ sourceUnit: unit })}
-                  className={cn(
-                    "px-3 py-1.5 text-sm font-mono rounded-md border transition-colors",
-                    fcf.sourceUnit === unit
-                      ? "bg-primary-500/20 border-primary-500 text-primary-400"
-                      : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
-                  )}
-                >
-                  {unit}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 4: Size Dimension (for Features of Size) */}
-      {showSizeDimension && (
-        <section className="panel">
-          <div className="panel-header">
-            <h3 className="panel-title">Size Dimension</h3>
-            {sizeDimensionRequired ? (
-              <span className="text-xs text-warning-400">Required for {fcf.tolerance?.materialCondition}</span>
-            ) : (
-              <span className="text-xs text-slate-500">Optional</span>
+    <div className={cn("space-y-3", className)}>
+      {/* Section 1: Feature Type */}
+      <section className="space-y-2">
+        <StepLabel step={1} label="Define Feature" />
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-slate-400">Feature:</label>
+          <select
+            value={fcf.featureType || ""}
+            onChange={(e) => updateFcf({ featureType: e.target.value as FeatureType || undefined })}
+            className={cn(
+              "bg-slate-800 border border-slate-700 rounded-md font-mono text-sm text-slate-300",
+              "hover:border-slate-600 focus:border-primary-500 focus:outline-none",
+              "cursor-pointer appearance-none px-3 py-1.5 w-32"
             )}
-          </div>
-          <div className="p-4">
-            <p className="text-xs text-slate-500 mb-4">
-              {sizeDimensionRequired
-                ? "Enter the size dimension to calculate bonus tolerance and virtual/resultant conditions."
-                : "Enter size dimension if you want to calculate MMC/LMC boundaries. Required when using material condition modifiers."}
-            </p>
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 6px center',
+              backgroundSize: '16px',
+              paddingRight: '28px',
+            }}
+          >
+            <option value="">Select...</option>
+            {(Object.keys(FEATURE_TYPE_LABELS) as FeatureType[]).map((type) => (
+              <option key={type} value={type}>{FEATURE_TYPE_LABELS[type]}</option>
+            ))}
+          </select>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="border-t border-slate-800/50" />
+
+      {/* Section 2: Geometric Tolerance */}
+      <section className="space-y-2">
+        <StepLabel step={2} label="Geometric Tolerance" />
+        <CharacteristicPicker
+          value={fcf.characteristic || null}
+          onChange={(char) => updateFcf({ characteristic: char })}
+          compact
+          showLabels
+          equallySpaced
+        />
+        {/* Characteristic description inline */}
+        {fcf.characteristic && (
+          <p className="text-xs text-slate-500 flex items-center gap-1.5">
+            <Info className="w-3 h-3 text-slate-600" />
+            {CHARACTERISTIC_DESCRIPTIONS[fcf.characteristic]}
+          </p>
+        )}
+      </section>
+
+      {/* Divider */}
+      <div className="border-t border-slate-800/50" />
+
+      {/* Section 3: Tolerance Zone (single horizontal row) */}
+      <section className="space-y-2">
+        <div className="flex items-center gap-2">
+          <StepLabel step={3} label="Tolerance Zone" />
+          {isCylindricalFeature && fcf.tolerance?.diameter && fcf.characteristic === "position" && (
+            <span className="text-[10px] text-accent-400 ml-2">(⌀ auto for {fcf.featureType})</span>
+          )}
+        </div>
+        <ToleranceInput
+          value={fcf.tolerance || {}}
+          onChange={updateTolerance}
+          unit={fcf.sourceUnit || "mm"}
+          onUnitChange={(unit) => updateFcf({ sourceUnit: unit })}
+          showDiameter={fcf.characteristic === "position" || fcf.characteristic === "perpendicularity"}
+          showMaterialCondition={fcf.characteristic !== "flatness"}
+          showUnitSelector
+          compact
+        />
+      </section>
+
+      {/* Divider */}
+      <div className="border-t border-slate-800/50" />
+
+      {/* Section 4: Size Dimension (conditional, compact) */}
+      {showSizeDimension && (
+        <>
+          <section className="space-y-2">
+            <div className="flex items-center gap-2">
+              <StepLabel step={4} label="Size Dimension" />
+              {sizeDimensionRequired ? (
+                <span className="text-[10px] text-warning-400 ml-2">Required for {fcf.tolerance?.materialCondition}</span>
+              ) : (
+                <span className="text-[10px] text-slate-600 ml-2">Optional</span>
+              )}
+            </div>
             <SizeDimensionInput
               value={fcf.sizeDimension}
               onChange={updateSizeDimension}
               featureType={fcf.featureType}
               unit={fcf.sourceUnit || "mm"}
             />
-          </div>
-        </section>
+          </section>
+          <div className="border-t border-slate-800/50" />
+        </>
       )}
 
-      {/* Section 5: Datum References */}
+      {/* Section 5: Datum References (side-by-side layout) */}
       {allowsDatums && (
-        <section className="panel">
-          <div className="panel-header">
-            <h3 className="panel-title">
-              Datum References
-              {requiresDatums && (
-                <span className="ml-2 text-xs text-error-400 font-normal">
-                  Required
-                </span>
-              )}
-            </h3>
-          </div>
-          <div className="space-y-4">
-            {/* Selected datums */}
+        <>
+          <section className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-500 w-20">Selected:</span>
-              <DatumList
-                datums={fcf.datums || []}
-                removable
-                onRemove={removeDatum}
-              />
+              <StepLabel step={showSizeDimension ? 5 : 4} label="Datum References" />
+              {requiresDatums && (
+                <span className="text-[10px] text-error-400 ml-2">Required</span>
+              )}
             </div>
-
-            {/* Datum selector */}
-            <div>
-              <span className="text-sm text-slate-500 mb-2 block">
-                Click to add (max 3):
-              </span>
-              <DatumSelector
-                selectedDatums={(fcf.datums || []).map((d) => d.id)}
-                onSelect={addDatum}
-                onDeselect={(id) => {
-                  const index = (fcf.datums || []).findIndex((d) => d.id === id);
-                  if (index >= 0) removeDatum(index);
-                }}
-                maxDatums={3}
-              />
-            </div>
-
-            {/* Material conditions for datums */}
-            {(fcf.datums || []).length > 0 && (
-              <div className="space-y-2 pt-4 border-t border-slate-800">
-                <span className="text-sm text-slate-500 block">
-                  Material conditions:
-                </span>
-                {(fcf.datums || []).map((datum, index) => (
-                  <div key={datum.id} className="flex items-center gap-3">
-                    <span className="w-20 font-mono text-accent-400">
-                      Datum {datum.id}:
-                    </span>
-                    <MaterialConditionSelector
-                      value={datum.materialCondition}
-                      onChange={(mc) => updateDatumMC(index, mc)}
-                      allowRFS
-                      size="sm"
-                    />
-                  </div>
-                ))}
+            <div className="flex gap-4 items-stretch">
+              {/* Datum selector grid */}
+              <div className="flex-shrink-0">
+                <DatumSelector
+                  selectedDatums={(fcf.datums || []).map((d) => d.id)}
+                  onSelect={addDatum}
+                  onDeselect={(id) => {
+                    const index = (fcf.datums || []).findIndex((d) => d.id === id);
+                    if (index >= 0) removeDatum(index);
+                  }}
+                  maxDatums={3}
+                  compact
+                />
               </div>
-            )}
-          </div>
-        </section>
+
+              {/* Selected datums with inline MC - aligned container */}
+              <div className="flex-1 flex items-center border-l border-slate-800/50 pl-4 min-h-[56px]">
+                {(fcf.datums || []).length > 0 ? (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {(fcf.datums || []).map((datum, index) => (
+                      <div
+                        key={datum.id}
+                        className="flex items-center gap-1 bg-slate-800/50 border border-slate-700 rounded px-2 py-1"
+                      >
+                        <span className="font-mono text-sm text-accent-400 font-bold">{datum.id}</span>
+                        <MaterialConditionSelector
+                          value={datum.materialCondition}
+                          onChange={(mc) => updateDatumMC(index, mc)}
+                          allowRFS
+                          size="xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeDatum(index)}
+                          className="text-slate-500 hover:text-slate-300 ml-1"
+                          aria-label={`Remove datum ${datum.id}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-xs text-slate-600 italic">Select datums A-N →</span>
+                )}
+              </div>
+            </div>
+          </section>
+          <div className="border-t border-slate-800/50" />
+        </>
       )}
 
-      {/* Section 6: Frame Modifiers (Advanced) */}
-      <section className="panel">
-        <div className="panel-header">
-          <h3 className="panel-title">Frame Modifiers</h3>
-          <span className="text-xs text-slate-500">Optional</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(FRAME_MODIFIER_LABELS) as FrameModifier[]).map((mod) => {
-            const isSelected = (fcf.modifiers || []).includes(mod);
-            return (
-              <button
-                key={mod}
-                type="button"
-                onClick={() => {
-                  const current = fcf.modifiers || [];
-                  updateFcf({
-                    modifiers: isSelected
-                      ? current.filter((m) => m !== mod)
-                      : [...current, mod],
-                  });
-                }}
-                className={cn(
-                  "px-3 py-1.5 text-xs rounded-md border transition-colors",
-                  isSelected
-                    ? "bg-accent-500/20 border-accent-500 text-accent-400"
-                    : "bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600"
-                )}
-              >
-                {FRAME_MODIFIER_LABELS[mod]}
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      {/* Section 6: Options Row (Modifiers + Name + Notes) */}
+      <section className="space-y-2">
+        <StepLabel
+          step={showSizeDimension ? (allowsDatums ? 6 : 5) : (allowsDatums ? 5 : 4)}
+          label="Options"
+        />
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Frame Modifiers */}
+          <div className="flex items-center gap-1">
+            {(Object.keys(FRAME_MODIFIER_LABELS) as FrameModifier[]).map((mod) => {
+              const isSelected = (fcf.modifiers || []).includes(mod);
+              return (
+                <button
+                  key={mod}
+                  type="button"
+                  onClick={() => {
+                    const current = fcf.modifiers || [];
+                    updateFcf({
+                      modifiers: isSelected
+                        ? current.filter((m) => m !== mod)
+                        : [...current, mod],
+                    });
+                  }}
+                  className={cn(
+                    "px-2 py-1 text-[10px] rounded border transition-colors",
+                    isSelected
+                      ? "bg-accent-500/20 border-accent-500 text-accent-400"
+                      : "bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600"
+                  )}
+                  title={FRAME_MODIFIER_LABELS[mod]}
+                >
+                  {FRAME_MODIFIER_LABELS[mod].split(' ')[0]}
+                </button>
+              );
+            })}
+          </div>
 
-      {/* Section 7: Name & Notes */}
-      <section className="panel">
-        <div className="panel-header">
-          <h3 className="panel-title">Name & Notes</h3>
-          <span className="text-xs text-slate-500">Optional</span>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-slate-400 mb-1 block">
-              FCF Name
-            </label>
+          {/* Separator */}
+          <div className="h-5 w-px bg-slate-700" />
+
+          {/* Name input */}
+          <div className="flex items-center gap-2 flex-1 min-w-[150px]">
+            <label className="text-xs text-slate-400 whitespace-nowrap">Name:</label>
             <input
               type="text"
               value={fcf.name || ""}
               onChange={(e) => updateFcf({ name: e.target.value || undefined })}
-              className="input"
-              placeholder="e.g., Mounting Hole Position"
+              className="input text-sm py-1 flex-1 min-w-0"
+              placeholder="e.g., Mounting Hole"
             />
           </div>
-          <div>
-            <label className="text-sm text-slate-400 mb-1 block">
-              Notes
-            </label>
-            <textarea
-              value={(fcf.notes || []).join("\n")}
-              onChange={(e) =>
-                updateFcf({
-                  notes: e.target.value
-                    ? e.target.value.split("\n").filter(Boolean)
-                    : undefined,
-                })
-              }
-              className="input min-h-[80px] resize-y"
-              placeholder="Additional notes or annotations..."
-            />
+
+          {/* Notes popover trigger */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowNotesPopover(!showNotesPopover)}
+              className={cn(
+                "p-1.5 rounded border transition-colors",
+                (fcf.notes || []).length > 0
+                  ? "bg-primary-500/20 border-primary-500 text-primary-400"
+                  : "bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600"
+              )}
+              title="Add notes"
+            >
+              <FileText className="w-4 h-4" />
+            </button>
+
+            {/* Notes popover */}
+            {showNotesPopover && (
+              <div className="absolute right-0 top-full mt-2 w-72 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50">
+                <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+                  <span className="text-xs font-mono text-slate-400">Notes</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowNotesPopover(false)}
+                    className="text-slate-500 hover:text-slate-300"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="p-3">
+                  <textarea
+                    value={(fcf.notes || []).join("\n")}
+                    onChange={(e) =>
+                      updateFcf({
+                        notes: e.target.value
+                          ? e.target.value.split("\n").filter(Boolean)
+                          : undefined,
+                      })
+                    }
+                    className="input min-h-[100px] resize-y text-sm w-full"
+                    placeholder="Additional notes..."
+                    autoFocus
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -70,19 +70,21 @@ export default function BuilderPage() {
 
     const issues: ValidationResult["issues"] = [];
 
+    // Guidance message when characteristic not selected (warning, not error)
     if (!fcfData.characteristic) {
       issues.push({
         code: "E000" as any,
-        message: "Select a characteristic type",
+        message: "Input required: Select a geometric characteristic to begin",
         path: "characteristic",
-        severity: "error",
+        severity: "warning",
       });
     }
 
-    if (!fcfData.tolerance?.value || fcfData.tolerance.value <= 0) {
+    // Reject negative tolerance values (zero is valid for bonus tolerance)
+    if (fcfData.tolerance?.value !== undefined && fcfData.tolerance.value < 0) {
       issues.push({
         code: "E031" as any,
-        message: "Tolerance value must be greater than zero",
+        message: "Tolerance value cannot be negative",
         path: "tolerance.value",
         severity: "error",
       });
@@ -244,10 +246,17 @@ export default function BuilderPage() {
       {/* Validation Status Bar */}
       <div className="flex items-center gap-4 py-3 px-4 bg-slate-100/50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50">
         <div className="flex items-center gap-2">
-          {validationResult?.valid ? (
+          {validationResult?.valid && (validationResult?.summary.warningCount || 0) === 0 ? (
             <>
               <CheckCircle2 className="w-4 h-4 text-accent-500" />
               <span className="font-mono text-xs text-accent-500">VALID</span>
+            </>
+          ) : validationResult?.valid && (validationResult?.summary.warningCount || 0) > 0 ? (
+            <>
+              <AlertCircle className="w-4 h-4 text-warning-500" />
+              <span className="font-mono text-xs text-warning-500">
+                {validationResult.summary.warningCount} WARNING{validationResult.summary.warningCount !== 1 ? 'S' : ''}
+              </span>
             </>
           ) : (
             <>

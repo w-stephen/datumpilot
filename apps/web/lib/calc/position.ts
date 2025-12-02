@@ -281,10 +281,18 @@ export function calculatePositionDeviation(
 function validatePositionInput(input: PositionInput): CalculatorError[] {
   const errors: CalculatorError[] = [];
 
-  if (input.geometricTolerance <= 0) {
+  // Zero tolerance is valid when MMC is specified (bonus tolerance concept)
+  // Only reject negative values, or zero without material condition
+  if (input.geometricTolerance < 0) {
     errors.push({
       code: "INVALID_TOLERANCE",
-      message: "Geometric tolerance must be greater than zero",
+      message: "Geometric tolerance cannot be negative",
+      field: "geometricTolerance"
+    });
+  } else if (input.geometricTolerance === 0 && input.materialCondition === "RFS") {
+    errors.push({
+      code: "INVALID_TOLERANCE",
+      message: "Zero tolerance requires MMC or LMC for bonus tolerance",
       field: "geometricTolerance"
     });
   }

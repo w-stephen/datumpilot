@@ -135,6 +135,7 @@ export function DatumSelector({
   onDeselect,
   maxDatums = 3,
   size = "md",
+  compact = false,
   className,
 }: {
   selectedDatums: string[];
@@ -142,11 +143,19 @@ export function DatumSelector({
   onDeselect: (datumId: string) => void;
   maxDatums?: number;
   size?: "sm" | "md" | "lg";
+  compact?: boolean;
   className?: string;
 }) {
+  const effectiveSize = compact ? "sm" : size;
+  // In compact mode, show only 7 letters per row (A-G, H-N)
+  const displayLetters = compact ? DATUM_LETTERS.slice(0, 14) : DATUM_LETTERS;
+
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
-      {DATUM_LETTERS.map((letter) => {
+    <div className={cn(
+      compact ? "grid grid-cols-7 gap-1" : "flex flex-wrap gap-2",
+      className
+    )}>
+      {displayLetters.map((letter) => {
         const isSelected = selectedDatums.includes(letter);
         const isDisabled = !isSelected && selectedDatums.length >= maxDatums;
 
@@ -163,9 +172,10 @@ export function DatumSelector({
             disabled={isDisabled}
             className={cn(
               "inline-flex items-center justify-center",
-              "border-2 rounded font-mono font-bold",
+              "border rounded font-mono font-bold",
               "transition-all duration-200",
-              sizeClasses[size],
+              compact ? "w-6 h-6 text-xs border" : sizeClasses[effectiveSize],
+              !compact && "border-2",
               isSelected
                 ? "bg-accent-500/20 border-accent-500 text-accent-400"
                 : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300",

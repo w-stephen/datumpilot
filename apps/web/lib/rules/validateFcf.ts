@@ -422,20 +422,22 @@ const rules: Rule[] = [
   {
     code: "E031",
     category: "tolerance-zone",
-    description: "Tolerance value must be greater than zero",
+    description: "Tolerance value must be non-negative (zero allowed with MMC for bonus tolerance)",
     severity: "error",
     applies: () => true,
     evaluate: (fcf) => {
       const issues: ValidationIssue[] = [];
-      if (fcf.tolerance.value <= 0) {
+      // Zero tolerance is valid when MMC is specified (bonus tolerance concept)
+      // Only reject negative values
+      if (fcf.tolerance.value < 0) {
         issues.push(
           issue("E031", "tolerance.value", "error", {
-            suggestion: "Specify a positive tolerance value"
+            suggestion: "Tolerance value cannot be negative"
           })
         );
       }
       fcf.composite?.segments.forEach((seg, i) => {
-        if (seg.tolerance.value <= 0) {
+        if (seg.tolerance.value < 0) {
           issues.push(issue("E031", `composite.segments[${i}].tolerance.value`, "error"));
         }
       });
