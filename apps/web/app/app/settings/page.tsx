@@ -541,7 +541,7 @@ export default function SettingsPage() {
                           VALIDATE ON EXPORT
                         </label>
                         <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-0.5">
-                          Run validation before exporting JSON
+                          Run validation before exporting
                         </p>
                       </div>
                       <ToggleSwitch

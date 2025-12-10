@@ -105,8 +105,8 @@ export default async function PricingPage() {
                 description: "Build feature control frames with live ASME validation",
               },
               {
-                title: "JSON Interpreter",
-                description: "Parse and validate FCF JSON with instant feedback",
+                title: "FCF Interpreter",
+                description: "Parse and validate FCF data with instant feedback",
               },
               {
                 title: "Tolerance Calculations",
@@ -121,8 +121,8 @@ export default async function PricingPage() {
                 description: "Organize FCFs and measurements by project",
               },
               {
-                title: "JSON Export",
-                description: "Export FCF data in canonical JSON format",
+                title: "PNG/SVG Export",
+                description: "Export FCF drawings for documentation and reports",
               },
             ].map((feature) => (
               <div
@@ -150,7 +150,7 @@ export default async function PricingPage() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent-500/10 border border-accent-500/30">
             <Zap className="w-4 h-4 text-accent-500" />
             <span className="font-mono text-xs text-accent-500">
-              14-day money-back guarantee on all paid plans
+              Start free and upgrade anytime
             </span>
           </div>
         </div>

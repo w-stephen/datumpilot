@@ -29,7 +29,7 @@ const quickActions = [
   },
   {
     title: "INTERPRETER",
-    description: "Interpret FCF JSON and run tolerance calculations",
+    description: "Interpret FCF data and run tolerance calculations",
     href: "/app/interpreter",
     icon: FileJson,
     shortcut: "02",

@@ -43,7 +43,8 @@
     "test:watch": "vitest",
     "test:ci": "vitest run --runInBand",
     "check": "pnpm lint:ci && pnpm typecheck && pnpm test:ci",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,mdx}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,mdx}\"",
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook"
   },
   "pnpm-peer-dependency-was-here": "false"
 }

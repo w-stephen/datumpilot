@@ -391,8 +391,8 @@ export default function MarketingPage() {
               },
               {
                 icon: FileJson,
-                title: "JSON Interpreter",
-                description: "Import FCF data from JSON format and get instant validation, tolerance calculations, and AI explanations.",
+                title: "FCF Interpreter",
+                description: "Import FCF data and get instant validation, tolerance calculations, and AI explanations.",
               },
               {
                 icon: Calculator,
@@ -434,7 +434,7 @@ export default function MarketingPage() {
               {
                 step: "01",
                 title: "INPUT",
-                description: "Build visually, paste JSON, or upload engineering drawings",
+                description: "Build visually or import from engineering drawings",
                 icon: Grid3X3,
               },
               {
@@ -446,7 +446,7 @@ export default function MarketingPage() {
               {
                 step: "03",
                 title: "INTERPRET",
-                description: "AI-powered explanations and validated JSON export",
+                description: "AI-powered explanations and professional exports",
                 icon: Sparkles,
               },
             ].map((item, index) => (
