@@ -1,47 +1,40 @@
-# DatumPilot - AI Architecture & Model Selection
+# DatumPilot - AI Architecture
 
 ## Document Info
-- **Version**: 1.1
-- **Last Updated**: November 29, 2025
+- **Version**: 2.0
+- **Last Updated**: December 2025
 - **Status**: Approved
 
 ---
 
 ## 1) Executive Summary
 
-DatumPilot uses a **2-agent AI architecture** with **GPT-5.1** as the recommended model for both agents. This design prioritizes:
+DatumPilot uses a **single-agent AI architecture** with **Claude Opus 4.5** as the primary model and **OpenAI GPT-4.1** as fallback. This design prioritizes:
 
-- **Accuracy**: Critical for engineering tolerance calculations
-- **Deterministic authority**: AI cannot override the rules/calculation engine
-- **Cost efficiency**: GPT-5.1 is 2-3x cheaper than alternatives
-- **Simplicity**: Fewer agents means easier debugging and maintenance
+- **Accuracy**: Claude Opus 4.5 excels at instruction following
+- **Deterministic authority**: AI explains but cannot override calculations
+- **Reliability**: Automatic failover to OpenAI on errors
+- **Cost efficiency**: Prompt caching reduces token costs by ~90%
+
+### What Changed from Original Design
+
+| Original (v1.0) | Current (v2.0) |
+|-----------------|----------------|
+| 2-agent GPT-5.1 (Extraction + Explanation) | Single-agent Claude Opus 4.5 (Explanation only) |
+| Image interpretation (Mode 1) | Removed from v1 scope |
+| Extraction Agent | Removed (no image input) |
+| parseConfidence from extraction | Removed (builder input is always confident) |
 
 ---
 
 ## 2) Architecture Overview
 
-### 2.1 Two-Agent Pattern
+### 2.1 Single-Agent Pattern
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              USER INPUT                                      │
-│              (Image/PDF)                    (Builder Form)                   │
-└──────────────┬──────────────────────────────────┬───────────────────────────┘
-               │                                  │
-               ▼                                  │
-┌──────────────────────────┐                      │
-│    EXTRACTION AGENT      │                      │
-│    (GPT-5.1)             │                      │
-│                          │                      │
-│    image → candidate     │                      │
-│    FCF JSON +            │                      │
-│    parseConfidence       │                      │
-└──────────────┬───────────┘                      │
-               │                                  │
-               ▼                                  ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         USER CONFIRMATION / EDIT                             │
-│                    (All paths converge to editable form)                     │
+│                         (FCF Builder Form)                                   │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
@@ -68,13 +61,25 @@ DatumPilot uses a **2-agent AI architecture** with **GPT-5.1** as the recommende
                                                       │
                                                       ▼
                             ┌─────────────────────────────────────┐
+                            │     AI PROVIDER ABSTRACTION         │
+                            │                                     │
+                            │  Primary: Claude Opus 4.5           │
+                            │  Fallback: OpenAI GPT-4.1           │
+                            │  Features:                          │
+                            │   • Prompt caching (Anthropic)      │
+                            │   • Automatic retry (2 attempts)    │
+                            │   • Exponential backoff             │
+                            │   • Provider failover               │
+                            └──────────────┬──────────────────────┘
+                                           │
+                                           ▼
+                            ┌─────────────────────────────────────┐
                             │        EXPLANATION AGENT            │
-                            │        (GPT-5.1)                    │
                             │                                     │
                             │  Input:                             │
                             │   • Validated FCF JSON              │
                             │   • CalcResult (optional)           │
-                            │   • ValidationResult (if warnings)  │
+                            │   • ValidationResult                │
                             │                                     │
                             │  Modes:                             │
                             │   • With CalcResult: explains       │
@@ -84,121 +89,107 @@ DatumPilot uses a **2-agent AI architecture** with **GPT-5.1** as the recommende
                             │                                     │
                             │  Output:                            │
                             │   • Engineering-format explanation  │
-                            │   • References calc numbers (if any)│
-                            └─────────────────────────┬───────────┘
-                                                      │
-                                                      ▼
-                            ┌─────────────────────────────────────┐
-                            │          FINAL OUTPUT               │
-                            │                                     │
-                            │  • Canonical FCF JSON (validated)   │
-                            │  • Calculation results (numeric)    │
-                            │  • Explanation (engineering format) │
-                            │  • Confidence level                 │
+                            │   • AI metadata (provider, tokens)  │
                             └─────────────────────────────────────┘
 ```
 
-### 2.2 Agent Responsibilities
+### 2.2 Provider Abstraction Layer
 
-| Agent | Purpose | Input | Output |
-|-------|---------|-------|--------|
-| **Extraction Agent** | Parse FCF data from images/PDFs | Image URL, GD&T symbol definitions | Candidate FCF JSON + parseConfidence |
-| **Explanation Agent** | Generate engineering-format explanation | Validated FCF JSON + CalcResult (optional) | Plain English explanation with variable breakdown |
+Located at `apps/web/lib/ai/providers/`:
 
-**Note on Specification-Only Mode**: The Explanation Agent can operate without CalcResult. When CalcResult is not provided, it explains what the FCF specification means and how it would be measured, rather than explaining specific calculation results. This allows users to get meaningful interpretations before providing measurement data.
+| File | Purpose |
+|------|---------|
+| `types.ts` | Core interfaces (AIProvider, ExplanationInput/Output) |
+| `prompts.ts` | Centralized prompts with GDT_REFERENCE_CONTENT for caching |
+| `anthropic.ts` | Claude Opus 4.5 implementation with prompt caching |
+| `openai.ts` | OpenAI GPT-4.1 fallback implementation |
+| `factory.ts` | Provider factory with retry and fallback logic |
+| `index.ts` | Clean exports |
 
-### 2.3 What Was Removed (from original 4-agent design)
+### 2.3 What Was Removed
 
-| Original Agent | Why Removed | Replacement |
-|----------------|-------------|-------------|
-| Combined Agent | Redundant cross-validation | User confirmation catches errors |
-| QA/Adjudicator Agent | Unnecessary with deterministic authority | Rules engine validates; explanation prompt is constrained |
+| Original Component | Why Removed |
+|--------------------|-------------|
+| Mode 1 (Image Interpretation) | Simplified v1 scope |
+| Extraction Agent | No longer needed without image input |
+| parseConfidence | Builder input is always 1.0 confidence |
+| Combined Agent | Never implemented (from 4-agent design) |
+| QA Agent | Never implemented (from 4-agent design) |
 
 ---
 
-## 3) Model Selection: GPT-5.1
+## 3) Model Selection
 
-### 3.1 Why GPT-5.1?
+### 3.1 Primary: Claude Opus 4.5
 
-**Released**: November 12-13, 2025
+| Criterion | Value |
+|-----------|-------|
+| Model ID | `claude-opus-4-5-20250514` |
+| Context | 200K tokens |
+| Prompt caching | Yes (reduces costs ~90%) |
+| Cache TTL | 5 minutes (automatic refresh on use) |
+| Instruction following | Excellent |
 
-| Criterion | GPT-5.1 | Claude Sonnet 4.5 | Winner |
-|-----------|---------|-------------------|--------|
-| **Price (input)** | $1.25/1M | $3.00/1M | GPT-5.1 (2.4x cheaper) |
-| **Price (output)** | $10.00/1M | $15.00/1M | GPT-5.1 (1.5x cheaper) |
-| **Context window** | 400K tokens | 200K tokens | GPT-5.1 |
-| **Prompt caching** | 24 hours | Available | GPT-5.1 |
-| **Multimodal (MMMU)** | 84.2% | 77.8% | GPT-5.1 |
-| **SWE-bench** | 74.9% | 77.2% | Sonnet 4.5 |
-| **Instruction following** | Excellent | Excellent | Tie |
+### 3.2 Fallback: OpenAI GPT-4.1
 
-### 3.2 Key GPT-5.1 Features for DatumPilot
+| Criterion | Value |
+|-----------|-------|
+| Model ID | `gpt-4.1` |
+| Context | 128K tokens |
+| JSON mode | Yes |
+| Used when | Claude fails after retries |
 
-1. **Extended Prompt Caching (24 hours)**
-   - Cache GD&T symbol definitions (⌖, ⏥, ⟂, ◎, ⌰)
-   - Cache ASME Y14.5-2018 extraction rules
-   - Cache JSON schema for FCF output
-   - **90% cost savings on cached tokens**
+### 3.3 Configuration
 
-2. **Adaptive Reasoning**
-   - GPT-5.1 Instant: Fast for simple extractions
-   - GPT-5.1 Thinking: Deeper analysis for complex FCFs
-
-3. **Better Instruction Following**
-   - Critical for Explanation Agent to never contradict deterministic calculations
-
-4. **Superior Multimodal Understanding**
-   - 84.2% on MMMU benchmark
-   - Better for parsing technical drawings
-
-### 3.3 Model Variants
-
-| Variant | Use Case | Price |
-|---------|----------|-------|
-| **gpt-5.1** | Both agents (recommended) | $1.25/$10 per 1M tokens |
-| gpt-5.1-mini | Budget alternative for Explanation Agent | $0.25/$2 per 1M tokens |
-| gpt-5.1-codex | If heavy code generation needed | Same as gpt-5.1 |
-
-### 3.4 Cost Projections
-
-| Configuration | Per Request | Monthly (10K) | Monthly (100K) |
-|--------------|-------------|---------------|----------------|
-| GPT-5.1 (both agents) | ~$0.008 | ~$80 | ~$800 |
-| With prompt caching | ~$0.003-0.005 | ~$30-50 | ~$300-500 |
-| Claude Sonnet 4.5 (both) | ~$0.017 | ~$170 | ~$1,700 |
+Environment variables:
+```bash
+ANTHROPIC_API_KEY=sk-ant-...    # Required for primary provider
+OPENAI_API_KEY=sk-...           # Required for fallback
+AI_PRIMARY_PROVIDER=anthropic   # Default: "anthropic"
+AI_FALLBACK_PROVIDER=openai     # Default: "openai", can be "none"
+```
 
 ---
 
 ## 4) API Endpoints
 
-### 4.1 Simplified Endpoint Structure
+### 4.1 Current Structure
 
-| Endpoint | Purpose | Model |
-|----------|---------|-------|
-| `/api/ai/extract-fcf` | Extraction Agent | GPT-5.1 |
-| `/api/fcf/interpret` | Orchestrator (calls extraction if image, then explanation) | - |
+| Endpoint | Purpose |
+|----------|---------|
+| `/api/fcf/interpret` | Orchestrator: validate → calculate → explain |
 
-**Removed endpoints** (from 4-agent design):
-- ~~`/api/ai/combined-fcf`~~ - No longer needed
-- ~~`/api/ai/qa-fcf`~~ - No longer needed
+**Removed endpoints:**
+- ~~`/api/ai/extract-fcf`~~ - No longer needed (no image input)
 
-### 4.2 Orchestration Flow
+### 4.2 Response Format
+
+```typescript
+interface InterpretFcfResponse {
+  status: 'ok' | 'error';
+  fcf?: FcfJson;
+  validation?: ValidationResult;
+  calcResult?: CalcResult;
+  explanation?: string;
+  confidence?: 'high' | 'medium' | 'low';
+  warnings?: string[];
+  aiMetadata?: {
+    provider: 'anthropic' | 'openai';
+    model: string;
+    cacheStatus?: 'hit' | 'miss';
+    inputTokens?: number;
+    outputTokens?: number;
+  };
+}
+```
+
+### 4.3 Orchestration Flow
 
 ```typescript
 // Pseudocode for /api/fcf/interpret
 async function interpretFcf(input: InterpretRequest): Promise<InterpretResponse> {
-  let fcfJson: FcfJson;
-  let parseConfidence = 1.0;
-
-  // Step 1: Get FCF JSON (extraction or direct input)
-  if (input.imageUrl) {
-    const extraction = await extractionAgent.parse(input.imageUrl);
-    fcfJson = extraction.fcfJson;
-    parseConfidence = extraction.parseConfidence;
-    // User confirmation happens on frontend before this endpoint is called
-  } else {
-    fcfJson = input.fcfJson; // From builder or direct input
-  }
+  // Step 1: Get FCF JSON (always from builder or direct input now)
+  const fcfJson = input.fcfJson;
 
   // Step 2: Deterministic validation (AUTHORITATIVE)
   const validation = rulesEngine.validate(fcfJson);
@@ -212,20 +203,19 @@ async function interpretFcf(input: InterpretRequest): Promise<InterpretResponse>
     calcResult = calculationEngine.compute(fcfJson, input.measurements);
   }
 
-  // Step 4: Generate explanation (always runs, adapts to presence of calcResult)
-  // - With calcResult: explains calculation results using exact numbers
-  // - Without calcResult: explains specification meaning and measurement approach
+  // Step 4: Generate explanation (adapts to presence of calcResult)
   const explanation = await explanationAgent.explain(fcfJson, calcResult, validation);
 
-  // Step 5: Derive confidence
-  const confidence = deriveConfidence(parseConfidence, validation);
+  // Step 5: Derive confidence from validation only
+  const confidence = deriveConfidence(validation);
 
   return {
     fcfJson,
-    calcResult,    // undefined if no measurements provided
+    calcResult,
     explanation,
     confidence,
-    warnings: validation.warnings
+    warnings: validation.warnings,
+    aiMetadata: explanation.metadata
   };
 }
 ```
@@ -234,54 +224,47 @@ async function interpretFcf(input: InterpretRequest): Promise<InterpretResponse>
 
 ## 5) Prompt Engineering
 
-### 5.1 Extraction Agent Prompt Structure
+### 5.1 Cached Content
+
+The `GDT_REFERENCE_CONTENT` (~1500 tokens) is cached using Anthropic's prompt caching:
 
 ```typescript
-const extractionSystemPrompt = `
-You are a GD&T (Geometric Dimensioning and Tolerancing) extraction specialist.
-
-Your task: Parse Feature Control Frames from engineering drawing images and output structured JSON.
-
-CRITICAL RULES:
-1. Output ONLY valid JSON matching the FcfJson schema
-2. Include parseConfidence (0.0-1.0) based on image clarity and certainty
-3. Flag ambiguous symbols with notes
-4. Never invent values - use null for unreadable fields
-
+const GDT_REFERENCE_CONTENT = `
 GD&T SYMBOL REFERENCE:
-- ⌖ Position
-- ⏥ Flatness  
-- ⟂ Perpendicularity
-- ◎ Concentricity
-- ⌰ Circular Runout
-- ○ Circularity
-- ⊙ Symmetry
-- ⌓ Profile of a Line
-- ⌔ Profile of a Surface
-- Ⓜ MMC (Maximum Material Condition)
-- Ⓛ LMC (Least Material Condition)
-- Ⓕ RFS (Regardless of Feature Size)
+- ⌖ Position - Controls location of feature
+- ⏥ Flatness - Controls form (no datums)
+- ⟂ Perpendicularity - Controls orientation relative to datum
+- ◎ Concentricity - Controls coaxiality
+- ⌰ Circular Runout - Controls surface relative to datum axis
+...
 
-OUTPUT SCHEMA:
-${JSON.stringify(fcfJsonSchema, null, 2)}
+MATERIAL CONDITIONS:
+- Ⓜ MMC (Maximum Material Condition) - Most material present
+- Ⓛ LMC (Least Material Condition) - Least material present
+- Ⓕ RFS (Regardless of Feature Size) - Default, no bonus
+
+ASME Y14.5-2018 RULES:
+- Position requires at least one datum
+- Flatness cannot have datums
+- MMC/LMC only applicable to Features of Size
+...
 `;
 ```
 
+Cache statistics are included in the response metadata.
+
 ### 5.2 Explanation Agent Prompt Structure
 
-```typescript
-const explanationSystemPrompt = `
+Two modes of operation:
+
+**With CalcResult:**
+```
 You are explaining a GD&T Feature Control Frame to an engineer.
 
-MODES OF OPERATION:
-1. With CalcResult: You MUST use the exact numeric values provided.
-   DO NOT compute your own values. The calculation engine is authoritative.
-2. Without CalcResult (Specification-Only Mode): Explain what the FCF means
-   and how it would be measured, without referencing specific numeric results.
+CRITICAL: You MUST use the exact numeric values from CalcResult.
+DO NOT compute your own values. The calculation engine is authoritative.
 
-OUTPUT FORMAT: Engineering-style explanation
-
-When CalcResult IS provided:
+OUTPUT FORMAT:
 ──────────────────────────────────────────────────────────────────
   GIVEN (FCF Definition)
     Characteristic, Tolerance Zone, Datums, Material Conditions...
@@ -291,75 +274,88 @@ When CalcResult IS provided:
 
   INTERPRETATION
     Plain English explanation with calculation results
+```
 
-When CalcResult is NOT provided:
+**Without CalcResult (Specification-Only):**
+```
+You are explaining what a GD&T FCF specification means.
+
+OUTPUT FORMAT:
 ──────────────────────────────────────────────────────────────────
   SUMMARY
-    What geometric characteristic is controlled and tolerance zone shape
+    What geometric characteristic is controlled
 
   DATUMS & PRECEDENCE
     How the Datum Reference Frame constrains the part
 
   MATERIAL CONDITION EFFECTS
-    MMC/LMC/RFS effects and bonus tolerance potential (if applicable)
+    MMC/LMC/RFS effects and bonus tolerance potential
 
   MEASUREMENT GUIDANCE
     How this tolerance would be measured/verified
-
-  PRACTICAL INTERPRETATION
-    What this tolerance means for manufacturing and inspection
-`;
 ```
 
 ---
 
 ## 6) Confidence Scoring
 
-Confidence is derived from extraction signals and validation results, not from a QA agent.
+Simplified derivation (no parseConfidence since no image extraction):
 
 ```typescript
-interface ConfidenceFactors {
-  parseConfidence: number;      // From Extraction Agent (0-1)
-  validationClean: boolean;     // No errors or warnings from rules engine
-  imageQuality?: 'high' | 'medium' | 'low';
-}
-
-function deriveConfidence(factors: ConfidenceFactors): 'high' | 'medium' | 'low' {
-  if (factors.parseConfidence >= 0.9 && factors.validationClean) {
-    return 'high';
-  }
-  if (factors.parseConfidence >= 0.7 && factors.validationClean) {
-    return 'medium';
-  }
-  return 'low';
+function deriveConfidence(validation: ValidationResult): 'high' | 'medium' | 'low' {
+  if (validation.summary.errorCount > 0) return 'low';
+  if (validation.summary.warningCount > 0) return 'medium';
+  return 'high';
 }
 ```
 
-For Mode 2 (Builder), parseConfidence is effectively 1.0 since there's no extraction ambiguity.
+For builder input, confidence is always derived from validation results only.
 
 ---
 
-## 7) Why This Design Works
+## 7) Error Handling
 
-### 7.1 Deterministic Authority Preserved
+### 7.1 Retry Logic
 
-| Data | Source | Authority |
-|------|--------|-----------|
-| FCF JSON structure | Extraction Agent or Builder | User-confirmed, then rules-validated |
-| Validation pass/fail | Rules Engine | **Deterministic, authoritative** |
-| Error codes (E001, etc.) | Rules Engine | **Deterministic, authoritative** |
-| Bonus tolerance | Calculation Engine | **Deterministic, authoritative** |
-| Virtual condition | Calculation Engine | **Deterministic, authoritative** |
-| Pass/fail | Calculation Engine | **Deterministic, authoritative** |
-| Natural language explanation | Explanation Agent | Informational only, constrained by calc results |
+```typescript
+const RETRY_CONFIG = {
+  maxAttempts: 2,
+  baseDelayMs: 1000,
+  maxDelayMs: 10000,
+  retryableErrors: [
+    'rate_limit_error',
+    'overloaded_error',
+    'timeout',
+    /^5\d{2}$/  // 5xx status codes
+  ]
+};
+```
 
-### 7.2 Trade-offs Accepted
+### 7.2 Fallback Logic
 
-| 4-Agent Feature | 2-Agent Equivalent | Why It's OK |
-|-----------------|-------------------|-------------|
-| Combined Agent cross-validation | Single extraction + user confirmation | User catches errors |
-| QA Agent contradiction detection | Explanation prompt includes authoritative numbers | LLM is constrained rather than checked |
-| QA Agent confidence assignment | Derived from parseConfidence + validation | Simpler, more predictable |
+If primary provider (Claude) fails after retries:
+1. Log warning with correlation ID
+2. Attempt fallback provider (OpenAI)
+3. If fallback fails, return error to user with helpful message
+
+```typescript
+async function generateWithFallback(input: ExplanationInput): Promise<ExplanationOutput> {
+  try {
+    return await primaryProvider.generate(input);
+  } catch (primaryError) {
+    logger.warn('Primary provider failed, attempting fallback', {
+      error: primaryError,
+      correlationId
+    });
+
+    if (fallbackProvider) {
+      return await fallbackProvider.generate(input);
+    }
+
+    throw primaryError;
+  }
+}
+```
 
 ---
 
@@ -367,33 +363,49 @@ For Mode 2 (Builder), parseConfidence is effectively 1.0 since there's no extrac
 
 | Metric | Target | Notes |
 |--------|--------|-------|
-| Extraction latency | < 3 seconds | Streaming recommended |
-| Explanation latency | < 2 seconds | Shorter output |
-| Total `/api/fcf/interpret` | < 5 seconds | P90 |
-| Cost per request | < $0.01 | With prompt caching |
+| Explanation latency | < 3 seconds P90 | With caching |
+| Total `/api/fcf/interpret` | < 4 seconds P90 | Including validation + calc |
+| Cache hit rate | > 80% | After warmup |
+| Cost per request | < $0.02 | With prompt caching |
 
 ---
 
-## 9) Future Considerations
+## 9) Authority Model
 
-### 9.1 When to Revisit Model Selection
-
-- OpenAI releases GPT-5.2 or GPT-6
-- Anthropic releases Claude Sonnet 5 with significantly better multimodal
-- Google releases Gemini 3 with competitive pricing
-- Your extraction accuracy falls below 90% on production data
-
-### 9.2 Potential Enhancements
-
-- **Batch processing**: Use OpenAI Batch API for 50% cost savings on non-real-time workflows
-- **Fine-tuning**: If extraction accuracy is insufficient, consider fine-tuning on GD&T examples
-- **Hybrid approach**: Use GPT-5.1 for extraction, Claude Sonnet 4.5 for explanation if quality demands
+| Data | Source | Authority |
+|------|--------|-----------|
+| FCF JSON structure | Builder form | User-confirmed, then rules-validated |
+| Validation pass/fail | Rules Engine | **Deterministic, authoritative** |
+| Error codes (E001, etc.) | Rules Engine | **Deterministic, authoritative** |
+| Bonus tolerance | Calculation Engine | **Deterministic, authoritative** |
+| Virtual condition | Calculation Engine | **Deterministic, authoritative** |
+| Pass/fail | Calculation Engine | **Deterministic, authoritative** |
+| Natural language explanation | Explanation Agent | Informational only, constrained by calc results |
 
 ---
 
-## 10) References
+## 10) Future Considerations
 
-- OpenAI GPT-5.1 Announcement (November 12, 2025)
-- Anthropic Claude Sonnet 4.5 Announcement (September 29, 2025)
+### 10.1 When to Revisit Architecture
+
+- User demand for image interpretation (Mode 1)
+- Anthropic releases Claude 4 with improved capabilities
+- OpenAI releases GPT-5 with competitive pricing
+- Need for batch processing or async workflows
+
+### 10.2 Potential Enhancements
+
+- **Fine-tuning**: If explanation quality needs improvement
+- **Streaming**: For longer explanations, stream responses
+- **Hybrid**: Different models for different complexity levels
+- **Image support**: Re-add Extraction Agent if Mode 1 is reinstated
+
+---
+
+## 11) References
+
+- Anthropic Claude Opus 4.5 Documentation
+- OpenAI GPT-4.1 API Reference
 - ASME Y14.5-2018 Standard
-- DatumPilot PRD v1.1
+- DatumPilot PRD v2.0
+- ADR-009: Single-Agent Architecture Migration

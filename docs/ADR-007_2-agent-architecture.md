@@ -1,37 +1,23 @@
 # ADR-007: 2-Agent AI Architecture
 
 ## Status
-**Accepted** - November 25, 2025
+**Superseded** by [ADR-009](./ADR-009_single-agent-claude-architecture.md) - December 2025
 
-## Context
+> **Note**: This ADR documented the original 2-agent architecture (Extraction + Explanation).
+> With Mode 1 (image interpretation) removed from v1 scope, the Extraction Agent was removed,
+> leaving only the Explanation Agent. See ADR-009 for the current single-agent architecture.
 
-DatumPilot's initial design proposed a 4-agent AI architecture:
-1. **Extraction Agent** - Parse FCF from images/PDFs
-2. **Interpretation Agent** - Generate explanations
-3. **Combined Agent** - Cross-validate extraction with interpretation
-4. **QA/Adjudicator Agent** - Final quality check and confidence scoring
+---
 
-During architecture review, we identified several concerns:
-- **Redundancy**: Combined Agent duplicated validation already performed by deterministic rules engine
-- **Complexity**: 4 agents increased latency, cost, and debugging difficulty
-- **Authority confusion**: QA Agent could potentially contradict deterministic calculations
-- **Cost**: More agents = more API calls = higher costs
+## Original Decision (November 2025)
 
-## Decision
-
-Adopt a **2-agent architecture** with deterministic core authority:
+Adopted a **2-agent architecture** with deterministic core authority:
 
 ### Agents Retained
 | Agent | Purpose | Input | Output |
 |-------|---------|-------|--------|
 | **Extraction Agent** | Parse FCF from images/PDFs | Image URL, GD&T symbol definitions | Candidate FCF JSON + parseConfidence |
 | **Explanation Agent** | Generate engineering explanation | Validated FCF JSON + CalcResult | Plain English explanation |
-
-### Agents Removed
-| Agent | Replacement |
-|-------|-------------|
-| Combined Agent | User confirmation UI catches extraction errors |
-| QA/Adjudicator Agent | Rules engine validates; explanation prompt is constrained by calc results |
 
 ### Authority Model
 ```
@@ -42,30 +28,23 @@ User Input → [Extraction Agent] → User Confirmation → [Rules Engine: AUTHO
                                                     [Explanation Agent: Informational]
 ```
 
-The deterministic core (rules engine + calculation engine) is **authoritative**. AI agents cannot override validation results or calculations.
+## Why Superseded
 
-## Consequences
+1. **Mode 1 (Image Interpretation) removed from v1 scope**
+   - Extraction Agent no longer needed
+   - `parseConfidence` field removed from data model
+   - Focus shifted to builder-first approach
 
-### Positive
-- **Simpler system**: 2 agents vs 4 reduces complexity by 50%
-- **Lower latency**: Fewer sequential AI calls
-- **Lower cost**: ~50% reduction in AI API costs
-- **Clearer authority**: Deterministic engines are single source of truth
-- **Easier debugging**: Fewer moving parts
+2. **Model selection changed**
+   - Moved from GPT-5.1 to Claude Opus 4.5 as primary
+   - Added OpenAI GPT-4.1 as fallback
+   - Provider abstraction layer added
 
-### Negative
-- **User responsibility**: Users must verify extraction accuracy (mitigated by confirmation UI)
-- **Less redundancy**: No AI cross-validation (mitigated by deterministic validation)
+3. **Simplified architecture**
+   - Single agent (Explanation) vs two agents
+   - Cleaner prompt caching strategy with Anthropic
+   - Reduced complexity and cost
 
-### Neutral
-- Confidence scoring now derived from `parseConfidence + validationClean` instead of QA agent assessment
-
-## Alternatives Considered
-
-1. **Keep 4-agent design** - Rejected due to redundancy and cost
-2. **Single agent (extraction + explanation combined)** - Rejected; separation allows caching optimization and clearer prompts
-3. **3-agent (drop only QA)** - Rejected; Combined Agent still redundant with user confirmation
-
-## References
-- `docs/06_ai_architecture.md` - Full architecture specification
-- `docs/architecture_update_summary.md` - Migration checklist
+## See Also
+- [ADR-009: Single-Agent Claude Opus 4.5 Architecture](./ADR-009_single-agent-claude-architecture.md)
+- `docs/06_ai_architecture.md` - Current architecture specification

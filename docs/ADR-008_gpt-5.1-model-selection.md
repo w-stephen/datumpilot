@@ -1,95 +1,50 @@
 # ADR-008: GPT-5.1 Model Selection
 
 ## Status
-**Accepted** - November 25, 2025
+**Superseded** by [ADR-009](./ADR-009_single-agent-claude-architecture.md) - December 2025
 
-## Context
+> **Note**: This ADR documented the original GPT-5.1 model selection for the 2-agent architecture.
+> With Mode 1 (image interpretation) removed and the shift to a single-agent architecture,
+> we re-evaluated model selection. See ADR-009 for the current Claude Opus 4.5 + OpenAI fallback approach.
 
-DatumPilot requires an AI model for two agents:
-1. **Extraction Agent** - Parse GD&T Feature Control Frames from images/PDFs
-2. **Explanation Agent** - Generate engineering-format explanations
+---
 
-Key requirements:
-- **Multimodal capability** - Must parse technical drawings accurately
-- **Instruction following** - Explanation Agent must never contradict deterministic calculations
-- **Cost efficiency** - High-volume potential (10K-100K requests/month)
-- **Structured output** - Must reliably produce valid JSON matching FcfJson schema
+## Original Decision (November 2025)
 
-## Decision
+Use **GPT-5.1** for both Extraction and Explanation agents based on:
+- Superior multimodal understanding (84.2% MMMU) for image extraction
+- 24-hour prompt caching for cost efficiency
+- 2.4x cheaper input tokens vs Claude Sonnet 4.5
 
-Use **GPT-5.1** (released November 12-13, 2025) for both agents.
-
-### Model Comparison
-
-| Criterion | GPT-5.1 | Claude Sonnet 4.5 | Winner |
-|-----------|---------|-------------------|--------|
-| **Price (input)** | $1.25/1M tokens | $3.00/1M tokens | GPT-5.1 (2.4x cheaper) |
-| **Price (output)** | $10.00/1M tokens | $15.00/1M tokens | GPT-5.1 (1.5x cheaper) |
-| **Context window** | 400K tokens | 200K tokens | GPT-5.1 |
-| **Prompt caching** | 24 hours | Available | GPT-5.1 |
-| **Multimodal (MMMU)** | 84.2% | 77.8% | GPT-5.1 |
-| **SWE-bench** | 74.9% | 77.2% | Claude Sonnet 4.5 |
-| **Instruction following** | Excellent | Excellent | Tie |
-
-### Key GPT-5.1 Features
-
-1. **Extended Prompt Caching (24 hours)**
-   - Cache GD&T symbol definitions
-   - Cache ASME Y14.5-2018 extraction rules
-   - Cache JSON schema for FCF output
-   - **90% cost savings on cached tokens**
-
-2. **Superior Multimodal Understanding**
-   - 84.2% on MMMU benchmark (vs 77.8% for Claude Sonnet 4.5)
-   - Critical for parsing technical drawings with GD&T symbols
-
-3. **Adaptive Reasoning**
-   - GPT-5.1 Instant for simple extractions
-   - GPT-5.1 Thinking for complex FCFs (future option)
-
-### Cost Projections
-
+### Original Cost Projections
 | Volume | Without Caching | With Caching |
 |--------|-----------------|--------------|
 | Per request | ~$0.008 | ~$0.003-0.005 |
 | 10K/month | ~$80 | ~$30-50 |
 | 100K/month | ~$800 | ~$300-500 |
 
-Claude Sonnet 4.5 equivalent: ~$170/month (10K) or ~$1,700/month (100K)
+## Why Superseded
 
-## Consequences
+1. **Multimodal not needed for v1**
+   - Image extraction (Mode 1) removed from scope
+   - GPT-5.1's multimodal advantage no longer relevant
+   - Single Explanation Agent works with validated FCF JSON, not images
 
-### Positive
-- **2-3x cost savings** compared to Claude Sonnet 4.5
-- **Better multimodal accuracy** for technical drawing extraction
-- **24-hour prompt caching** enables aggressive cost optimization
-- **400K context** allows full ASME Y14.5 reference in prompts
+2. **Claude Opus 4.5 advantages for explanation tasks**
+   - Superior instruction following for engineering explanations
+   - Better at respecting authoritative numbers from deterministic engine
+   - More nuanced, educational explanations
 
-### Negative
-- **Vendor lock-in** to OpenAI (mitigated by clean abstraction layer)
-- **Slightly lower SWE-bench** (not critical for our use case)
+3. **Provider diversity**
+   - Single-vendor lock-in risk mitigated
+   - Claude primary + OpenAI fallback provides redundancy
+   - Provider abstraction layer makes switching trivial
 
-### Neutral
-- Requires OpenAI API key and account
-- Must implement prompt caching strategy to realize cost savings
+4. **Revised cost model**
+   - Explanation-only workload different from extraction + explanation
+   - Prompt caching still beneficial (Anthropic supports it)
+   - Fallback to GPT-4.1 provides cost-effective backup
 
-## Model Variants
-
-| Variant | Use Case | Status |
-|---------|----------|--------|
-| **gpt-5.1** | Both agents (recommended) | Primary |
-| gpt-5.1-mini | Budget fallback for Explanation Agent | Optional |
-| gpt-5.1-codex | Not needed (no heavy code generation) | Not used |
-
-## Revisit Triggers
-
-Re-evaluate model selection when:
-- OpenAI releases GPT-5.2 or GPT-6
-- Anthropic releases Claude Sonnet 5 with significantly better multimodal
-- Google releases Gemini 3 with competitive pricing
-- Extraction accuracy falls below 90% on production data
-
-## References
-- `docs/06_ai_architecture.md` - Full architecture specification
-- OpenAI GPT-5.1 Announcement (November 12, 2025)
-- Anthropic Claude Sonnet 4.5 Announcement (September 29, 2025)
+## See Also
+- [ADR-009: Single-Agent Claude Opus 4.5 Architecture](./ADR-009_single-agent-claude-architecture.md)
+- `docs/06_ai_architecture.md` - Current architecture specification
