@@ -321,3 +321,73 @@ export interface MeasurementListParams extends ListParams {
   calculator?: Calculator;
   passFail?: boolean;
 }
+
+// ============================================================================
+// STACKUP ANALYSES
+// ============================================================================
+
+export type StackupPositiveDirection = "left-to-right" | "right-to-left" | "bottom-to-top" | "top-to-bottom";
+export type StackupAnalysisMethod = "worst-case" | "rss" | "six-sigma";
+
+export interface StackupAcceptanceCriteriaJson {
+  minimum?: number;
+  maximum?: number;
+}
+
+export interface StackupDimensionJson {
+  id: string;
+  name: string;
+  description?: string;
+  nominal: number;
+  tolerancePlus: number;
+  toleranceMinus: number;
+  sign: "positive" | "negative";
+  sensitivityCoefficient: number;
+  processCapability?: number;
+  sourceDrawing?: string;
+  sourceRevision?: string;
+}
+
+export interface StackupAnalysisRow extends Timestamps, SoftDelete {
+  id: string;
+  project_id: string;
+  name: string;
+  description?: string | null;
+  measurement_objective: string;
+  acceptance_criteria: StackupAcceptanceCriteriaJson;
+  positive_direction: StackupPositiveDirection;
+  dimensions: StackupDimensionJson[];
+  analysis_method: StackupAnalysisMethod;
+  unit: Unit;
+  created_by: string;
+}
+
+export interface StackupAnalysisInsert {
+  project_id: string;
+  name: string;
+  description?: string | null;
+  measurement_objective: string;
+  acceptance_criteria: StackupAcceptanceCriteriaJson;
+  positive_direction: StackupPositiveDirection;
+  dimensions: StackupDimensionJson[];
+  analysis_method: StackupAnalysisMethod;
+  unit?: Unit;
+}
+
+export interface StackupAnalysisUpdate {
+  name?: string;
+  description?: string | null;
+  measurement_objective?: string;
+  acceptance_criteria?: StackupAcceptanceCriteriaJson;
+  positive_direction?: StackupPositiveDirection;
+  dimensions?: StackupDimensionJson[];
+  analysis_method?: StackupAnalysisMethod;
+  unit?: Unit;
+}
+
+export interface StackupAnalysisListParams extends ListParams {
+  projectId: string;
+  analysisMethod?: StackupAnalysisMethod;
+  search?: string;
+  includeDeleted?: boolean;
+}
