@@ -10,7 +10,10 @@ import {
   Save,
   RotateCcw,
   Check,
+  CreditCard,
+  ExternalLink,
 } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
 type Tab = "display" | "validation" | "notifications" | "account";
@@ -255,6 +258,20 @@ export default function SettingsPage() {
                     <span className="font-mono text-xs tracking-wide">{label}</span>
                   </button>
                 ))}
+                {/* Billing link */}
+                <div className="mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+                  <Link
+                    href="/app/settings/billing"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-500 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-300 transition-colors"
+                  >
+                    <span className="font-mono text-[9px] w-5 text-slate-400 dark:text-slate-700">
+                      05
+                    </span>
+                    <CreditCard className="w-4 h-4" />
+                    <span className="font-mono text-xs tracking-wide flex-1">BILLING</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
               </div>
             </TechnicalPanel>
           </nav>
