@@ -14,6 +14,7 @@ import {
   Crosshair,
   ChevronRight,
   TrendingUp,
+  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -34,11 +35,18 @@ const quickActions = [
     shortcut: "02",
   },
   {
+    title: "STACK-UP ANALYSIS",
+    description: "Calculate tolerance accumulation using Worst-Case, RSS, and Six Sigma methods",
+    href: "/app/stackup",
+    icon: Layers,
+    shortcut: "03",
+  },
+  {
     title: "PROJECTS",
     description: "Manage your FCF collections and measurement runs",
     href: "/app/projects",
     icon: FolderKanban,
-    shortcut: "03",
+    shortcut: "04",
   },
 ];
 

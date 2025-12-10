@@ -13,6 +13,7 @@ import {
   Crosshair,
   Sun,
   Moon,
+  Layers,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
@@ -45,10 +46,16 @@ const mainNavItems: NavItem[] = [
     code: "03",
   },
   {
+    label: "STACK-UP",
+    href: "/app/stackup",
+    icon: Layers,
+    code: "04",
+  },
+  {
     label: "PROJECTS",
     href: "/app/projects",
     icon: FolderKanban,
-    code: "04",
+    code: "05",
   },
 ];
 
