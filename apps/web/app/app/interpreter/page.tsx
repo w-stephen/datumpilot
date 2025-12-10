@@ -245,12 +245,6 @@ export default function DocumentationPage() {
                       link: "/app/builder",
                     },
                     {
-                      icon: Target,
-                      title: "Image Mode",
-                      desc: "Extract FCFs from engineering drawings using AI-powered image recognition.",
-                      link: "/app/image-interpreter",
-                    },
-                    {
                       icon: Layers,
                       title: "Projects",
                       desc: "Organize and manage your FCFs in project collections.",
@@ -437,9 +431,9 @@ export default function DocumentationPage() {
             <TechnicalPanel label="HOW.TO.USE.DATUMPILOT">
               <div className="p-6">
                 <p className="text-slate-600 dark:text-slate-300 font-mono text-sm leading-relaxed mb-6">
-                  DatumPilot provides two main workflows for working with Feature Control Frames:
+                  DatumPilot provides an interactive workflow for building and interpreting Feature Control Frames:
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="max-w-xl">
                   {/* Builder Workflow */}
                   <div className="space-y-4">
                     <h3 className="font-mono text-sm text-accent-500 font-semibold flex items-center gap-2">
@@ -453,34 +447,10 @@ export default function DocumentationPage() {
                         { step: "3", action: "Add modifiers", desc: "MMC, LMC, or leave as RFS" },
                         { step: "4", action: "Configure datums", desc: "Add primary, secondary, tertiary" },
                         { step: "5", action: "Validate and interpret", desc: "Get AI-powered explanation" },
+                        { step: "6", action: "Export or save", desc: "PNG, SVG, PDF or save to project" },
                       ].map((item) => (
                         <div key={item.step} className="flex items-start gap-3 p-3 bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
                           <span className="font-mono text-xs text-accent-500 font-bold w-5">{item.step}</span>
-                          <div>
-                            <span className="font-mono text-xs text-slate-700 dark:text-slate-200">{item.action}</span>
-                            <p className="font-mono text-[10px] text-slate-500">{item.desc}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Image Workflow */}
-                  <div className="space-y-4">
-                    <h3 className="font-mono text-sm text-purple-400 font-semibold flex items-center gap-2">
-                      <Target className="w-4 h-4" />
-                      IMAGE MODE WORKFLOW
-                    </h3>
-                    <div className="space-y-3">
-                      {[
-                        { step: "1", action: "Upload drawing", desc: "PNG, JPG, or PDF format" },
-                        { step: "2", action: "AI extraction", desc: "Automatically detect FCFs" },
-                        { step: "3", action: "Review results", desc: "Check extracted data" },
-                        { step: "4", action: "Confirm & interpret", desc: "Validate and get explanation" },
-                        { step: "5", action: "Save to project", desc: "Organize your FCFs" },
-                      ].map((item) => (
-                        <div key={item.step} className="flex items-start gap-3 p-3 bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
-                          <span className="font-mono text-xs text-purple-400 font-bold w-5">{item.step}</span>
                           <div>
                             <span className="font-mono text-xs text-slate-700 dark:text-slate-200">{item.action}</span>
                             <p className="font-mono text-[10px] text-slate-500">{item.desc}</p>

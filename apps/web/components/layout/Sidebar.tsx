@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   PenTool,
   FileJson,
-  ImagePlus,
   FolderKanban,
   Settings,
   ChevronLeft,
@@ -46,16 +45,10 @@ const mainNavItems: NavItem[] = [
     code: "03",
   },
   {
-    label: "IMAGE MODE",
-    href: "/app/image-interpreter",
-    icon: ImagePlus,
-    code: "04",
-  },
-  {
     label: "PROJECTS",
     href: "/app/projects",
     icon: FolderKanban,
-    code: "05",
+    code: "04",
   },
 ];
 

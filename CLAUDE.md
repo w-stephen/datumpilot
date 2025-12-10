@@ -33,11 +33,10 @@ DatumPilot is a GD&T (Geometric Dimensioning and Tolerancing) feature control fr
 
 1. **Web Frontend** (`apps/web/app/`)
    - Next.js 15 App Router with route groups: `(marketing)/` for public pages, `app/` for authenticated app
-   - Pages: builder, interpreter, image-interpreter, projects, settings
+   - Pages: builder, interpreter, projects, settings
 
 2. **API Layer** (`apps/web/app/api/`)
    - `/api/fcf/*` - FCF validation, interpretation, export
-- `/api/ai/*` - AI agent endpoints (extract; explanation invoked via `/api/fcf/interpret`)
    - `/api/projects/`, `/api/uploads/` - CRUD operations
 
 3. **Deterministic Core** (`apps/web/lib/`)
@@ -47,12 +46,15 @@ DatumPilot is a GD&T (Geometric Dimensioning and Tolerancing) feature control fr
    - `calc/` - Calculators for position, flatness, perpendicularity, profile
 
 4. **AI Orchestration** (`apps/web/lib/ai/`)
-   - 2-agent pattern: Extraction + Explanation (GPT-5.1) with deterministic validation/calculation as authority
-   - AI model: GPT-5.1 for both agents; see `docs/06_ai_architecture.md` for prompts and flow
-   - `orchestrator.server.ts` - Server-only orchestration
+   - Explanation Agent only (builder input requires no extraction)
+   - `orchestrator.server.ts` - Server-only orchestration (validation → calculation → explanation)
    - AI cannot override deterministic validation; serves to explain and suggest
 
-5. **Data Layer**
+5. **Export Pipeline** (`apps/web/lib/export/`)
+   - User-facing: PNG, SVG, PDF (visual exports for drawings and reports)
+   - Internal/API: JSON (preserved for future CAD/PLM integrations)
+
+6. **Data Layer**
    - Supabase Postgres with RLS for multi-tenant isolation
    - Tables: projects, fcf_records, measurements, user_settings, uploads
    - All FCF JSON stored as `jsonb` in `fcf_records`

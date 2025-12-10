@@ -1,4 +1,4 @@
-import { FcfJson, FeatureType, GeometricStandard } from "@/lib/fcf/schema";
+import { FcfJson } from "@/lib/fcf/schema";
 import { ValidationResult } from "@/lib/rules/validateFcf";
 import {
   FlatnessInput,
@@ -25,28 +25,10 @@ export type CalcResult =
   | { characteristic: "perpendicularity"; result: PerpendicularityResult }
   | { characteristic: "profile"; result: ProfileResult };
 
-export interface ExtractionAgentRequest {
-  imageUrl?: string;
-  text?: string;
-  hints?: {
-    featureType?: FeatureType;
-    standard?: GeometricStandard;
-  };
-}
-
-export interface ExtractionAgentResponse {
-  fcf: FcfJson;
-  parseConfidence: number; // 0.0–1.0 signal from the model
-  notes?: string[];
-  rawText?: string;
-  promptVersion?: string;
-}
-
 export interface ExplanationAgentRequest {
   fcf: FcfJson;
   calcResult?: CalcResult;
   validation: ValidationResult;
-  parseConfidence?: number;
   format?: "markdown" | "plain";
 }
 
@@ -56,23 +38,18 @@ export interface ExplanationAgentResponse {
   promptVersion?: string;
 }
 
+/**
+ * Simplified for v1: accepts FCF JSON directly (no image/text extraction).
+ */
 export interface InterpretFcfRequest {
-  imageUrl?: string;
-  text?: string;
-  fcf?: FcfJson;
+  fcf: FcfJson;
   calculationInput?: CalculationInput;
-  parseConfidenceOverride?: number;
   correlationId?: string;
-  hints?: {
-    featureType?: FeatureType;
-    standard?: GeometricStandard;
-  };
 }
 
 export interface InterpretFcfSuccess {
   status: "ok";
   fcf: FcfJson;
-  parseConfidence: number;
   validation: ValidationResult;
   calcResult?: CalcResult;
   explanation?: ExplanationAgentResponse;
@@ -83,12 +60,10 @@ export interface InterpretFcfSuccess {
 
 export interface InterpretFcfFailure {
   status: "error";
-  stage: "extraction" | "validation" | "calculation" | "explanation";
+  stage: "validation" | "calculation" | "explanation";
   message: string;
-  parseConfidence?: number;
   validation?: ValidationResult;
   correlationId: string;
-  notes?: string[];
 }
 
 export type InterpretFcfResponse = InterpretFcfSuccess | InterpretFcfFailure;

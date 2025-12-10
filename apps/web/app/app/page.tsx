@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import {
   PenTool,
   FileJson,
-  ImagePlus,
   FolderKanban,
   ArrowRight,
   Activity,
@@ -14,7 +13,6 @@ import {
   Clock,
   Crosshair,
   ChevronRight,
-  AlertTriangle,
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -36,18 +34,11 @@ const quickActions = [
     shortcut: "02",
   },
   {
-    title: "IMAGE MODE",
-    description: "Extract FCF data from engineering drawings using AI",
-    href: "/app/image-interpreter",
-    icon: ImagePlus,
-    shortcut: "03",
-  },
-  {
     title: "PROJECTS",
     description: "Manage your FCF collections and measurement runs",
     href: "/app/projects",
     icon: FolderKanban,
-    shortcut: "04",
+    shortcut: "03",
   },
 ];
 
@@ -63,7 +54,7 @@ const stats = [
 const recentActivity = [
   { action: "Created FCF", item: "Position @ MMC - Mounting Hole", time: "2h ago", status: "valid" },
   { action: "Ran calculation", item: "Flatness - Top Surface", time: "4h ago", status: "pass" },
-  { action: "Extracted FCF", item: "Perpendicularity - Slot", time: "1d ago", status: "warning" },
+  { action: "Validated FCF", item: "Perpendicularity - Slot", time: "1d ago", status: "warning" },
   { action: "Created project", item: "Assembly QA - Phase 2", time: "2d ago", status: "valid" },
 ];
 
@@ -301,7 +292,7 @@ export default function DashboardPage() {
               </h3>
               <p className="text-sm text-slate-500 mb-5 leading-relaxed">
                 New to GD&T interpretation? Start by building your first Feature Control Frame
-                or upload an engineering drawing to extract FCF data automatically.
+                with the interactive builder and get AI-powered explanations.
               </p>
               <div className="flex items-center gap-3">
                 <Link
@@ -315,11 +306,11 @@ export default function DashboardPage() {
                   BUILD FCF
                 </Link>
                 <Link
-                  href="/app/image-interpreter"
+                  href="/app/interpreter"
                   className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono text-xs font-medium hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
                 >
-                  <ImagePlus className="w-3.5 h-3.5" />
-                  UPLOAD DRAWING
+                  <FileJson className="w-3.5 h-3.5" />
+                  INTERPRET FCF
                 </Link>
               </div>
             </div>

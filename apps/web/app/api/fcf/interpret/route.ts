@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { orchestrateFcfInterpretation } from "@/lib/ai/orchestrator.server";
 import { InterpretFcfRequest } from "@/lib/ai/types";
-import { fcfJsonSchema, FcfJson } from "@/lib/fcf/schema";
+import { fcfJsonSchema } from "@/lib/fcf/schema";
 
 const calculationInputSchema = z
   .object({
@@ -12,17 +12,12 @@ const calculationInputSchema = z
   })
   .optional();
 
+// Simplified for v1: FCF is required (no image/text extraction)
 const interpretRequestSchema = z.object({
-    imageUrl: z.string().url().optional(),
-    text: z.string().optional(),
-    fcf: z.unknown().optional(),
-    calculationInput: calculationInputSchema,
-    parseConfidenceOverride: z.number().min(0).max(1).optional(),
-    correlationId: z.string().optional()
-  })
-  .refine((val) => Boolean(val.fcf || val.imageUrl || val.text), {
-    message: "Provide fcf or imageUrl/text"
-  });
+  fcf: fcfJsonSchema,
+  calculationInput: calculationInputSchema,
+  correlationId: z.string().optional()
+});
 
 export async function POST(req: Request) {
   try {
@@ -32,30 +27,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: parsed.error.format() }, { status: 400 });
     }
 
-    // Validate and type-narrow the FCF if provided directly.
-    let validatedFcf: FcfJson | undefined;
-    if (parsed.data.fcf) {
-      const check = fcfJsonSchema.safeParse(parsed.data.fcf);
-      if (!check.success) {
-        return NextResponse.json(
-          { error: "Invalid FcfJson payload", details: check.error.format() },
-          { status: 400 }
-        );
-      }
-      validatedFcf = check.data;
-    }
-
     const request: InterpretFcfRequest = {
-      imageUrl: parsed.data.imageUrl,
-      text: parsed.data.text,
-      fcf: validatedFcf,
+      fcf: parsed.data.fcf,
       calculationInput: parsed.data.calculationInput as InterpretFcfRequest["calculationInput"],
-      parseConfidenceOverride: parsed.data.parseConfidenceOverride,
       correlationId: parsed.data.correlationId
     };
 
     const result = await orchestrateFcfInterpretation(request);
-    const statusCode = result.status === "ok" ? 200 : result.stage === "extraction" ? 502 : 400;
+    const statusCode = result.status === "ok" ? 200 : 400;
     return NextResponse.json(result, { status: statusCode });
   } catch (error) {
     console.error("[fcf/interpret] failed", error);

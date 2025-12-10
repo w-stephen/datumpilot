@@ -18,7 +18,6 @@ const routeLabels: Record<string, string> = {
   "/app": "Dashboard",
   "/app/builder": "FCF Builder",
   "/app/interpreter": "Interpreter",
-  "/app/image-interpreter": "Image Interpreter",
   "/app/projects": "Projects",
   "/app/settings": "Settings",
 };

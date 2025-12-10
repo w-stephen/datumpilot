@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import {
   PenTool,
   FileJson,
-  ImagePlus,
   Shield,
   Target,
   ArrowRight,
@@ -255,11 +254,11 @@ export default function MarketingPage() {
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                  href="/app/image-interpreter"
+                  href="/app/interpreter"
                   className="inline-flex items-center gap-2 px-6 py-3 border border-slate-700 text-slate-300 font-mono text-sm font-medium hover:border-slate-600 hover:text-slate-100 transition-all"
                 >
-                  <ImagePlus className="w-4 h-4" />
-                  EXTRACT FROM DRAWING
+                  <FileJson className="w-4 h-4" />
+                  INTERPRET FCF
                 </Link>
               </div>
 
@@ -394,11 +393,6 @@ export default function MarketingPage() {
                 icon: FileJson,
                 title: "JSON Interpreter",
                 description: "Import FCF data from JSON format and get instant validation, tolerance calculations, and AI explanations.",
-              },
-              {
-                icon: ImagePlus,
-                title: "Image Extraction",
-                description: "Upload engineering drawings and extract FCF data automatically using advanced AI vision processing.",
               },
               {
                 icon: Calculator,

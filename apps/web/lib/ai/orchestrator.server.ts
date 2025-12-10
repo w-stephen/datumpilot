@@ -7,7 +7,6 @@ import { calculatePerpendicularity } from "@/lib/calc/perpendicularity";
 import { calculatePosition } from "@/lib/calc/position";
 import { calculateProfile } from "@/lib/calc/profile";
 
-import { runExtractionAgent } from "./extractionAgent";
 import { runExplanationAgent } from "./explanationAgent";
 import {
   CalcResult,
@@ -17,13 +16,14 @@ import {
   InterpretFcfResponse
 } from "./types";
 
-function deriveConfidence(parseConfidence: number, validation: ValidationResult): ConfidenceLevel {
-  const hasErrors = validation.summary.errorCount > 0;
-  const hasWarnings = validation.summary.warningCount > 0;
-  if (hasErrors) return "low";
-  if (parseConfidence >= 0.9 && !hasWarnings) return "high";
-  if (parseConfidence >= 0.7 && !hasErrors) return "medium";
-  return "low";
+/**
+ * Derives confidence level based on validation results.
+ * Simplified: no longer considers parseConfidence from extraction.
+ */
+function deriveConfidence(validation: ValidationResult): ConfidenceLevel {
+  if (validation.summary.errorCount > 0) return "low";
+  if (validation.summary.warningCount > 0) return "medium";
+  return "high";
 }
 
 type CalcOutcome = { ok: true; calcResult: CalcResult } | { ok: false; message: string };
@@ -65,48 +65,33 @@ function runDeterministicCalculation(input: CalculationInput): CalcOutcome {
   }
 }
 
+/**
+ * Orchestrates FCF interpretation: validation → calculation → explanation.
+ * Simplified for v1: accepts FCF JSON directly (no image/text extraction).
+ */
 export async function orchestrateFcfInterpretation(
   request: InterpretFcfRequest
 ): Promise<InterpretFcfResponse> {
   const correlationId = request.correlationId ?? randomUUID();
-  let parseConfidence = request.parseConfidenceOverride ?? (request.fcf ? 1 : 0);
-  let fcf: FcfJson;
 
-  if (request.fcf) {
-    fcf = request.fcf;
-  } else if (request.imageUrl || request.text) {
-    try {
-      const extraction = await runExtractionAgent({
-        imageUrl: request.imageUrl,
-        text: request.text,
-        hints: request.hints
-      });
-      fcf = extraction.fcf;
-      parseConfidence = request.parseConfidenceOverride ?? extraction.parseConfidence;
-    } catch (error) {
-      return {
-        status: "error",
-        stage: "extraction",
-        message: error instanceof Error ? error.message : "Extraction failed",
-        correlationId
-      };
-    }
-  } else {
+  // FCF is required - no extraction from image/text
+  if (!request.fcf) {
     return {
       status: "error",
-      stage: "extraction",
-      message: "Provide an FCF JSON payload or an image/text for extraction",
+      stage: "validation",
+      message: "FCF JSON payload is required",
       correlationId
     };
   }
 
+  const fcf = request.fcf;
   const validation = validateFcf(fcf);
+
   if (!validation.valid) {
     return {
       status: "error",
       stage: "validation",
       message: "FCF failed deterministic validation",
-      parseConfidence,
       validation,
       correlationId
     };
@@ -120,7 +105,6 @@ export async function orchestrateFcfInterpretation(
         status: "error",
         stage: "calculation",
         message: calcOutcome.message,
-        parseConfidence,
         validation,
         correlationId
       };
@@ -129,21 +113,18 @@ export async function orchestrateFcfInterpretation(
   }
 
   const warnings = validation.warnings.map((issue) => `${issue.code}: ${issue.message}`);
-  const confidence = deriveConfidence(parseConfidence, validation);
+  const confidence = deriveConfidence(validation);
 
-  // Always run explanation agent (with or without calcResult)
   try {
     const explanation = await runExplanationAgent({
       fcf,
       calcResult,
-      validation,
-      parseConfidence
+      validation
     });
 
     return {
       status: "ok",
       fcf,
-      parseConfidence,
       validation,
       calcResult,
       explanation,
@@ -156,7 +137,6 @@ export async function orchestrateFcfInterpretation(
       status: "error",
       stage: "explanation",
       message: error instanceof Error ? error.message : "Explanation failed",
-      parseConfidence,
       validation,
       correlationId
     };

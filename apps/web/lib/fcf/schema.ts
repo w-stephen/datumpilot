@@ -60,8 +60,8 @@ export type CompositeFrame =
     };
 
 export type SourceInfo = {
-  inputType: "image" | "builder" | "json"; // How this FCF was captured.
-  fileUrl?: string; // Optional reference to the source image/file.
+  inputType: "builder" | "json"; // How this FCF was captured.
+  fileUrl?: string; // Optional reference to the source file.
   uploadId?: string; // Optional link to uploads table/storage metadata.
   notes?: string;
 };
@@ -99,7 +99,7 @@ export const frameModifierSchema = z.enum([
 ]);
 const geometricStandardSchema = z.enum(["ASME_Y14_5_2018", "ISO_1101"]);
 const zoneShapeSchema = z.enum(["cylindrical", "spherical", "twoParallelPlanes", "twoParallelLines"]);
-const sourceInputTypeSchema = z.enum(["image", "builder", "json"]);
+const sourceInputTypeSchema = z.enum(["builder", "json"]);
 
 const datumReferenceSchema = z.object({
   id: z.string().min(1),
