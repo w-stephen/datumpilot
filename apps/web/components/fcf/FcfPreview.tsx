@@ -26,6 +26,7 @@ const FCF = {
   symbolWidth: 32,
   toleranceMinWidth: 48,
   datumWidth: 28,
+  datumWidthWithMC: 44, // Wider cell when datum has material condition
   strokeWidth: 2,
   fontSize: 14,
   fontFamily: "IBM Plex Mono, monospace",
@@ -73,9 +74,12 @@ function calculateFrameWidth(fcf: Partial<FcfJson>): number {
   let width = FCF.symbolWidth; // Characteristic symbol
   width += getToleranceWidth(fcf); // Tolerance value
 
-  // Datum references
+  // Datum references - wider cells for datums with material conditions
   const datums = fcf.datums || [];
-  width += datums.length * FCF.datumWidth;
+  datums.forEach((datum) => {
+    const hasMC = datum.materialCondition && datum.materialCondition !== "RFS";
+    width += hasMC ? FCF.datumWidthWithMC : FCF.datumWidth;
+  });
 
   return width;
 }
@@ -266,6 +270,8 @@ function renderCells(fcf: Partial<FcfJson>, charColor: string): React.ReactNode 
   const datums = fcf.datums || [];
   datums.forEach((datum, index) => {
     const mcSymbol = getMCSymbol(datum.materialCondition);
+    const hasMC = mcSymbol !== "";
+    const cellWidth = hasMC ? FCF.datumWidthWithMC : FCF.datumWidth;
 
     cells.push(
       <g key={`datum-${index}`} transform={`translate(${xOffset}, 0)`}>
@@ -273,16 +279,16 @@ function renderCells(fcf: Partial<FcfJson>, charColor: string): React.ReactNode 
         <rect
           x={0}
           y={0}
-          width={FCF.datumWidth}
+          width={cellWidth}
           height={FCF.cellHeight}
           fill="transparent"
           stroke="#334155"
           strokeWidth={1}
         />
-        {/* Datum letter */}
+        {/* Datum letter and material condition side by side */}
         <text
-          x={FCF.datumWidth / 2}
-          y={FCF.cellHeight / 2 - (mcSymbol ? 4 : 0)}
+          x={hasMC ? cellWidth / 2 - 6 : cellWidth / 2}
+          y={FCF.cellHeight / 2}
           textAnchor="middle"
           dominantBaseline="central"
           fill="#00D4AA"
@@ -291,24 +297,15 @@ function renderCells(fcf: Partial<FcfJson>, charColor: string): React.ReactNode 
           fontWeight="bold"
         >
           {datum.id}
+          {mcSymbol && (
+            <tspan fill="#F59E0B" fontSize={FCF.fontSize} dx="3">
+              {mcSymbol}
+            </tspan>
+          )}
         </text>
-        {/* Material condition */}
-        {mcSymbol && (
-          <text
-            x={FCF.datumWidth / 2}
-            y={FCF.cellHeight / 2 + 8}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill="#F59E0B"
-            fontSize={FCF.fontSize - 4}
-            fontFamily={FCF.fontFamily}
-          >
-            {mcSymbol}
-          </text>
-        )}
       </g>
     );
-    xOffset += FCF.datumWidth;
+    xOffset += cellWidth;
   });
 
   return cells;
