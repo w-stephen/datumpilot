@@ -46,9 +46,11 @@ DatumPilot is a GD&T (Geometric Dimensioning and Tolerancing) feature control fr
    - `calc/` - Calculators for position, flatness, perpendicularity, profile
 
 4. **AI Orchestration** (`apps/web/lib/ai/`)
-   - Explanation Agent only (builder input requires no extraction)
+   - Provider abstraction with Claude Opus 4.5 (primary) and OpenAI GPT-4.1 (fallback)
+   - `providers/` - Provider-agnostic abstraction with automatic retry and fallback
    - `orchestrator.server.ts` - Server-only orchestration (validation → calculation → explanation)
    - AI cannot override deterministic validation; serves to explain and suggest
+   - Prompt caching enabled for Anthropic (GDT reference content cached)
 
 5. **Export Pipeline** (`apps/web/lib/export/`)
    - User-facing: PNG, SVG, PDF (visual exports for drawings and reports)
@@ -88,4 +90,7 @@ Units stored canonically in `mm`; source unit preserved for traceability.
 Copy `.env.example` to `.env.local` and configure:
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
-- `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY` (primary AI provider)
+- `OPENAI_API_KEY` (fallback AI provider)
+- `AI_PRIMARY_PROVIDER` (optional: "anthropic" or "openai", default: "anthropic")
+- `AI_FALLBACK_PROVIDER` (optional: "anthropic", "openai", or "none")

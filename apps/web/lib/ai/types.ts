@@ -10,8 +10,24 @@ import {
   ProfileInput,
   ProfileResult
 } from "@/lib/calc/types";
+import type { ProviderType } from "./providers/types";
 
 export type ConfidenceLevel = "high" | "medium" | "low";
+
+/**
+ * AI provider metadata returned with explanation responses.
+ */
+export interface AIMetadata {
+  provider: ProviderType;
+  model: string;
+  cacheStatus?: "hit" | "miss" | "disabled";
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    cacheCreationInputTokens?: number;
+    cacheReadInputTokens?: number;
+  };
+}
 
 export type CalculationInput =
   | { characteristic: "position"; input: PositionInput }
@@ -36,6 +52,7 @@ export interface ExplanationAgentResponse {
   explanation: string;
   warnings?: string[];
   promptVersion?: string;
+  aiMetadata?: AIMetadata;
 }
 
 /**
@@ -56,6 +73,7 @@ export interface InterpretFcfSuccess {
   confidence: ConfidenceLevel;
   warnings?: string[];
   correlationId: string;
+  aiMetadata?: AIMetadata;
 }
 
 export interface InterpretFcfFailure {

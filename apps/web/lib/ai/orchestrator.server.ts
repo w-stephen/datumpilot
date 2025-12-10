@@ -130,7 +130,8 @@ export async function orchestrateFcfInterpretation(
       explanation,
       confidence,
       warnings: warnings.length ? warnings : undefined,
-      correlationId
+      correlationId,
+      aiMetadata: explanation.aiMetadata
     };
   } catch (error) {
     return {

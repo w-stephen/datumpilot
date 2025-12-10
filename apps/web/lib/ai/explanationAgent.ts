@@ -1,30 +1,34 @@
-import { chatJson } from "./openaiClient";
-import { buildExplanationUserPrompt, explanationSystemPrompt, promptVersion } from "./prompts";
+import { generateExplanation, type ExplanationOutput } from "./providers";
 import { ExplanationAgentRequest, ExplanationAgentResponse } from "./types";
 
 /**
  * Calls the Explanation Agent to produce a constrained narrative
  * using authoritative validation + calculation outputs.
+ *
+ * Uses provider abstraction with Claude Opus 4.5 (primary) and
+ * OpenAI GPT-4.1 (fallback) with automatic retry and failover.
  */
 export async function runExplanationAgent(
   request: ExplanationAgentRequest
 ): Promise<ExplanationAgentResponse> {
   const { fcf, calcResult, validation, format } = request;
 
-  const userPrompt = buildExplanationUserPrompt({
-    fcfJson: JSON.stringify(fcf, null, 2),
-    calcResult: calcResult ? JSON.stringify(calcResult, null, 2) : undefined,
-    validationResult: JSON.stringify(validation, null, 2),
-    format
+  const result: ExplanationOutput = await generateExplanation({
+    fcf,
+    validation,
+    calculation: calcResult,
+    format,
   });
 
-  const response = await chatJson<ExplanationAgentResponse>(
-    [
-      { role: "system", content: explanationSystemPrompt.trim() },
-      { role: "user", content: userPrompt.trim() }
-    ],
-    { model: "gpt-5.1", temperature: 0 }
-  );
-
-  return { ...response, warnings: response.warnings ?? [], promptVersion };
+  return {
+    explanation: result.explanation,
+    warnings: result.warnings,
+    promptVersion: result.providerInfo.promptVersion,
+    aiMetadata: {
+      provider: result.providerInfo.provider,
+      model: result.providerInfo.model,
+      cacheStatus: result.cacheStatus,
+      usage: result.usage,
+    },
+  };
 }
