@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 import { stripe } from "./client";
 import { getStripePriceId, type Tier } from "./config";
@@ -211,9 +212,7 @@ export async function syncSubscriptionFromStripe(
 
   try {
     let customerId: string | null = null;
-    let stripeSubscription: Awaited<
-      ReturnType<typeof stripe.subscriptions.retrieve>
-    > | null = null;
+    let stripeSubscription: Stripe.Subscription | null = null;
 
     // If session ID provided, get customer and subscription from checkout session
     if (sessionId) {
@@ -280,6 +279,10 @@ export async function syncSubscriptionFromStripe(
     }
 
     // Sync the active subscription
+    if (!stripeSubscription) {
+      return { success: true, tier: "free" };
+    }
+
     const subscriptionItem = stripeSubscription.items.data[0];
     const priceId = subscriptionItem?.price.id;
     const tier = getTierFromPriceId(priceId);

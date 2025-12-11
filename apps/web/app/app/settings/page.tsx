@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Ruler,
   Eye,
@@ -12,9 +12,12 @@ import {
   Check,
   CreditCard,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { createClient } from "@/lib/supabase/client";
+import { TIERS, type Tier } from "@/lib/stripe/config";
 
 type Tab = "display" | "validation" | "notifications" | "account";
 
@@ -40,6 +43,38 @@ interface NotificationSettings {
   validationAlerts: boolean;
   projectUpdates: boolean;
   weeklyDigest: boolean;
+}
+
+interface UserData {
+  id: string;
+  email: string;
+  name: string | null;
+  organization: string | null;
+  createdAt: string;
+}
+
+interface SubscriptionData {
+  tier: Tier;
+  status: string;
+}
+
+// Helper functions
+function getInitials(nameOrEmail: string): string {
+  if (nameOrEmail.includes("@")) {
+    // It's an email - use first two characters of local part
+    return nameOrEmail.split("@")[0].slice(0, 2).toUpperCase();
+  }
+  // It's a name - get first letter of first and last name
+  const parts = nameOrEmail.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return nameOrEmail.slice(0, 2).toUpperCase();
+}
+
+function formatMemberSince(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
 // Technical panel wrapper
@@ -108,6 +143,50 @@ function ToggleSwitch({
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("display");
   const [saved, setSaved] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [accountLoading, setAccountLoading] = useState(true);
+
+  // Fetch user and subscription data
+  useEffect(() => {
+    async function fetchAccountData() {
+      try {
+        const supabase = createClient();
+
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setAccountLoading(false);
+          return;
+        }
+
+        // Set user data
+        setUserData({
+          id: user.id,
+          email: user.email || "",
+          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          organization: user.user_metadata?.organization || null,
+          createdAt: user.created_at,
+        });
+
+        // Fetch subscription data
+        const res = await fetch("/api/billing");
+        if (res.ok) {
+          const data = await res.json();
+          setSubscription({
+            tier: data.tier,
+            status: data.status,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch account data:", error);
+      } finally {
+        setAccountLoading(false);
+      }
+    }
+
+    fetchAccountData();
+  }, []);
 
   // Display settings
   const [displaySettings, setDisplaySettings] = useState<DisplaySettings>({
@@ -670,67 +749,86 @@ export default function SettingsPage() {
                     </div>
                   }
                 >
-                  <div className="p-4 space-y-6">
-                    {/* User info */}
-                    <div className="flex items-center gap-4 p-4 bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
-                      <div className="w-14 h-14 border border-accent-500/30 bg-accent-500/5 flex items-center justify-center font-mono text-lg font-bold text-accent-500">
-                        JD
-                      </div>
-                      <div>
-                        <h4 className="font-mono text-sm text-slate-700 dark:text-slate-200">
-                          JOHN DOE
-                        </h4>
-                        <p className="font-mono text-xs text-slate-500">
-                          john.doe@example.com
-                        </p>
-                        <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-1">
-                          Member since January 2024
-                        </p>
-                      </div>
+                  {accountLoading ? (
+                    <div className="p-8 flex items-center justify-center">
+                      <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
                     </div>
+                  ) : userData ? (
+                    <div className="p-4 space-y-6">
+                      {/* User info */}
+                      <div className="flex items-center gap-4 p-4 bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                        <div className="w-14 h-14 border border-accent-500/30 bg-accent-500/5 flex items-center justify-center font-mono text-lg font-bold text-accent-500">
+                          {getInitials(userData.name || userData.email)}
+                        </div>
+                        <div>
+                          <h4 className="font-mono text-sm text-slate-700 dark:text-slate-200">
+                            {(userData.name || userData.email.split("@")[0]).toUpperCase()}
+                          </h4>
+                          <p className="font-mono text-xs text-slate-500">
+                            {userData.email}
+                          </p>
+                          <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-1">
+                            Member since {formatMemberSince(userData.createdAt)}
+                          </p>
+                        </div>
+                      </div>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-mono text-xs text-slate-700 dark:text-slate-200">
-                          EMAIL
-                        </label>
-                        <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-0.5">
-                          Your account email address
-                        </p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="font-mono text-xs text-slate-700 dark:text-slate-200">
+                            EMAIL
+                          </label>
+                          <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-0.5">
+                            Your account email address
+                          </p>
+                        </div>
+                        <span className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                          {userData.email}
+                        </span>
                       </div>
-                      <span className="font-mono text-xs text-slate-600 dark:text-slate-400">
-                        john.doe@example.com
-                      </span>
-                    </div>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-mono text-xs text-slate-700 dark:text-slate-200">
-                          ORGANIZATION
-                        </label>
-                        <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-0.5">
-                          Your company or team
-                        </p>
-                      </div>
-                      <span className="font-mono text-xs text-slate-600 dark:text-slate-400">
-                        ACME MANUFACTURING
-                      </span>
-                    </div>
+                      {userData.organization && (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <label className="font-mono text-xs text-slate-700 dark:text-slate-200">
+                              ORGANIZATION
+                            </label>
+                            <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-0.5">
+                              Your company or team
+                            </p>
+                          </div>
+                          <span className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                            {userData.organization.toUpperCase()}
+                          </span>
+                        </div>
+                      )}
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-mono text-xs text-slate-700 dark:text-slate-200">
-                          PLAN
-                        </label>
-                        <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-0.5">
-                          Your subscription plan
-                        </p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="font-mono text-xs text-slate-700 dark:text-slate-200">
+                            PLAN
+                          </label>
+                          <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-0.5">
+                            Your subscription plan
+                          </p>
+                        </div>
+                        <span className={cn(
+                          "px-3 py-1 font-mono text-[10px] border",
+                          subscription?.tier === "pro" || subscription?.tier === "team"
+                            ? "bg-accent-500/20 text-accent-400 border-accent-500/30"
+                            : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700"
+                        )}>
+                          {subscription ? TIERS[subscription.tier].name.toUpperCase() : "FREE"}
+                        </span>
                       </div>
-                      <span className="px-3 py-1 font-mono text-[10px] bg-accent-500/20 text-accent-400 border border-accent-500/30">
-                        PROFESSIONAL
-                      </span>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <p className="font-mono text-xs text-slate-500">
+                        Unable to load account data
+                      </p>
+                    </div>
+                  )}
                 </TechnicalPanel>
 
                 <TechnicalPanel
