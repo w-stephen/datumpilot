@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CreditCard,
   Loader2,
@@ -9,7 +10,10 @@ import {
   CheckCircle2,
   Zap,
 } from "lucide-react";
-import { createPortalSession } from "@/lib/stripe/actions";
+import {
+  createPortalSession,
+  syncSubscriptionFromStripe,
+} from "@/lib/stripe/actions";
 import { TIERS, type Tier } from "@/lib/stripe/config";
 import { cn } from "@/lib/utils/cn";
 import Link from "next/link";
@@ -33,14 +37,33 @@ interface BillingData {
 }
 
 export default function BillingSettingsPage() {
+  const searchParams = useSearchParams();
   const [billing, setBilling] = useState<BillingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [syncSuccess, setSyncSuccess] = useState(false);
 
   useEffect(() => {
     async function fetchBilling() {
       try {
+        // If returning from checkout, sync subscription from Stripe first
+        // This ensures we get the latest data even if webhook is delayed
+        const isSuccess = searchParams.get("success") === "true";
+        const sessionId = searchParams.get("session_id");
+        if (isSuccess) {
+          const syncResult = await syncSubscriptionFromStripe(
+            sessionId || undefined
+          );
+          if (
+            syncResult.success &&
+            syncResult.tier &&
+            syncResult.tier !== "free"
+          ) {
+            setSyncSuccess(true);
+          }
+        }
+
         const res = await fetch("/api/billing");
         if (!res.ok) throw new Error("Failed to fetch billing data");
         const data = await res.json();
@@ -52,7 +75,7 @@ export default function BillingSettingsPage() {
       }
     }
     fetchBilling();
-  }, []);
+  }, [searchParams]);
 
   const handleManageBilling = () => {
     startTransition(async () => {
@@ -86,6 +109,16 @@ export default function BillingSettingsPage() {
 
   return (
     <div className="space-y-8">
+      {/* Success Banner */}
+      {syncSuccess && (
+        <div className="flex items-center gap-3 p-4 bg-success-500/10 border border-success-500/30">
+          <CheckCircle2 className="w-5 h-5 text-success-500 flex-shrink-0" />
+          <p className="font-mono text-sm text-success-500">
+            Your subscription has been activated successfully!
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">

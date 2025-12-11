@@ -17,6 +17,25 @@ Use this guide to configure webhook delivery for the existing Stripe subscriptio
 3) Select events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`.
 4) Save and copy the signing secret to your production environment variable `STRIPE_WEBHOOK_SECRET`.
 
+## Testing Checkout Flow
+
+1) Ensure the dev server is running: `pnpm dev`
+2) In a separate terminal, start webhook forwarding: `pnpm stripe:listen`
+3) Log in to the app and go to `/pricing` or `/app/settings/billing`
+4) Click "Upgrade" on a paid plan
+5) Use Stripe test cards:
+   - Success: `4242 4242 4242 4242`
+   - Decline: `4000 0000 0000 0002`
+   - Any future expiry, any CVC, any billing address
+6) After successful payment, you'll be redirected to `/app/settings/billing?success=true`
+7) The webhook will update the subscription record in Supabase
+
+## Verifying Success
+
+- Check the `stripe listen` terminal for webhook events
+- Verify subscription in Supabase: `subscriptions` table should have `tier: "pro"` or `tier: "team"`
+- Or use Stripe MCP: `mcp__stripe__list_subscriptions`
+
 ## Notes
 
 - The handler already verifies the Stripe signature; the secret must match the environment (`test` vs `live`).
