@@ -312,7 +312,7 @@ export default function SettingsPage() {
           {/* Sidebar */}
           <nav className="w-56 flex-shrink-0">
             <TechnicalPanel label="NAV.TABS">
-              <div className="p-2 space-y-1">
+              <div className="p-4 space-y-1">
                 {tabs.map(({ id, label, icon: Icon, code }) => (
                   <button
                     key={id}
@@ -338,7 +338,7 @@ export default function SettingsPage() {
                   </button>
                 ))}
                 {/* Billing link */}
-                <div className="mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+                <div className="mt-3 pt-3 border-t border-slate-200/50 dark:border-slate-800/50">
                   <Link
                     href="/app/settings/billing"
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-500 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-300 transition-colors"
@@ -375,7 +375,7 @@ export default function SettingsPage() {
                         <label className="font-mono text-xs text-slate-700 dark:text-slate-200">
                           DEFAULT UNIT
                         </label>
-                        <p className="font-mono text-[10px] text-slate-600 mt-0.5">
+                        <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600 mt-0.5">
                           Unit system for new FCF entries
                         </p>
                       </div>
