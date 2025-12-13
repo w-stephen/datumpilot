@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   PenTool,
-  FileJson,
   FolderKanban,
   ArrowRight,
   Activity,
@@ -28,25 +27,18 @@ const quickActions = [
     shortcut: "01",
   },
   {
-    title: "INTERPRETER",
-    description: "Interpret FCF data and run tolerance calculations",
-    href: "/app/interpreter",
-    icon: FileJson,
-    shortcut: "02",
-  },
-  {
     title: "STACK-UP ANALYSIS",
     description: "Calculate tolerance accumulation using Worst-Case, RSS, and Six Sigma methods",
     href: "/app/stackup",
     icon: Layers,
-    shortcut: "03",
+    shortcut: "02",
   },
   {
     title: "PROJECTS",
     description: "Manage your FCF collections and measurement runs",
     href: "/app/projects",
     icon: FolderKanban,
-    shortcut: "04",
+    shortcut: "03",
   },
 ];
 
@@ -184,35 +176,35 @@ export default function DashboardPage() {
           <div className="flex-1 h-px bg-gradient-to-r from-slate-300 dark:from-slate-800 to-transparent" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {quickActions.map((action) => (
             <Link
               key={action.href}
               href={action.href}
               className="group relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-accent-500/30 transition-all duration-300"
               style={{
-                clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
+                clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
               }}
             >
               {/* Corner cuts visual */}
-              <div className="absolute top-0 right-0 w-4 h-4 border-l border-b border-slate-200 dark:border-slate-800 group-hover:border-accent-500/30 transition-colors" style={{ transform: 'translate(0, 0) rotate(45deg)', transformOrigin: 'top right' }} />
+              <div className="absolute top-0 right-0 w-3 h-3 border-l border-b border-slate-200 dark:border-slate-800 group-hover:border-accent-500/30 transition-colors" style={{ transform: 'translate(0, 0) rotate(45deg)', transformOrigin: 'top right' }} />
 
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 border border-slate-300 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center group-hover:border-accent-500/50 group-hover:bg-accent-500/5 transition-all">
-                    <action.icon className="w-5 h-5 text-slate-500 dark:text-slate-400 group-hover:text-accent-500 transition-colors" />
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-9 h-9 border border-slate-300 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center group-hover:border-accent-500/50 group-hover:bg-accent-500/5 transition-all">
+                    <action.icon className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-accent-500 transition-colors" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-slate-400 dark:text-slate-700 group-hover:text-accent-500/50 transition-colors">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-[10px] text-slate-400 dark:text-slate-700 group-hover:text-accent-500/50 transition-colors">
                       {action.shortcut}
                     </span>
-                    <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-700 group-hover:text-accent-500 group-hover:translate-x-1 transition-all" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-700 group-hover:text-accent-500 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </div>
-                <h3 className="font-mono text-base font-semibold text-slate-900 dark:text-slate-100 tracking-wide mb-2">
+                <h3 className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100 tracking-wide mb-1">
                   {action.title}
                 </h3>
-                <p className="text-sm text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
                   {action.description}
                 </p>
               </div>
@@ -314,11 +306,11 @@ export default function DashboardPage() {
                   BUILD FCF
                 </Link>
                 <Link
-                  href="/app/interpreter"
+                  href="/app/stackup"
                   className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono text-xs font-medium hover:border-slate-400 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
                 >
-                  <FileJson className="w-3.5 h-3.5" />
-                  INTERPRET FCF
+                  <Layers className="w-3.5 h-3.5" />
+                  STACK-UP
                 </Link>
               </div>
             </div>
