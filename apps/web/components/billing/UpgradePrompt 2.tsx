@@ -1,23 +1,15 @@
 "use client";
 
-import { Zap, X, AlertTriangle } from "lucide-react";
+import { Zap, X } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
-
-interface UsageData {
-  resource: "projects" | "fcfs" | "stackups";
-  current: number;
-  limit: number;
-}
 
 interface UpgradePromptProps {
   /** The feature or action being blocked */
-  feature?: string;
+  feature: string;
   /** Optional custom message */
   message?: string;
-  /** Usage data for quota-based prompts */
-  usage?: UsageData;
   /** Variant style */
   variant?: "inline" | "banner" | "modal";
   /** Whether to show dismiss button */
@@ -26,12 +18,6 @@ interface UpgradePromptProps {
   onDismiss?: () => void;
 }
 
-const RESOURCE_LABELS: Record<string, string> = {
-  projects: "projects",
-  fcfs: "FCF records",
-  stackups: "stack-up analyses",
-};
-
 /**
  * Prompts users to upgrade their subscription.
  * Used when hitting tier limits or accessing pro features.
@@ -39,7 +25,6 @@ const RESOURCE_LABELS: Record<string, string> = {
 export function UpgradePrompt({
   feature,
   message,
-  usage,
   variant = "inline",
   dismissible = false,
   onDismiss,
@@ -48,78 +33,25 @@ export function UpgradePrompt({
 
   if (dismissed) return null;
 
-  // Don't show if neither feature nor usage is provided
-  if (!feature && !usage) return null;
-
-  // Calculate if we should show based on usage
-  const showForUsage =
-    usage &&
-    usage.limit !== -1 &&
-    usage.limit !== Infinity &&
-    usage.current / usage.limit >= 0.8;
-
-  const atLimit =
-    usage &&
-    usage.limit !== -1 &&
-    usage.limit !== Infinity &&
-    usage.current >= usage.limit;
-
-  // Don't show if usage provided but not at warning threshold
-  if (usage && !showForUsage) return null;
-
   const handleDismiss = () => {
     setDismissed(true);
     onDismiss?.();
   };
 
-  // Generate message based on context
-  let displayTitle: string;
-  let displayMessage: string;
-
-  if (atLimit && usage) {
-    const resourceLabel = RESOURCE_LABELS[usage.resource] || usage.resource;
-    displayTitle = `${resourceLabel.charAt(0).toUpperCase() + resourceLabel.slice(1)} limit reached`;
-    displayMessage = message || `You've used all ${usage.limit} ${resourceLabel} in your free plan.`;
-  } else if (showForUsage && usage) {
-    const remaining = usage.limit - usage.current;
-    const percentage = Math.round((usage.current / usage.limit) * 100);
-    const resourceLabel = RESOURCE_LABELS[usage.resource] || usage.resource;
-    displayTitle = `${percentage}% of ${resourceLabel} used`;
-    displayMessage = message || `You have ${remaining} ${resourceLabel} remaining.`;
-  } else if (feature) {
-    displayTitle = `Unlock ${feature}`;
-    displayMessage = message || `Upgrade to Pro to access ${feature}.`;
-  } else {
-    return null;
-  }
-
-  const isWarning = atLimit;
+  const defaultMessage = `Upgrade to Pro to access ${feature}.`;
+  const displayMessage = message || defaultMessage;
 
   if (variant === "banner") {
     return (
-      <div className={cn(
-        "relative px-4 py-3",
-        isWarning
-          ? "bg-gradient-to-r from-warning-500/10 to-warning-500/5 border border-warning-500/30"
-          : "bg-gradient-to-r from-accent-500/10 to-accent-500/5 border border-accent-500/30"
-      )}>
+      <div className="relative bg-gradient-to-r from-accent-500/10 to-accent-500/5 border border-accent-500/30 px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-8 h-8 flex items-center justify-center border",
-              isWarning
-                ? "bg-warning-500/20 border-warning-500/30"
-                : "bg-accent-500/20 border-accent-500/30"
-            )}>
-              {isWarning ? (
-                <AlertTriangle className="w-4 h-4 text-warning-500" />
-              ) : (
-                <Zap className="w-4 h-4 text-accent-500" />
-              )}
+            <div className="w-8 h-8 flex items-center justify-center bg-accent-500/20 border border-accent-500/30">
+              <Zap className="w-4 h-4 text-accent-500" />
             </div>
             <div>
               <p className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100">
-                {displayTitle}
+                Unlock {feature}
               </p>
               <p className="font-mono text-[10px] text-slate-500 dark:text-slate-600">
                 {displayMessage}
@@ -210,18 +142,11 @@ export function UpgradePrompt({
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-3",
-        isWarning
-          ? "bg-warning-500/5 border border-warning-500/20"
-          : "bg-accent-500/5 border border-accent-500/20",
+        "flex items-center gap-3 p-3 bg-accent-500/5 border border-accent-500/20",
         dismissible && "pr-2"
       )}
     >
-      {isWarning ? (
-        <AlertTriangle className="w-4 h-4 text-warning-500 flex-shrink-0" />
-      ) : (
-        <Zap className="w-4 h-4 text-accent-500 flex-shrink-0" />
-      )}
+      <Zap className="w-4 h-4 text-accent-500 flex-shrink-0" />
       <p className="font-mono text-xs text-slate-600 dark:text-slate-400 flex-1">
         {displayMessage}
       </p>
@@ -239,66 +164,6 @@ export function UpgradePrompt({
           <X className="w-3.5 h-3.5" />
         </button>
       )}
-    </div>
-  );
-}
-
-/**
- * Hook to fetch usage data for a specific resource
- */
-export function useUsageCheck(resource: "projects" | "fcfs" | "stackups") {
-  const [usage, setUsage] = useState<UsageData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchUsage() {
-      try {
-        const res = await fetch("/api/billing");
-        if (res.ok) {
-          const data = await res.json();
-          setUsage({
-            resource,
-            current: data.usage[resource] || 0,
-            limit: data.limits[resource] || -1,
-          });
-        }
-      } catch {
-        // Silent fail - don't block UI
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchUsage();
-  }, [resource]);
-
-  return { usage, loading };
-}
-
-/**
- * Convenience component that auto-fetches usage for a resource
- */
-export function UsageAwareUpgradePrompt({
-  resource,
-  variant = "banner",
-  dismissible = true,
-  className,
-}: {
-  resource: "projects" | "fcfs" | "stackups";
-  variant?: "inline" | "banner" | "modal";
-  dismissible?: boolean;
-  className?: string;
-}) {
-  const { usage, loading } = useUsageCheck(resource);
-
-  if (loading || !usage) return null;
-
-  return (
-    <div className={className}>
-      <UpgradePrompt
-        usage={usage}
-        variant={variant}
-        dismissible={dismissible}
-      />
     </div>
   );
 }

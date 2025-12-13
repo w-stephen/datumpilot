@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -65,6 +66,16 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              classNames: {
+                toast: "font-mono text-xs bg-slate-900 border-slate-800 text-slate-100",
+                success: "border-accent-500/30",
+                error: "border-error-500/30",
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>

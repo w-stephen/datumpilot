@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { getUser } from "@/lib/supabase/server";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { SettingsProvider } from "@/lib/settings/context";
 import AppShell from "@/components/layout/AppShell";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -8,7 +9,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <AuthProvider user={user}>
-      <AppShell>{children}</AppShell>
+      <SettingsProvider>
+        <AppShell>{children}</AppShell>
+      </SettingsProvider>
     </AuthProvider>
   );
 }

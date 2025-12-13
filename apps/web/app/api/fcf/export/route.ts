@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { Resvg } from "@resvg/resvg-js";
 import { fcfJsonSchema, FcfJson } from "@/lib/fcf/schema";
 import type { ExportFormat, ExportResult } from "@/lib/export/types";
+import { generateFcfSvg } from "@/lib/export/svg-generator";
+import { generateFcfPdf } from "@/lib/export/pdf-generator";
+import { checkFeatureAccess, getSubscriptionStatus } from "@/lib/stripe/subscription";
 
 // Request schema - JSON kept for future API integrations
 const exportRequestSchema = z.object({
@@ -16,14 +20,35 @@ const exportRequestSchema = z.object({
     .optional(),
 });
 
+// Map format to feature name
+const formatToFeature: Record<ExportFormat, "exportPng" | "exportSvg" | "exportPdf" | "exportJson"> = {
+  png: "exportPng",
+  svg: "exportSvg",
+  pdf: "exportPdf",
+  json: "exportJson",
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { fcf, format, options } = exportRequestSchema.parse(body);
 
-    // TODO: Check subscription tier for export access
-    // Free tier: no visual exports
-    // Pro/Team: PNG, SVG, PDF
+    // Check subscription tier for export access
+    const feature = formatToFeature[format];
+    const hasAccess = await checkFeatureAccess(feature);
+
+    if (!hasAccess) {
+      const status = await getSubscriptionStatus();
+      return NextResponse.json(
+        {
+          error: "Upgrade required",
+          message: `${format.toUpperCase()} export is available on Pro and Team plans.`,
+          currentTier: status?.tier || "free",
+          requiredTier: "pro",
+        },
+        { status: 403 }
+      );
+    }
 
     let result: ExportResult;
 
@@ -68,7 +93,7 @@ export async function POST(request: NextRequest) {
 }
 
 // ---------------------------------------------------------------------------
-// Export Generators (Placeholder implementations)
+// Export Generators
 // ---------------------------------------------------------------------------
 
 interface ExportOptions {
@@ -78,74 +103,111 @@ interface ExportOptions {
 }
 
 /**
- * Generate PNG export of FCF visualization.
- * TODO: Implement with SVG rendering + sharp conversion
+ * Generate PNG export of FCF visualization using resvg.
  */
 async function generatePngExport(
   fcf: FcfJson,
-  _options?: ExportOptions
+  options?: ExportOptions
 ): Promise<ExportResult> {
-  // TODO: Implementation steps:
-  // 1. Generate SVG of FCF frame using FcfFrameRenderer
-  // 2. Convert SVG to PNG using sharp or similar
-  // 3. Upload to Supabase storage
-  // 4. Return signed URL
+  const scale = options?.scale ?? 2;
+  const backgroundColor = options?.backgroundColor ?? "#1A2332";
 
-  const filename = `fcf-${fcf.name || "export"}-${Date.now()}.png`;
+  // Generate SVG string
+  const svgString = generateFcfSvg(fcf, {
+    scale,
+    backgroundColor,
+    includeMetadata: false,
+  });
 
-  // Placeholder - return mock result
-  // In production, this would upload to storage and return a real URL
+  // Convert SVG to PNG using resvg
+  const resvg = new Resvg(svgString, {
+    fitTo: {
+      mode: "original",
+    },
+    font: {
+      fontDirs: [],
+      defaultFontFamily: "monospace",
+    },
+  });
+
+  const pngData = resvg.render();
+  const pngBuffer = pngData.asPng();
+
+  // Generate filename
+  const filename = `fcf-${sanitizeFilename(fcf.name || "export")}-${Date.now()}.png`;
+
+  // Return as base64 data URL for direct download
+  const base64 = pngBuffer.toString("base64");
+  const dataUrl = `data:image/png;base64,${base64}`;
+
   return {
-    url: `/api/fcf/export/download?file=${encodeURIComponent(filename)}`,
-    format: "png" as ExportFormat,
+    url: dataUrl,
+    format: "png",
     filename,
-    expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(), // 15 min
+    size: pngBuffer.length,
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
   };
 }
 
 /**
  * Generate SVG export of FCF visualization.
- * TODO: Implement with FcfFrameRenderer
  */
 async function generateSvgExport(
   fcf: FcfJson,
-  _options?: ExportOptions
+  options?: ExportOptions
 ): Promise<ExportResult> {
-  // TODO: Implementation steps:
-  // 1. Generate SVG of FCF frame using FcfFrameRenderer
-  // 2. Upload to Supabase storage
-  // 3. Return signed URL
+  const scale = options?.scale ?? 1.5;
+  const backgroundColor = options?.backgroundColor ?? "transparent";
 
-  const filename = `fcf-${fcf.name || "export"}-${Date.now()}.svg`;
+  // Generate SVG string
+  const svgString = generateFcfSvg(fcf, {
+    scale,
+    backgroundColor,
+    includeMetadata: options?.includeMetadata ?? true,
+  });
+
+  // Generate filename
+  const filename = `fcf-${sanitizeFilename(fcf.name || "export")}-${Date.now()}.svg`;
+
+  // Return as data URL
+  const base64 = Buffer.from(svgString, "utf-8").toString("base64");
+  const dataUrl = `data:image/svg+xml;base64,${base64}`;
 
   return {
-    url: `/api/fcf/export/download?file=${encodeURIComponent(filename)}`,
-    format: "svg" as ExportFormat,
+    url: dataUrl,
+    format: "svg",
     filename,
+    size: Buffer.byteLength(svgString, "utf-8"),
     expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
   };
 }
 
 /**
  * Generate PDF export with FCF frame and metadata.
- * TODO: Implement with jsPDF or @react-pdf/renderer
  */
 async function generatePdfExport(
   fcf: FcfJson,
-  _options?: ExportOptions
+  options?: ExportOptions
 ): Promise<ExportResult> {
-  // TODO: Implementation steps:
-  // 1. Generate PDF with FCF frame visualization
-  // 2. Include metadata (name, characteristic, datums, etc.)
-  // 3. Upload to Supabase storage
-  // 4. Return signed URL
+  // Generate PDF buffer
+  const pdfBuffer = await generateFcfPdf(fcf, {
+    includeMetadata: options?.includeMetadata ?? true,
+    pageSize: "a4",
+    orientation: "portrait",
+  });
 
-  const filename = `fcf-${fcf.name || "export"}-${Date.now()}.pdf`;
+  // Generate filename
+  const filename = `fcf-${sanitizeFilename(fcf.name || "export")}-${Date.now()}.pdf`;
+
+  // Return as base64 data URL
+  const base64 = pdfBuffer.toString("base64");
+  const dataUrl = `data:application/pdf;base64,${base64}`;
 
   return {
-    url: `/api/fcf/export/download?file=${encodeURIComponent(filename)}`,
-    format: "pdf" as ExportFormat,
+    url: dataUrl,
+    format: "pdf",
     filename,
+    size: pdfBuffer.length,
     expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
   };
 }
@@ -154,19 +216,30 @@ async function generatePdfExport(
  * Generate JSON export for API integrations.
  * Not exposed in UI, kept for future CAD/PLM integrations.
  */
-async function generateJsonExport(
-  fcf: FcfJson
-): Promise<ExportResult> {
-  // TODO: Implementation steps:
-  // 1. Upload JSON to Supabase storage
-  // 2. Return signed URL
+async function generateJsonExport(fcf: FcfJson): Promise<ExportResult> {
+  const jsonString = JSON.stringify(fcf, null, 2);
+  const filename = `fcf-${sanitizeFilename(fcf.name || "export")}-${Date.now()}.json`;
 
-  const filename = `fcf-${fcf.name || "export"}-${Date.now()}.json`;
+  // Return as data URL
+  const base64 = Buffer.from(jsonString, "utf-8").toString("base64");
+  const dataUrl = `data:application/json;base64,${base64}`;
 
   return {
-    url: `/api/fcf/export/download?file=${encodeURIComponent(filename)}`,
-    format: "json" as ExportFormat,
+    url: dataUrl,
+    format: "json",
     filename,
+    size: Buffer.byteLength(jsonString, "utf-8"),
     expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
   };
+}
+
+/**
+ * Sanitize filename to remove special characters
+ */
+function sanitizeFilename(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 50);
 }

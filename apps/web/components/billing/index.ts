@@ -6,4 +6,4 @@
 
 export { PricingCards } from "./PricingCards";
 export { UsageDisplay } from "./UsageDisplay";
-export { UpgradePrompt } from "./UpgradePrompt";
+export { UpgradePrompt, UsageAwareUpgradePrompt, useUsageCheck } from "./UpgradePrompt";
