@@ -280,7 +280,7 @@ export default function DashboardPage() {
       </section>
 
       {/* Getting Started */}
-      <TechnicalPanel label="INIT.GUIDE" className="overflow-hidden">
+      <TechnicalPanel label="INIT.GUIDE">
         <div className="p-6">
           <div className="flex items-start gap-5">
             <div className="w-14 h-14 border border-accent-500/30 bg-accent-500/5 flex items-center justify-center flex-shrink-0">
@@ -318,16 +318,18 @@ export default function DashboardPage() {
         </div>
 
         {/* Decorative grid */}
-        <div
-          className="absolute bottom-0 right-0 w-32 h-32 opacity-[0.08] dark:opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, #00D4AA 1px, transparent 1px),
-              linear-gradient(to bottom, #00D4AA 1px, transparent 1px)
-            `,
-            backgroundSize: '8px 8px',
-          }}
-        />
+        <div className="absolute bottom-0 right-0 w-32 h-32 overflow-hidden pointer-events-none">
+          <div
+            className="w-full h-full opacity-[0.08] dark:opacity-[0.03]"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, #00D4AA 1px, transparent 1px),
+                linear-gradient(to bottom, #00D4AA 1px, transparent 1px)
+              `,
+              backgroundSize: '8px 8px',
+            }}
+          />
+        </div>
       </TechnicalPanel>
     </div>
   );
