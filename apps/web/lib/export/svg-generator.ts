@@ -25,8 +25,15 @@ const FCF = {
 const CHARACTERISTIC_SYMBOLS: Record<Characteristic, string> = {
   position: "⊕",
   flatness: "⏥",
+  straightness: "⎯",
+  circularity: "○",
+  cylindricity: "⌭",
   perpendicularity: "⊥",
+  parallelism: "∥",
+  angularity: "∠",
   profile: "⌓",
+  runout: "↗",
+  totalRunout: "↗↗",
   other: "?",
 };
 
@@ -39,8 +46,15 @@ const MATERIAL_CONDITION_SYMBOLS: Record<MaterialConditionSymbol, string> = {
 const CHARACTERISTIC_COLORS: Record<Characteristic, string> = {
   position: "#3B82F6",
   flatness: "#10B981",
+  straightness: "#059669",
+  circularity: "#14B8A6",
+  cylindricity: "#0D9488",
   perpendicularity: "#F59E0B",
+  parallelism: "#D97706",
+  angularity: "#EA580C",
   profile: "#8B5CF6",
+  runout: "#EC4899",
+  totalRunout: "#DB2777",
   other: "#6B7280",
 };
 

@@ -92,16 +92,16 @@ export type Rule = {
 const featureOfSizeTypes: FeatureType[] = ["hole", "slot", "pin", "boss"];
 
 /** Form tolerances that cannot reference datums or use MMC/LMC */
-const formCharacteristics: Characteristic[] = ["flatness"];
-// Note: straightness, circularity, cylindricity would be added when schema expands
+const formCharacteristics: Characteristic[] = ["flatness", "straightness", "circularity", "cylindricity"];
 
 /** Orientation tolerances requiring datum reference */
-const orientationCharacteristics: Characteristic[] = ["perpendicularity"];
-// Note: parallelism, angularity would be added when schema expands
+const orientationCharacteristics: Characteristic[] = ["perpendicularity", "parallelism", "angularity"];
 
 /** Location tolerances requiring datum reference */
 const locationCharacteristics: Characteristic[] = ["position"];
-// Note: Concentricity and Symmetry were removed from ASME Y14.5-2018
+
+/** Runout tolerances requiring datum axis reference */
+const runoutCharacteristics: Characteristic[] = ["runout", "totalRunout"];
 
 /**
  * Check if FCF uses material condition anywhere (tolerance or datums).
@@ -255,17 +255,20 @@ const rules: Rule[] = [
   {
     code: "E006",
     category: "datum-requirements",
-    description: "Orientation/location tolerances require datum reference",
+    description: "Orientation/location/runout tolerances require datum reference",
     severity: "error",
     applies: (fcf) =>
       orientationCharacteristics.includes(fcf.characteristic) ||
-      locationCharacteristics.includes(fcf.characteristic),
+      locationCharacteristics.includes(fcf.characteristic) ||
+      runoutCharacteristics.includes(fcf.characteristic),
     evaluate: (fcf) =>
       !fcf.datums || fcf.datums.length === 0
         ? [
             issue("E006", "datums", "error", {
               characteristic: fcf.characteristic,
-              suggestion: "Add at least a primary datum reference"
+              suggestion: runoutCharacteristics.includes(fcf.characteristic)
+                ? "Add datum axis reference for runout measurement"
+                : "Add at least a primary datum reference"
             })
           ]
         : []
@@ -676,4 +679,4 @@ export function getRulesByCategory(category: RuleCategory): readonly Rule[] {
 // EXPORTS FOR TESTING
 // ============================================================================
 
-export { featureOfSizeTypes, formCharacteristics, orientationCharacteristics, locationCharacteristics };
+export { featureOfSizeTypes, formCharacteristics, orientationCharacteristics, locationCharacteristics, runoutCharacteristics };

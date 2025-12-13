@@ -106,9 +106,16 @@ export default function FcfBuilderPanel({
     [fcf.datums, updateFcf]
   );
 
-  // Check if characteristic requires datums
-  const requiresDatums = fcf.characteristic === "position" || fcf.characteristic === "perpendicularity";
-  const allowsDatums = fcf.characteristic !== "flatness";
+  // Form characteristics cannot reference datums
+  const formCharacteristics = ["flatness", "straightness", "circularity", "cylindricity"];
+  // These characteristics require datum references
+  const requiresDatums = fcf.characteristic === "position" ||
+    fcf.characteristic === "perpendicularity" ||
+    fcf.characteristic === "parallelism" ||
+    fcf.characteristic === "angularity" ||
+    fcf.characteristic === "runout" ||
+    fcf.characteristic === "totalRunout";
+  const allowsDatums = !fcf.characteristic || !formCharacteristics.includes(fcf.characteristic);
 
   // Check if feature is cylindrical (should have diametral zone)
   const isCylindricalFeature = fcf.featureType && CYLINDRICAL_FEATURES.includes(fcf.featureType);
@@ -194,22 +201,14 @@ export default function FcfBuilderPanel({
       <div className="border-t border-[#E5E7EB] dark:border-slate-800/50" />
 
       {/* Section 2: Geometric Tolerance */}
-      <section className="space-y-2">
+      <section className="space-y-3">
         <StepLabel step={2} label="Geometric Tolerance" />
         <CharacteristicPicker
           value={fcf.characteristic || null}
           onChange={(char) => updateFcf({ characteristic: char })}
-          compact
-          showLabels
-          equallySpaced
+          showCategories
+          showDescriptions
         />
-        {/* Characteristic description inline */}
-        {fcf.characteristic && (
-          <p className="text-sm text-[#6B7280] dark:text-slate-500 flex items-center gap-1.5">
-            <Info className="w-3.5 h-3.5 text-[#9CA3AF] dark:text-slate-600" />
-            {CHARACTERISTIC_DESCRIPTIONS[fcf.characteristic]}
-          </p>
-        )}
       </section>
 
       {/* Divider */}
@@ -228,8 +227,8 @@ export default function FcfBuilderPanel({
           onChange={updateTolerance}
           unit={fcf.sourceUnit || "mm"}
           onUnitChange={(unit) => updateFcf({ sourceUnit: unit })}
-          showDiameter={fcf.characteristic === "position" || fcf.characteristic === "perpendicularity"}
-          showMaterialCondition={fcf.characteristic !== "flatness"}
+          showDiameter={fcf.characteristic === "position" || fcf.characteristic === "perpendicularity" || fcf.characteristic === "straightness"}
+          showMaterialCondition={!fcf.characteristic || !formCharacteristics.includes(fcf.characteristic)}
           showUnitSelector
           compact
         />

@@ -38,10 +38,17 @@ const FCF = {
  */
 function getCharacteristicSymbol(char: string): string {
   const symbols: Record<string, string> = {
-    position: "⊕",
-    flatness: "⏥",
-    perpendicularity: "⊥",
-    profile: "⌓",
+    position: GDT_SYMBOLS.position,
+    flatness: GDT_SYMBOLS.flatness,
+    straightness: GDT_SYMBOLS.straightness,
+    circularity: GDT_SYMBOLS.circularity,
+    cylindricity: GDT_SYMBOLS.cylindricity,
+    perpendicularity: GDT_SYMBOLS.perpendicularity,
+    parallelism: GDT_SYMBOLS.parallelism,
+    angularity: GDT_SYMBOLS.angularity,
+    profile: GDT_SYMBOLS.profile,
+    runout: GDT_SYMBOLS.runout,
+    totalRunout: GDT_SYMBOLS.totalRunout,
     other: "?",
   };
   return symbols[char] || "?";

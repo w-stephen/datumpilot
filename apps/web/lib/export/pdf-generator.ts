@@ -12,8 +12,15 @@ import { generateFcfSvg } from "./svg-generator";
 const CHARACTERISTIC_LABELS: Record<Characteristic, string> = {
   position: "Position",
   flatness: "Flatness",
+  straightness: "Straightness",
+  circularity: "Circularity",
+  cylindricity: "Cylindricity",
   perpendicularity: "Perpendicularity",
+  parallelism: "Parallelism",
+  angularity: "Angularity",
   profile: "Profile",
+  runout: "Runout",
+  totalRunout: "Total Runout",
   other: "Other",
 };
 

@@ -1,7 +1,24 @@
 import { z } from "zod";
 
-// Enumerations kept tight to the current product scope and the v2 data model.
-export type Characteristic = "position" | "flatness" | "perpendicularity" | "profile" | "other";
+// GD&T Geometric Characteristics per ASME Y14.5-2018
+// Form: flatness, straightness, circularity, cylindricity
+// Orientation: perpendicularity, parallelism, angularity
+// Location: position
+// Profile: profile (of a surface or line)
+// Runout: runout, totalRunout
+export type Characteristic =
+  | "position"
+  | "flatness"
+  | "straightness"
+  | "circularity"
+  | "cylindricity"
+  | "perpendicularity"
+  | "parallelism"
+  | "angularity"
+  | "profile"
+  | "runout"
+  | "totalRunout"
+  | "other";
 export type Unit = "mm" | "inch";
 export type FeatureType = "hole" | "slot" | "pin" | "boss" | "surface" | "plane" | "edge";
 export type MaterialConditionSymbol = "MMC" | "LMC" | "RFS";
@@ -87,7 +104,20 @@ export type FcfJson = {
   notes?: string[]; // Free-form annotations (e.g., "basic angle 30°").
 };
 
-const characteristicSchema = z.enum(["position", "flatness", "perpendicularity", "profile", "other"]);
+const characteristicSchema = z.enum([
+  "position",
+  "flatness",
+  "straightness",
+  "circularity",
+  "cylindricity",
+  "perpendicularity",
+  "parallelism",
+  "angularity",
+  "profile",
+  "runout",
+  "totalRunout",
+  "other",
+]);
 const unitSchema = z.enum(["mm", "inch"]);
 const featureTypeSchema = z.enum(["hole", "slot", "pin", "boss", "surface", "plane", "edge"]);
 const materialConditionSchema = z.enum(["MMC", "LMC", "RFS"]);
