@@ -108,7 +108,11 @@ function TechnicalPanel({
   className?: string;
 }) {
   return (
-    <div className={cn("relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800", className)}>
+    <div className={cn(
+      "relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800",
+      label && "mt-3",
+      className
+    )}>
       {/* Corner accents */}
       <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-slate-300 dark:border-slate-700" />
       <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-slate-300 dark:border-slate-700" />

@@ -15,6 +15,7 @@ export function TechnicalPanel({ children, label, className }: TechnicalPanelPro
     <div
       className={cn(
         "relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800",
+        label && "mt-3", // Add top margin when label present to prevent clipping
         className
       )}
     >
