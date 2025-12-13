@@ -14,7 +14,6 @@ import { NotificationsPanel } from "@/components/layout/NotificationsPanel";
 const routeLabels: Record<string, string> = {
   "/app": "Dashboard",
   "/app/builder": "FCF Builder",
-  "/app/interpreter": "Interpreter",
   "/app/stackup": "Stack-Up Analysis",
   "/app/projects": "Projects",
   "/app/settings": "Settings",

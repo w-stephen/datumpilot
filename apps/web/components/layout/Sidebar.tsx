@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   PenTool,
-  FileJson,
   FolderKanban,
   Settings,
   ChevronLeft,
@@ -40,22 +39,16 @@ const mainNavItems: NavItem[] = [
     code: "02",
   },
   {
-    label: "INTERPRETER",
-    href: "/app/interpreter",
-    icon: FileJson,
-    code: "03",
-  },
-  {
     label: "STACK-UP",
     href: "/app/stackup",
     icon: Layers,
-    code: "04",
+    code: "03",
   },
   {
     label: "PROJECTS",
     href: "/app/projects",
     icon: FolderKanban,
-    code: "05",
+    code: "04",
   },
 ];
 
