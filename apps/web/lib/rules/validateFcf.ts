@@ -101,7 +101,7 @@ const orientationCharacteristics: Characteristic[] = ["perpendicularity"];
 
 /** Location tolerances requiring datum reference */
 const locationCharacteristics: Characteristic[] = ["position"];
-// Note: concentricity, symmetry would be added when schema expands
+// Note: Concentricity and Symmetry were removed from ASME Y14.5-2018
 
 /**
  * Check if FCF uses material condition anywhere (tolerance or datums).

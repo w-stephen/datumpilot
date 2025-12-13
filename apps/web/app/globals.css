@@ -792,3 +792,56 @@ html.dark .tooltip {
 .pulse-glow {
   animation: pulseGlow 2s ease-in-out infinite;
 }
+
+/* ============================================================================
+   Numbered Headings for Support Documentation
+   ============================================================================ */
+
+.article-numbered-headings {
+  counter-reset: h2counter;
+}
+
+.article-numbered-headings h2 {
+  counter-reset: h3counter;
+  counter-increment: h2counter;
+}
+
+.article-numbered-headings h2::before {
+  content: counter(h2counter) ". ";
+  color: #9ca3af;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  margin-right: 0.5rem;
+}
+
+.article-numbered-headings h3 {
+  counter-reset: h4counter;
+  counter-increment: h3counter;
+}
+
+.article-numbered-headings h3::before {
+  content: counter(h2counter) "." counter(h3counter) " ";
+  color: #9ca3af;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  margin-right: 0.5rem;
+}
+
+.article-numbered-headings h4 {
+  counter-increment: h4counter;
+}
+
+.article-numbered-headings h4::before {
+  content: counter(h2counter) "." counter(h3counter) "." counter(h4counter) " ";
+  color: #9ca3af;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  margin-right: 0.5rem;
+}
+
+/* Dark mode adjustments */
+.dark .article-numbered-headings h2::before,
+.dark .article-numbered-headings h3::before,
+.dark .article-numbered-headings h4::before {
+  color: #6b7280;
+}

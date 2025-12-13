@@ -1,5 +1,3 @@
-"use client";
-
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import { Callout } from "./Callout";

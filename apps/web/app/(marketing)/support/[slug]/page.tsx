@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 import {
   getSupportArticle,
   getSupportSlugs,
   getAdjacentArticles,
 } from "@/lib/content/support";
 import { mdxComponents } from "@/components/mdx";
+import { TableOfContents } from "@/components/mdx/TableOfContents";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PageProps {
@@ -47,7 +49,7 @@ export default async function SupportArticlePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="mb-8">
           <Link
@@ -60,7 +62,7 @@ export default async function SupportArticlePage({ params }: PageProps) {
         </nav>
 
         {/* Article Header */}
-        <header className="mb-8">
+        <header className="mb-8 max-w-4xl">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
             {article.title}
           </h1>
@@ -76,21 +78,37 @@ export default async function SupportArticlePage({ params }: PageProps) {
           )}
         </header>
 
-        {/* Article Content */}
-        <article className="prose prose-gray dark:prose-invert max-w-none">
-          <MDXRemote
-            source={article.content}
-            components={mdxComponents}
-            options={{
-              mdxOptions: {
-                remarkPlugins: [remarkGfm],
-              },
-            }}
-          />
-        </article>
+        {/* Mobile TOC - shown above content on small screens */}
+        <div className="mb-8 lg:hidden">
+          <TableOfContents content={article.content} />
+        </div>
+
+        {/* Main content with sidebar TOC */}
+        <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-8">
+          {/* Article Content */}
+          <article className="prose prose-gray prose-headings:text-gray-900 prose-headings:scroll-mt-24 prose-p:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600 hover:prose-a:text-blue-800 dark:prose-invert dark:prose-headings:text-white dark:prose-p:text-gray-300 dark:prose-strong:text-white dark:prose-a:text-blue-400 max-w-none article-numbered-headings">
+            <MDXRemote
+              source={article.content}
+              components={mdxComponents}
+              options={{
+                mdxOptions: {
+                  remarkPlugins: [remarkGfm],
+                  rehypePlugins: [rehypeSlug],
+                },
+              }}
+            />
+          </article>
+
+          {/* Sidebar TOC - sticky on desktop */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-24">
+              <TableOfContents content={article.content} />
+            </div>
+          </aside>
+        </div>
 
         {/* Navigation */}
-        <nav className="mt-12 flex items-center justify-between border-t border-gray-200 pt-6 dark:border-gray-800">
+        <nav className="mt-12 flex items-center justify-between border-t border-gray-200 pt-6 dark:border-gray-800 max-w-4xl">
           {prev ? (
             <Link
               href={`/support/${prev.slug}`}

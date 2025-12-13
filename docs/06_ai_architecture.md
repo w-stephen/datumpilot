@@ -234,8 +234,8 @@ GD&T SYMBOL REFERENCE:
 - ⌖ Position - Controls location of feature
 - ⏥ Flatness - Controls form (no datums)
 - ⟂ Perpendicularity - Controls orientation relative to datum
-- ◎ Concentricity - Controls coaxiality
 - ⌰ Circular Runout - Controls surface relative to datum axis
+Note: Concentricity and Symmetry removed from ASME Y14.5-2018
 ...
 
 MATERIAL CONDITIONS:

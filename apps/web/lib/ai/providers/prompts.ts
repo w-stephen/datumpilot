@@ -34,8 +34,8 @@ export const GDT_REFERENCE_CONTENT = `
 
 ### Location Controls
 - **Position (⌖)**: Controls the location of a feature of size relative to datums. The most common GD&T control.
-- **Concentricity (◎)**: Controls how closely the axis of a feature coincides with a datum axis. Rarely used; replaced by position in most cases.
-- **Symmetry (⌯)**: Controls how symmetrical a feature is about a datum center plane. Also rarely used.
+
+Note: Concentricity and Symmetry were removed from ASME Y14.5-2018. Use Position for coaxiality and symmetrical features.
 
 ### Profile Controls
 - **Profile of a Line (⌒)**: Controls the form of a 2D line element on a surface.

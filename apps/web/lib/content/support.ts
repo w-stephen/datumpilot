@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-const SUPPORT_CONTENT_DIR = path.join(process.cwd(), "apps/web/content/support");
+const SUPPORT_CONTENT_DIR = path.join(process.cwd(), "content/support");
 
 export interface SupportArticle {
   slug: string;

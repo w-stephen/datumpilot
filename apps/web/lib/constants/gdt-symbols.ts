@@ -22,8 +22,6 @@ export const GDT_SYMBOLS = {
   straightness: "⎯",
   parallelism: "∥",
   angularity: "∠",
-  concentricity: "◎",
-  symmetry: "≡",
   runout: "↗",
   totalRunout: "↗↗",
 

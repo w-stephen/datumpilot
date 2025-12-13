@@ -27,7 +27,7 @@ export const errorCodes = {
   E013: "Parallelism requires at least one datum reference",
   E014: "Angularity requires at least one datum reference",
   E015: "Runout requires a datum axis reference",
-  E016: "Concentricity requires a datum axis reference",
+  E016: "Reserved (Concentricity removed from ASME Y14.5-2018)",
   E017: "Duplicate datum letter in reference frame",
   E018: "Datum reference order matters: primary must precede secondary/tertiary",
   E019: "Maximum 3 datum references allowed in standard datum reference frame",

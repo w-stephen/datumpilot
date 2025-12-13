@@ -83,7 +83,7 @@ const mockProjects: Project[] = [
   {
     id: "proj-005",
     name: "Shaft Alignment Study",
-    description: "Concentricity and runout analysis for rotating shafts",
+    description: "Position and runout analysis for rotating shafts",
     fcfCount: 6,
     measurementCount: 24,
     validationStatus: "valid",
