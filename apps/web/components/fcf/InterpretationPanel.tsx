@@ -24,6 +24,7 @@ const MAX_INTERPRETATIONS_PER_FCF = 3;
 
 interface InterpretationPanelProps {
   fcf: Partial<FcfJson>;
+  isValid?: boolean;
   onClose?: () => void;
   className?: string;
 }
@@ -167,6 +168,7 @@ function SubPanel({
 
 export default function InterpretationPanel({
   fcf,
+  isValid = false,
   onClose,
   className,
 }: InterpretationPanelProps) {
@@ -476,11 +478,18 @@ export default function InterpretationPanel({
             </p>
             <button
               onClick={handleInterpret}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-accent-500 text-slate-950 font-mono text-xs font-semibold hover:bg-accent-400 transition-colors"
+              disabled={!isValid}
+              className={cn(
+                "inline-flex items-center gap-2 px-6 py-3 font-mono text-xs font-semibold transition-colors",
+                isValid
+                  ? "bg-accent-500 text-slate-950 hover:bg-accent-400"
+                  : "bg-[#E5E7EB] dark:bg-slate-800 text-[#9CA3AF] dark:text-slate-500 cursor-not-allowed"
+              )}
               style={{
                 clipPath:
                   "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))",
               }}
+              title={isValid ? "Analyze this FCF" : "Fix validation errors first"}
             >
               <Sparkles className="w-4 h-4" />
               INTERPRET FCF

@@ -10,6 +10,10 @@ import {
   Sparkles,
   AlertCircle,
   CheckCircle2,
+  Download,
+  Image,
+  FileText,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { FcfJson } from "@/lib/fcf/schema";
@@ -65,6 +69,55 @@ export default function BuilderPage() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [exportingFormat, setExportingFormat] = useState<"png" | "svg" | "pdf" | null>(null);
+
+  // Export handler
+  const handleExport = useCallback(async (format: "png" | "svg" | "pdf") => {
+    if (!fcf.characteristic) return;
+
+    setExportingFormat(format);
+    try {
+      const response = await fetch("/api/fcf/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fcf: {
+            ...fcf,
+            characteristic: fcf.characteristic,
+            sourceUnit: fcf.sourceUnit || "mm",
+            source: fcf.source || { inputType: "builder" },
+            tolerance: fcf.tolerance || { value: 0 },
+          },
+          format,
+          options: {
+            scale: format === "png" ? 2 : 1.5,
+            backgroundColor: format === "svg" ? "transparent" : "#1A2332",
+          },
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        console.error("Export error:", data.error);
+        alert(data.message || "Export failed. Please try again.");
+        return;
+      }
+
+      // Trigger download
+      const link = document.createElement("a");
+      link.href = data.url;
+      link.download = data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Export failed. Please try again.");
+    } finally {
+      setExportingFormat(null);
+    }
+  }, [fcf]);
 
   // Mock validation
   const handleValidate = useCallback(async (fcfData: Partial<FcfJson>) => {
@@ -317,9 +370,69 @@ export default function BuilderPage() {
               <TechnicalPanel
                 label="LIVE.PREVIEW"
                 headerRight={
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-3.5 h-3.5 text-accent-500" />
-                    <span className="font-mono text-[10px] text-[#6B7280] dark:text-slate-500">ASME Y14.5-2018</span>
+                  <div className="flex items-center gap-3">
+                    {/* Export buttons */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleExport("png")}
+                        disabled={!fcf.characteristic || exportingFormat !== null}
+                        className={cn(
+                          "flex items-center gap-1.5 px-2 py-1 font-mono text-[10px] border transition-colors",
+                          fcf.characteristic && !exportingFormat
+                            ? "border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-400 hover:border-accent-500 hover:text-accent-500"
+                            : "border-[#E5E7EB] dark:border-slate-800 text-[#D1D5DB] dark:text-slate-600 cursor-not-allowed"
+                        )}
+                        title="Export as PNG"
+                      >
+                        {exportingFormat === "png" ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Image className="w-3 h-3" />
+                        )}
+                        PNG
+                      </button>
+                      <button
+                        onClick={() => handleExport("svg")}
+                        disabled={!fcf.characteristic || exportingFormat !== null}
+                        className={cn(
+                          "flex items-center gap-1.5 px-2 py-1 font-mono text-[10px] border transition-colors",
+                          fcf.characteristic && !exportingFormat
+                            ? "border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-400 hover:border-accent-500 hover:text-accent-500"
+                            : "border-[#E5E7EB] dark:border-slate-800 text-[#D1D5DB] dark:text-slate-600 cursor-not-allowed"
+                        )}
+                        title="Export as SVG"
+                      >
+                        {exportingFormat === "svg" ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Download className="w-3 h-3" />
+                        )}
+                        SVG
+                      </button>
+                      <button
+                        onClick={() => handleExport("pdf")}
+                        disabled={!fcf.characteristic || exportingFormat !== null}
+                        className={cn(
+                          "flex items-center gap-1.5 px-2 py-1 font-mono text-[10px] border transition-colors",
+                          fcf.characteristic && !exportingFormat
+                            ? "border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-400 hover:border-accent-500 hover:text-accent-500"
+                            : "border-[#E5E7EB] dark:border-slate-800 text-[#D1D5DB] dark:text-slate-600 cursor-not-allowed"
+                        )}
+                        title="Export as PDF"
+                      >
+                        {exportingFormat === "pdf" ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <FileText className="w-3 h-3" />
+                        )}
+                        PDF
+                      </button>
+                    </div>
+                    <div className="h-4 w-px bg-[#E5E7EB] dark:bg-slate-700" />
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-accent-500" />
+                      <span className="font-mono text-[10px] text-[#6B7280] dark:text-slate-500">ASME Y14.5-2018</span>
+                    </div>
                   </div>
                 }
               >
@@ -342,7 +455,7 @@ export default function BuilderPage() {
               </TechnicalPanel>
 
               {/* Interpretation Panel - Always visible */}
-              <InterpretationPanel fcf={fcf} />
+              <InterpretationPanel fcf={fcf} isValid={(validationResult?.valid ?? false) && !!fcf.characteristic} />
 
               {/* Quick Reference */}
               <TechnicalPanel label="REF.SYMBOLS">
