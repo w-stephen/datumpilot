@@ -116,12 +116,12 @@ export default function FcfPreview({
       <div
         className={cn(
           "flex items-center justify-center",
-          "bg-slate-900/50 border-2 border-dashed border-slate-700 rounded-lg",
+          "bg-[#F9FAFB] dark:bg-slate-900/50 border-2 border-dashed border-[#D1D5DB] dark:border-slate-700 rounded-lg",
           className
         )}
         style={{ width: svgWidth, height: svgHeight }}
       >
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-[#6B7280] dark:text-slate-500">
           Select a characteristic to preview
         </p>
       </div>
@@ -131,11 +131,24 @@ export default function FcfPreview({
   return (
     <div
       className={cn(
-        "relative",
+        "relative fcf-preview",
         showGrid && "bg-grid-pattern",
         className
       )}
     >
+      {/* CSS variables for light/dark mode colors */}
+      <style>{`
+        .fcf-preview {
+          --fcf-bg: #FFFFFF;
+          --fcf-stroke: #D1D5DB;
+          --fcf-text: #111827;
+        }
+        .dark .fcf-preview {
+          --fcf-bg: #1A2332;
+          --fcf-stroke: #334155;
+          --fcf-text: #F8FAFC;
+        }
+      `}</style>
       <svg
         width={svgWidth}
         height={svgHeight}
@@ -163,8 +176,8 @@ export default function FcfPreview({
             y={0}
             width={frameWidth}
             height={frameHeight}
-            fill="#1A2332"
-            stroke="#334155"
+            fill="var(--fcf-bg)"
+            stroke="var(--fcf-stroke)"
             strokeWidth={FCF.strokeWidth}
             rx={2}
           />
@@ -202,7 +215,7 @@ function renderCells(fcf: Partial<FcfJson>, charColor: string): React.ReactNode 
           width={FCF.symbolWidth}
           height={FCF.cellHeight}
           fill="transparent"
-          stroke="#334155"
+          stroke="var(--fcf-stroke)"
           strokeWidth={1}
         />
         {/* Symbol */}
@@ -239,7 +252,7 @@ function renderCells(fcf: Partial<FcfJson>, charColor: string): React.ReactNode 
           width={toleranceWidth}
           height={FCF.cellHeight}
           fill="transparent"
-          stroke="#334155"
+          stroke="var(--fcf-stroke)"
           strokeWidth={1}
         />
         {/* Tolerance content */}
@@ -248,7 +261,7 @@ function renderCells(fcf: Partial<FcfJson>, charColor: string): React.ReactNode 
           y={FCF.cellHeight / 2}
           textAnchor="middle"
           dominantBaseline="central"
-          fill="#F8FAFC"
+          fill="var(--fcf-text)"
           fontSize={FCF.fontSize}
           fontFamily={FCF.fontFamily}
           fontWeight="600"
@@ -282,7 +295,7 @@ function renderCells(fcf: Partial<FcfJson>, charColor: string): React.ReactNode 
           width={cellWidth}
           height={FCF.cellHeight}
           fill="transparent"
-          stroke="#334155"
+          stroke="var(--fcf-stroke)"
           strokeWidth={1}
         />
         {/* Datum letter and material condition side by side */}
@@ -336,19 +349,19 @@ export function FcfPreviewCard({
   return (
     <div
       className={cn(
-        "bg-slate-900/50 border border-slate-800 rounded-lg overflow-hidden",
+        "bg-white dark:bg-slate-900/50 border border-[#E5E7EB] dark:border-slate-800 rounded-lg overflow-hidden",
         className
       )}
     >
       {/* Header */}
       {(title || actions) && (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB] dark:border-slate-800">
           <div>
             {title && (
-              <h3 className="font-mono font-semibold text-slate-200">{title}</h3>
+              <h3 className="font-mono font-semibold text-[#111827] dark:text-slate-200">{title}</h3>
             )}
             {subtitle && (
-              <p className="text-sm text-slate-500">{subtitle}</p>
+              <p className="text-sm text-[#6B7280] dark:text-slate-500">{subtitle}</p>
             )}
           </div>
           {actions}
@@ -356,32 +369,32 @@ export function FcfPreviewCard({
       )}
 
       {/* Preview */}
-      <div className="p-6 flex items-center justify-center bg-slate-950/50">
+      <div className="p-6 flex items-center justify-center bg-[#F9FAFB] dark:bg-slate-950/50">
         <FcfPreview fcf={fcf} scale={1.5} showGrid />
       </div>
 
       {/* Metadata */}
       {showMetadata && fcf.characteristic && (
-        <div className="px-4 py-3 border-t border-slate-800 bg-slate-900/30">
+        <div className="px-4 py-3 border-t border-[#E5E7EB] dark:border-slate-800 bg-[#F9FAFB] dark:bg-slate-900/30">
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-slate-500">Characteristic:</span>
+              <span className="text-[#6B7280] dark:text-slate-500">Characteristic:</span>
               <span className="font-medium" style={{ color: charColor }}>
                 {fcf.characteristic.charAt(0).toUpperCase() + fcf.characteristic.slice(1)}
               </span>
             </div>
             {fcf.featureType && (
               <div className="flex items-center gap-2">
-                <span className="text-slate-500">Feature:</span>
-                <span className="text-slate-300">
+                <span className="text-[#6B7280] dark:text-slate-500">Feature:</span>
+                <span className="text-[#374151] dark:text-slate-300">
                   {fcf.featureType.charAt(0).toUpperCase() + fcf.featureType.slice(1)}
                 </span>
               </div>
             )}
             {fcf.sourceUnit && (
               <div className="flex items-center gap-2">
-                <span className="text-slate-500">Units:</span>
-                <span className="text-slate-300 font-mono">{fcf.sourceUnit}</span>
+                <span className="text-[#6B7280] dark:text-slate-500">Units:</span>
+                <span className="text-[#374151] dark:text-slate-300 font-mono">{fcf.sourceUnit}</span>
               </div>
             )}
           </div>
