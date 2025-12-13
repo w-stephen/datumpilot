@@ -127,18 +127,21 @@
 
 /* CSS Variables for dynamic values */
 :root {
-  /* VS Code-inspired Light Mode Colors */
-  --vscode-bg-primary: #F3F3F3;
-  --vscode-bg-secondary: #FFFFFF;
-  --vscode-bg-sidebar: #F3F3F3;
-  --vscode-bg-card: #FFFFFF;
-  --vscode-text-primary: #1F1F1F;
-  --vscode-text-secondary: #616161;
-  --vscode-text-muted: #6E6E6E;
-  --vscode-text-faint: #8B8B8B;
-  --vscode-border: #E5E5E5;
-  --vscode-border-light: #F0F0F0;
-  --vscode-accent: #0066B8;
+  /* Professional Light Mode Colors - High Contrast Hierarchy */
+  --bg-app: #F5F7FA;           /* Main app background */
+  --bg-surface: #FFFFFF;        /* Cards and elevated surfaces */
+  --bg-surface-2: #F9FAFB;      /* Section backgrounds */
+  --bg-sidebar: #FFFFFF;        /* Sidebar background */
+
+  --text-primary: #111827;      /* Primary text - high contrast */
+  --text-secondary: #374151;    /* Secondary text */
+  --text-muted: #6B7280;        /* Muted/helper text */
+  --text-faint: #9CA3AF;        /* Very muted text */
+
+  --border: #E5E7EB;            /* Primary borders */
+  --border-light: #F3F4F6;      /* Subtle borders */
+
+  --accent: #14B8A6;            /* Teal accent */
 
   /* Background Colors (dark mode) */
   --color-bg-primary: #0F1419;
@@ -182,10 +185,10 @@ html.dark {
   color-scheme: dark;
 }
 
-/* Light mode body - VS Code inspired neutral grays */
+/* Light mode body - Professional hierarchy */
 body {
-  background-color: #F3F3F3;
-  color: #1F1F1F;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
   font-family: var(--font-family-sans);
   background-image: none;
   min-height: 100vh;
@@ -207,7 +210,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-mono);
   font-weight: 600;
   letter-spacing: -0.025em;
-  color: var(--vscode-text-primary);
+  color: var(--text-primary);
 }
 
 html.dark h1, html.dark h2, html.dark h3,
@@ -246,23 +249,23 @@ code, pre {
   color: white;
 }
 
-/* Scrollbar styling - Light mode (VS Code inspired) */
+/* Scrollbar styling - Light mode */
 ::-webkit-scrollbar {
   width: 0.625rem;
   height: 0.625rem;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--vscode-bg-primary);
+  background-color: var(--bg-app);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(100, 100, 100, 0.4);
+  background-color: var(--border);
   border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(100, 100, 100, 0.7);
+  background-color: var(--text-muted);
 }
 
 /* Scrollbar styling - Dark mode */

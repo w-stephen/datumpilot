@@ -18,7 +18,7 @@ export default async function StackupPage() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between pb-6 border-b border-slate-200/50 dark:border-slate-800/50">
+      <div className="flex items-center justify-between pb-6 border-b border-[#E5E7EB] dark:border-slate-800/50">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-px bg-accent-500" />
@@ -26,10 +26,10 @@ export default async function StackupPage() {
               STACK.ANALYSIS
             </span>
           </div>
-          <h1 className="font-mono text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+          <h1 className="font-mono text-2xl font-bold text-[#111827] dark:text-slate-50 tracking-tight">
             STACK-UP ANALYSIS
           </h1>
-          <p className="text-slate-500 mt-1 font-mono text-sm">
+          <p className="text-[#374151] dark:text-slate-500 mt-1 font-mono text-sm">
             Tolerance stack-up calculations using Worst-Case, RSS, and Six Sigma methods
           </p>
         </div>
@@ -47,21 +47,21 @@ export default async function StackupPage() {
       </div>
 
       {/* Status Bar */}
-      <div className="flex items-center gap-4 py-3 px-4 bg-slate-100/50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50">
+      <div className="flex items-center gap-4 py-3 px-4 bg-[#F9FAFB] dark:bg-slate-900/30 border-b border-[#E5E7EB] dark:border-slate-800/50">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 bg-accent-500 animate-pulse" />
           <span className="font-mono text-xs text-accent-500">
             {analyses.length} ANALYSIS{analyses.length !== 1 ? "ES" : ""}
           </span>
         </div>
-        <div className="h-4 w-px bg-slate-300 dark:bg-slate-700" />
+        <div className="h-4 w-px bg-[#E5E7EB] dark:bg-slate-700" />
         <span className="font-mono text-[10px] text-accent-500">
           {passCount} PASS
         </span>
         <span className="font-mono text-[10px] text-error-500">
           {failCount} FAIL
         </span>
-        <span className="font-mono text-[10px] text-slate-500">
+        <span className="font-mono text-[10px] text-[#6B7280] dark:text-slate-500">
           {analyses.length - passCount - failCount} INCOMPLETE
         </span>
       </div>
@@ -71,13 +71,13 @@ export default async function StackupPage() {
         {analyses.length === 0 ? (
           <TechnicalPanel label="NO.ANALYSES" className="h-full">
             <div className="flex flex-col items-center justify-center h-full text-center py-20">
-              <div className="w-16 h-16 border border-slate-800 mx-auto mb-6 flex items-center justify-center">
-                <Layers className="w-6 h-6 text-slate-700" />
+              <div className="w-16 h-16 border border-[#E5E7EB] dark:border-slate-800 mx-auto mb-6 flex items-center justify-center">
+                <Layers className="w-6 h-6 text-[#6B7280] dark:text-slate-700" />
               </div>
-              <h3 className="font-mono text-sm text-slate-500 mb-2">
+              <h3 className="font-mono text-sm text-[#374151] dark:text-slate-500 mb-2">
                 NO STACK-UP ANALYSES
               </h3>
-              <p className="font-mono text-xs text-slate-600 max-w-sm mb-6">
+              <p className="font-mono text-xs text-[#6B7280] dark:text-slate-600 max-w-sm mb-6">
                 Create your first tolerance stack-up analysis to calculate cumulative
                 tolerances using industry-standard methods.
               </p>

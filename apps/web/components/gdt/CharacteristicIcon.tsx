@@ -28,8 +28,8 @@ const sizeClasses = {
 };
 
 const labelSizeClasses = {
-  sm: "text-2xs",
-  md: "text-xs",
+  sm: "text-xs",
+  md: "text-sm",
   lg: "text-sm",
   xl: "text-base",
 };
@@ -52,14 +52,14 @@ function CharacteristicIconComponent({
   const content = (
     <div
       className={cn(
-        "inline-flex items-center justify-center rounded-lg font-mono font-bold",
+        "inline-flex items-center justify-center font-mono font-bold",
         "transition-all duration-200",
         sizeClasses[size],
         variant === "filled" && "text-slate-950",
         variant === "outline" && "border-2",
-        variant === "default" && "bg-slate-800 border border-slate-700",
+        variant === "default" && "bg-[#F9FAFB] dark:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700",
         interactive && "cursor-pointer hover:scale-105",
-        active && "ring-2 ring-offset-2 ring-offset-slate-950",
+        active && "ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-950",
         className
       )}
       style={{
@@ -85,7 +85,7 @@ function CharacteristicIconComponent({
         {content}
         <span
           className={cn(
-            "font-medium text-slate-400",
+            "font-medium text-[#374151] dark:text-slate-400",
             labelSizeClasses[size]
           )}
         >

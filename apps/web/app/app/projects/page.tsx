@@ -97,7 +97,7 @@ type ViewMode = "grid" | "list";
 type SortField = "name" | "updatedAt" | "fcfCount";
 type SortDirection = "asc" | "desc";
 
-// Technical panel wrapper with glassmorphism
+// Technical panel wrapper with proper hierarchy
 function TechnicalPanel({
   children,
   label,
@@ -109,18 +109,18 @@ function TechnicalPanel({
 }) {
   return (
     <div className={cn(
-      "relative bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm border border-white/50 dark:border-slate-800 shadow-sm shadow-black/[0.03]",
+      "relative bg-white dark:bg-slate-900/40 border border-[#E5E7EB] dark:border-slate-800",
       label && "mt-3",
       className
     )}>
       {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D4D4D4]/70 dark:border-slate-700" />
-      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D4D4D4]/70 dark:border-slate-700" />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D4D4D4]/70 dark:border-slate-700" />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D1D5DB] dark:border-slate-700" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D1D5DB] dark:border-slate-700" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D1D5DB] dark:border-slate-700" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D1D5DB] dark:border-slate-700" />
 
       {label && (
-        <div className="absolute -top-2.5 left-4 px-2 bg-[#F3F3F3]/90 dark:bg-[#0D1117] font-mono text-[10px] text-[#6E6E6E] dark:text-slate-500 tracking-widest backdrop-blur-sm">
+        <div className="absolute -top-2.5 left-4 px-2 bg-[#F5F7FA] dark:bg-[#0D1117] font-mono text-[10px] text-[#6B7280] dark:text-slate-500 tracking-widest">
           {label}
         </div>
       )}
@@ -201,16 +201,16 @@ export default function ProjectsPage() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between pb-6 border-b border-slate-200/50 dark:border-slate-800/50">
+      <div className="flex items-center justify-between pb-6 border-b border-[#E5E7EB] dark:border-slate-800/50">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-px bg-accent-500" />
             <span className="font-mono text-xs text-accent-500 tracking-widest">PROJ.MANAGER</span>
           </div>
-          <h1 className="font-mono text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+          <h1 className="font-mono text-2xl font-bold text-[#111827] dark:text-slate-50 tracking-tight">
             PROJECTS
           </h1>
-          <p className="text-slate-600 dark:text-slate-500 mt-1 font-mono text-sm">
+          <p className="text-[#374151] dark:text-slate-500 mt-1 font-mono text-sm">
             Manage FCF collections, measurements, and analysis runs
           </p>
         </div>
@@ -226,21 +226,21 @@ export default function ProjectsPage() {
       </div>
 
       {/* Status Bar */}
-      <div className="flex items-center gap-4 py-3 px-4 bg-slate-100/50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50">
+      <div className="flex items-center gap-4 py-3 px-4 bg-[#F9FAFB] dark:bg-slate-900/30 border-b border-[#E5E7EB] dark:border-slate-800/50">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 bg-accent-500 animate-pulse" />
           <span className="font-mono text-xs text-accent-500">
             {filteredProjects.length} PROJECT{filteredProjects.length !== 1 ? 'S' : ''}
           </span>
         </div>
-        <div className="h-4 w-px bg-slate-300 dark:bg-slate-700" />
-        <span className="font-mono text-[10px] text-slate-600 dark:text-slate-500">
+        <div className="h-4 w-px bg-[#E5E7EB] dark:bg-slate-700" />
+        <span className="font-mono text-[10px] text-[#374151] dark:text-slate-500">
           SORT: {sortField.toUpperCase()} {sortDirection.toUpperCase()}
         </span>
         {selectedTags.length > 0 && (
           <>
-            <div className="h-4 w-px bg-slate-300 dark:bg-slate-700" />
-            <span className="font-mono text-[10px] text-slate-600 dark:text-slate-400">
+            <div className="h-4 w-px bg-[#E5E7EB] dark:bg-slate-700" />
+            <span className="font-mono text-[10px] text-[#374151] dark:text-slate-400">
               FILTER: {selectedTags.join(', ').toUpperCase()}
             </span>
           </>
@@ -251,13 +251,13 @@ export default function ProjectsPage() {
       <div className="flex items-center justify-between py-4 gap-4">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search projects..."
-            className="w-full pl-10 pr-4 py-2 bg-white/60 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-accent-500/50 focus:border-accent-500/50"
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900/50 border border-[#E5E7EB] dark:border-slate-800 font-mono text-xs text-[#374151] dark:text-slate-300 placeholder-[#9CA3AF] dark:placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-accent-500/50 focus:border-accent-500/50"
           />
         </div>
 
@@ -273,7 +273,7 @@ export default function ProjectsPage() {
                   "px-2 py-1 font-mono text-[10px] border transition-colors uppercase",
                   selectedTags.includes(tag)
                     ? "bg-accent-500/20 border-accent-500 text-accent-400"
-                    : "bg-white/60 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-slate-300 dark:hover:border-slate-700"
+                    : "bg-white dark:bg-slate-900/50 border-[#E5E7EB] dark:border-slate-800 text-[#6B7280] hover:border-[#D1D5DB] dark:hover:border-slate-700"
                 )}
               >
                 {tag}
@@ -284,7 +284,7 @@ export default function ProjectsPage() {
           {/* Sort */}
           <button
             onClick={() => toggleSort("updatedAt")}
-            className="flex items-center gap-2 px-3 py-2 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 font-mono text-[10px] transition-colors"
+            className="flex items-center gap-2 px-3 py-2 border border-[#E5E7EB] dark:border-slate-800 text-[#6B7280] hover:text-[#111827] dark:hover:text-slate-300 hover:border-[#D1D5DB] dark:hover:border-slate-700 font-mono text-[10px] transition-colors"
           >
             <ArrowUpDown className="w-3 h-3" />
             {sortField === "updatedAt"
@@ -295,14 +295,14 @@ export default function ProjectsPage() {
           </button>
 
           {/* View mode */}
-          <div className="flex items-center border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center border border-[#E5E7EB] dark:border-slate-800">
             <button
               onClick={() => setViewMode("grid")}
               className={cn(
                 "p-2 transition-colors",
                 viewMode === "grid"
-                  ? "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
-                  : "text-slate-500 dark:text-slate-600 hover:text-slate-700 dark:hover:text-slate-400"
+                  ? "bg-[#E5E7EB] dark:bg-slate-800 text-[#111827] dark:text-slate-200"
+                  : "text-[#6B7280] dark:text-slate-600 hover:text-[#111827] dark:hover:text-slate-400"
               )}
             >
               <Grid className="w-3.5 h-3.5" />
@@ -312,8 +312,8 @@ export default function ProjectsPage() {
               className={cn(
                 "p-2 transition-colors",
                 viewMode === "list"
-                  ? "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
-                  : "text-slate-500 dark:text-slate-600 hover:text-slate-700 dark:hover:text-slate-400"
+                  ? "bg-[#E5E7EB] dark:bg-slate-800 text-[#111827] dark:text-slate-200"
+                  : "text-[#6B7280] dark:text-slate-600 hover:text-[#111827] dark:hover:text-slate-400"
               )}
             >
               <List className="w-3.5 h-3.5" />
@@ -327,13 +327,13 @@ export default function ProjectsPage() {
         {filteredProjects.length === 0 ? (
           <TechnicalPanel label="NO.RESULTS" className="h-full">
             <div className="flex flex-col items-center justify-center h-full text-center py-20">
-              <div className="w-16 h-16 border border-slate-800 mx-auto mb-6 flex items-center justify-center">
-                <FolderKanban className="w-6 h-6 text-slate-700" />
+              <div className="w-16 h-16 border border-[#E5E7EB] dark:border-slate-800 mx-auto mb-6 flex items-center justify-center">
+                <FolderKanban className="w-6 h-6 text-[#6B7280] dark:text-slate-700" />
               </div>
-              <h3 className="font-mono text-sm text-slate-500 mb-2">
+              <h3 className="font-mono text-sm text-[#374151] dark:text-slate-500 mb-2">
                 NO PROJECTS FOUND
               </h3>
-              <p className="font-mono text-xs text-slate-600 max-w-sm">
+              <p className="font-mono text-xs text-[#6B7280] dark:text-slate-600 max-w-sm">
                 {searchQuery || selectedTags.length > 0
                   ? "Try adjusting your search or filters"
                   : "Create your first project to start organizing FCFs"}
@@ -410,16 +410,16 @@ function ProjectCard({
   return (
     <Link
       href={`/app/projects/${project.id}`}
-      className="group relative bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm border border-white/50 dark:border-slate-800 shadow-sm shadow-black/[0.03] hover:border-accent-500/30 hover:shadow-md hover:shadow-accent-500/5 transition-all"
+      className="group relative bg-white dark:bg-slate-900/40 border border-[#E5E7EB] dark:border-slate-800 hover:border-accent-500/50 hover:shadow-md transition-all"
     >
       {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D4D4D4]/70 dark:border-slate-700" />
-      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D4D4D4]/70 dark:border-slate-700" />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D4D4D4]/70 dark:border-slate-700" />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D1D5DB] dark:border-slate-700" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D1D5DB] dark:border-slate-700" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D1D5DB] dark:border-slate-700" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D1D5DB] dark:border-slate-700" />
 
       {/* Index label */}
-      <div className="absolute -top-2.5 left-4 px-2 bg-[#F3F3F3]/90 dark:bg-[#0D1117] font-mono text-[10px] text-[#6E6E6E] dark:text-slate-600 tracking-widest backdrop-blur-sm">
+      <div className="absolute -top-2.5 left-4 px-2 bg-[#F5F7FA] dark:bg-[#0D1117] font-mono text-[10px] text-[#6B7280] dark:text-slate-600 tracking-widest">
         PROJ.{String(index + 1).padStart(2, '0')}
       </div>
 
@@ -430,26 +430,26 @@ function ProjectCard({
             e.preventDefault();
             onToggleDropdown();
           }}
-          className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors opacity-0 group-hover:opacity-100"
+          className="p-1.5 hover:bg-[#F3F4F6] dark:hover:bg-slate-800 transition-colors opacity-0 group-hover:opacity-100"
         >
-          <MoreVertical className="w-4 h-4 text-slate-500" />
+          <MoreVertical className="w-4 h-4 text-[#6B7280]" />
         </button>
         {showDropdown && (
-          <div className="absolute right-0 top-8 w-32 bg-white/90 dark:bg-[#0A0E14] backdrop-blur-md border border-white/50 dark:border-slate-800 shadow-lg shadow-black/5 py-1 z-10">
+          <div className="absolute right-0 top-8 w-32 bg-white dark:bg-[#0A0E14] border border-[#E5E7EB] dark:border-slate-800 shadow-lg py-1 z-10">
             {/* Corner accents for dropdown */}
-            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#D4D4D4]/70 dark:border-slate-700" />
-            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#D4D4D4]/70 dark:border-slate-700" />
-            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#D4D4D4]/70 dark:border-slate-700" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#D4D4D4]/70 dark:border-slate-700" />
-            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#D1D5DB] dark:border-slate-700" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#D1D5DB] dark:border-slate-700" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#D1D5DB] dark:border-slate-700" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#D1D5DB] dark:border-slate-700" />
+            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-[#374151] dark:text-slate-400 hover:bg-[#F3F4F6] dark:hover:bg-slate-800">
               <Edit className="w-3 h-3" />
               EDIT
             </button>
-            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-[#374151] dark:text-slate-400 hover:bg-[#F3F4F6] dark:hover:bg-slate-800">
               <Copy className="w-3 h-3" />
               DUPLICATE
             </button>
-            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-error-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-error-400 hover:bg-[#F3F4F6] dark:hover:bg-slate-800">
               <Trash2 className="w-3 h-3" />
               DELETE
             </button>
@@ -460,14 +460,14 @@ function ProjectCard({
       <div className="p-5 pt-6">
         {/* Header */}
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 border border-[#D4D4D4]/70 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center group-hover:border-accent-500/50 group-hover:bg-accent-500/10 transition-all">
-            <FolderKanban className="w-4 h-4 text-[#616161] group-hover:text-accent-500 transition-colors" />
+          <div className="w-10 h-10 border border-[#E5E7EB] dark:border-slate-700 bg-[#F9FAFB] dark:bg-slate-800/50 flex items-center justify-center group-hover:border-accent-500/50 group-hover:bg-accent-500/10 transition-all">
+            <FolderKanban className="w-4 h-4 text-[#374151] group-hover:text-accent-500 transition-colors" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 truncate uppercase">
+            <h3 className="font-mono text-xs font-semibold text-[#111827] dark:text-slate-100 truncate uppercase">
               {project.name}
             </h3>
-            <p className="font-mono text-[10px] text-slate-600 dark:text-slate-500 line-clamp-2 mt-1">
+            <p className="font-mono text-[10px] text-[#6B7280] dark:text-slate-500 line-clamp-2 mt-1">
               {project.description}
             </p>
           </div>
@@ -477,29 +477,29 @@ function ProjectCard({
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-1.5">
             <Target className="w-3.5 h-3.5 text-accent-500" />
-            <span className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300">
+            <span className="font-mono text-sm font-bold text-[#111827] dark:text-slate-300">
               {project.fcfCount}
             </span>
-            <span className="font-mono text-[10px] text-slate-600 dark:text-slate-600">FCFs</span>
+            <span className="font-mono text-[10px] text-[#6B7280] dark:text-slate-600">FCFs</span>
           </div>
           <div className="flex items-center gap-1.5">
             <FileJson className="w-3.5 h-3.5 text-primary-500" />
-            <span className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300">
+            <span className="font-mono text-sm font-bold text-[#111827] dark:text-slate-300">
               {project.measurementCount}
             </span>
-            <span className="font-mono text-[10px] text-slate-600 dark:text-slate-600">MEAS</span>
+            <span className="font-mono text-[10px] text-[#6B7280] dark:text-slate-600">MEAS</span>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-200/50 dark:border-slate-800/50">
+        <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB] dark:border-slate-800/50">
           <div className="flex items-center gap-1.5">
             <StatusIcon className={cn("w-3.5 h-3.5", status.color)} />
             <span className={cn("font-mono text-[10px]", status.color)}>
               {status.label}
             </span>
           </div>
-          <div className="flex items-center gap-1 font-mono text-[10px] text-slate-600 dark:text-slate-600">
+          <div className="flex items-center gap-1 font-mono text-[10px] text-[#6B7280] dark:text-slate-600">
             <Clock className="w-3 h-3" />
             {new Date(project.updatedAt).toLocaleDateString()}
           </div>
@@ -511,7 +511,7 @@ function ProjectCard({
             {project.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 font-mono text-[9px] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-500 uppercase"
+                className="px-2 py-0.5 font-mono text-[9px] border border-[#E5E7EB] dark:border-slate-800 text-[#6B7280] dark:text-slate-500 uppercase"
               >
                 {tag}
               </span>
@@ -556,35 +556,35 @@ function ProjectRow({
   return (
     <Link
       href={`/app/projects/${project.id}`}
-      className="group flex items-center gap-4 bg-slate-900/40 border border-slate-800 px-4 py-3 hover:border-slate-700 transition-colors"
+      className="group flex items-center gap-4 bg-white dark:bg-slate-900/40 border border-[#E5E7EB] dark:border-slate-800 px-4 py-3 hover:border-[#D1D5DB] dark:hover:border-slate-700 transition-colors"
     >
       {/* Index */}
-      <span className="font-mono text-[10px] text-slate-600 w-8">
+      <span className="font-mono text-[10px] text-[#9CA3AF] dark:text-slate-600 w-8">
         {String(index + 1).padStart(2, '0')}
       </span>
 
       {/* Icon */}
-      <div className="w-8 h-8 border border-slate-700 bg-slate-800/50 flex items-center justify-center">
-        <FolderKanban className="w-3.5 h-3.5 text-slate-500" />
+      <div className="w-8 h-8 border border-[#E5E7EB] dark:border-slate-700 bg-[#F9FAFB] dark:bg-slate-800/50 flex items-center justify-center">
+        <FolderKanban className="w-3.5 h-3.5 text-[#6B7280] dark:text-slate-500" />
       </div>
 
       {/* Name & Description */}
       <div className="flex-1 min-w-0">
-        <h3 className="font-mono text-xs text-slate-200 truncate uppercase">
+        <h3 className="font-mono text-xs text-[#111827] dark:text-slate-200 truncate uppercase">
           {project.name}
         </h3>
-        <p className="font-mono text-[10px] text-slate-600 truncate">{project.description}</p>
+        <p className="font-mono text-[10px] text-[#6B7280] dark:text-slate-600 truncate">{project.description}</p>
       </div>
 
       {/* Stats */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-1.5">
           <Target className="w-3.5 h-3.5 text-accent-500" />
-          <span className="font-mono text-xs text-slate-300">{project.fcfCount}</span>
+          <span className="font-mono text-xs text-[#111827] dark:text-slate-300">{project.fcfCount}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <FileJson className="w-3.5 h-3.5 text-primary-500" />
-          <span className="font-mono text-xs text-slate-300">{project.measurementCount}</span>
+          <span className="font-mono text-xs text-[#111827] dark:text-slate-300">{project.measurementCount}</span>
         </div>
       </div>
 
@@ -592,7 +592,7 @@ function ProjectRow({
       <StatusIcon className={cn("w-4 h-4", status.color)} />
 
       {/* Date */}
-      <div className="flex items-center gap-1 font-mono text-[10px] text-slate-600 w-24">
+      <div className="flex items-center gap-1 font-mono text-[10px] text-[#6B7280] dark:text-slate-600 w-24">
         <Calendar className="w-3 h-3" />
         {new Date(project.updatedAt).toLocaleDateString()}
       </div>
@@ -604,25 +604,25 @@ function ProjectRow({
             e.preventDefault();
             onToggleDropdown();
           }}
-          className="p-1.5 hover:bg-slate-800 transition-colors"
+          className="p-1.5 hover:bg-[#F3F4F6] dark:hover:bg-slate-800 transition-colors"
         >
-          <MoreVertical className="w-4 h-4 text-slate-500" />
+          <MoreVertical className="w-4 h-4 text-[#6B7280] dark:text-slate-500" />
         </button>
         {showDropdown && (
-          <div className="absolute right-0 top-8 w-32 bg-[#0A0E14] border border-slate-800 py-1 z-10">
-            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-slate-700" />
-            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-700" />
-            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-slate-700" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-slate-700" />
-            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-slate-400 hover:bg-slate-800">
+          <div className="absolute right-0 top-8 w-32 bg-white dark:bg-[#0A0E14] border border-[#E5E7EB] dark:border-slate-800 py-1 z-10">
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#D1D5DB] dark:border-slate-700" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#D1D5DB] dark:border-slate-700" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#D1D5DB] dark:border-slate-700" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#D1D5DB] dark:border-slate-700" />
+            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-[#374151] dark:text-slate-400 hover:bg-[#F3F4F6] dark:hover:bg-slate-800">
               <Edit className="w-3 h-3" />
               EDIT
             </button>
-            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-slate-400 hover:bg-slate-800">
+            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-[#374151] dark:text-slate-400 hover:bg-[#F3F4F6] dark:hover:bg-slate-800">
               <Copy className="w-3 h-3" />
               DUPLICATE
             </button>
-            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-error-400 hover:bg-slate-800">
+            <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-error-400 hover:bg-[#F3F4F6] dark:hover:bg-slate-800">
               <Trash2 className="w-3 h-3" />
               DELETE
             </button>

@@ -80,12 +80,12 @@ export default function ToleranceDisplay({
       )}
 
       {/* Primary value */}
-      <span className={cn("font-bold text-slate-50", valueSizeClasses[size])}>
+      <span className={cn("font-bold text-[#111827] dark:text-slate-50", valueSizeClasses[size])}>
         {formatValue(primaryValue, decimals)}
       </span>
 
       {/* Unit */}
-      <span className="text-slate-400 text-sm">
+      <span className="text-[#6B7280] dark:text-slate-400 text-sm">
         {targetUnit}
       </span>
 
@@ -99,7 +99,7 @@ export default function ToleranceDisplay({
 
       {/* Dual display (secondary unit) */}
       {dualDisplay && secondaryValue !== null && (
-        <span className="text-slate-500 text-sm">
+        <span className="text-[#9CA3AF] dark:text-slate-500 text-sm">
           ({formatValue(secondaryValue, decimals)}{" "}
           {targetUnit === "mm" ? "in" : "mm"})
         </span>
@@ -142,12 +142,12 @@ export function ToleranceInput({
           type="button"
           onClick={() => onChange({ ...value, diameter: !value.diameter })}
           className={cn(
-            "flex items-center justify-center rounded-md border font-mono",
+            "flex items-center justify-center border font-mono",
             "transition-all duration-200",
             compact ? "w-7 h-7 text-base" : "w-8 h-8 text-lg",
             value.diameter
-              ? "bg-accent-500/20 border-accent-500 text-accent-400"
-              : "bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600"
+              ? "bg-accent-500/20 border-accent-500 text-accent-500"
+              : "bg-white dark:bg-slate-800 border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-500 hover:border-[#D1D5DB] dark:hover:border-slate-600"
           )}
           aria-pressed={value.diameter}
           aria-label="Toggle diameter zone"
@@ -171,14 +171,14 @@ export function ToleranceInput({
           step={Math.pow(10, -decimals)}
           min={0}
           className={cn(
-            "input font-mono tabular-nums w-full",
-            compact ? "text-sm py-1.5 pr-2" : "text-lg font-semibold pr-12"
+            "font-mono tabular-nums w-full bg-white dark:bg-slate-900/50 border border-[#E5E7EB] dark:border-slate-800 text-[#111827] dark:text-slate-200 placeholder-[#9CA3AF] dark:placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-accent-500/50 focus:border-accent-500/50",
+            compact ? "text-sm py-1.5 px-2" : "text-lg font-semibold py-2 px-3 pr-12"
           )}
           placeholder="0.000"
           aria-label="Tolerance value"
         />
         {!showUnitSelector && !compact && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] dark:text-slate-500 text-sm">
             {unit}
           </span>
         )}
@@ -190,13 +190,13 @@ export function ToleranceInput({
           value={unit}
           onChange={(e) => onUnitChange(e.target.value as Unit)}
           className={cn(
-            "bg-slate-800 border border-slate-700 rounded-md font-mono text-slate-300",
-            "hover:border-slate-600 focus:border-accent-500 focus:outline-none",
+            "bg-white dark:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 font-mono text-[#374151] dark:text-slate-300",
+            "hover:border-[#D1D5DB] dark:hover:border-slate-600 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500/50",
             "cursor-pointer appearance-none",
             compact ? "px-2 py-1.5 text-xs w-14" : "px-3 py-2 text-sm w-16"
           )}
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right 4px center',
             backgroundSize: '16px',
@@ -223,14 +223,14 @@ export function ToleranceInput({
                 })
               }
               className={cn(
-                "flex items-center justify-center rounded-md border font-mono",
+                "flex items-center justify-center border font-mono",
                 "transition-all duration-200",
                 compact ? "w-9 h-7 text-xs" : "w-10 h-8 text-sm",
                 value.materialCondition === mc
                   ? mc === "MMC"
-                    ? "bg-amber-500/20 border-amber-500 text-amber-400"
-                    : "bg-cyan-500/20 border-cyan-500 text-cyan-400"
-                  : "bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600"
+                    ? "bg-amber-500/20 border-amber-500 text-amber-500"
+                    : "bg-cyan-500/20 border-cyan-500 text-cyan-500"
+                  : "bg-white dark:bg-slate-800 border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-500 hover:border-[#D1D5DB] dark:hover:border-slate-600"
               )}
               aria-pressed={value.materialCondition === mc}
               aria-label={mc === "MMC" ? "Maximum Material Condition" : "Least Material Condition"}

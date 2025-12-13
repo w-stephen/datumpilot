@@ -9,18 +9,12 @@ interface AppShellProps {
 
 export default function AppShell({ children }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F5] via-[#F3F3F3] to-[#EDEDED] dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      {/* Subtle accent gradient blobs for glassmorphism depth - light mode only */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden dark:hidden">
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-accent-500/[0.03] rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-primary-500/[0.02] rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-[#F5F7FA] dark:bg-slate-950">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main content area - offset by sidebar width */}
-      <div className="pl-64 transition-all duration-300 relative z-10">
+      <div className="pl-64 transition-all duration-300">
         {/* Top navigation */}
         <TopNav />
 

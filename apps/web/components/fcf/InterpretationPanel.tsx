@@ -47,25 +47,25 @@ function SubPanel({
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
-    <div className="border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
+    <div className="border border-[#E5E7EB] dark:border-slate-800 bg-[#F9FAFB] dark:bg-slate-900/30">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-100/50 dark:hover:bg-slate-800/30 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/30 transition-colors"
       >
-        <span className="font-mono text-[10px] text-slate-500 tracking-widest">
+        <span className="font-mono text-xs text-[#6B7280] dark:text-slate-500 tracking-widest">
           {label}
         </span>
         <div className="flex items-center gap-2">
           {headerRight}
           {expanded ? (
-            <ChevronUp className="w-3 h-3 text-slate-500" />
+            <ChevronUp className="w-3.5 h-3.5 text-[#6B7280] dark:text-slate-500" />
           ) : (
-            <ChevronDown className="w-3 h-3 text-slate-500" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#6B7280] dark:text-slate-500" />
           )}
         </div>
       </button>
       {expanded && (
-        <div className="border-t border-slate-200/50 dark:border-slate-800/50">
+        <div className="border-t border-[#E5E7EB] dark:border-slate-800/50">
           {children}
         </div>
       )}
@@ -183,21 +183,21 @@ export default function InterpretationPanel({
   return (
     <div
       className={cn(
-        "relative bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 backdrop-blur-sm",
+        "relative bg-white dark:bg-slate-900/60 border border-[#E5E7EB] dark:border-slate-800",
         className
       )}
     >
       {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-accent-500/50" />
-      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-accent-500/50" />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-accent-500/50" />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-accent-500/50" />
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D1D5DB] dark:border-accent-500/50" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D1D5DB] dark:border-accent-500/50" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D1D5DB] dark:border-accent-500/50" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D1D5DB] dark:border-accent-500/50" />
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200/50 dark:border-slate-800/50">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB] dark:border-slate-800/50">
         <div className="flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-accent-500" />
-          <span className="font-mono text-xs text-slate-600 dark:text-slate-300 tracking-wide">
+          <span className="font-mono text-sm text-[#374151] dark:text-slate-300 tracking-wide">
             FCF INTERPRETATION
           </span>
         </div>
@@ -205,7 +205,7 @@ export default function InterpretationPanel({
           {result && (
             <span
               className={cn(
-                "font-mono text-[10px] px-2 py-0.5 border",
+                "font-mono text-xs px-2 py-0.5 border",
                 result.confidence === "high"
                   ? "text-accent-500 border-accent-500/30 bg-accent-500/10"
                   : result.confidence === "medium"
@@ -219,9 +219,9 @@ export default function InterpretationPanel({
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1 hover:bg-[#F3F4F6] dark:hover:bg-slate-800 transition-colors"
             >
-              <X className="w-4 h-4 text-slate-500" />
+              <X className="w-4 h-4 text-[#6B7280] dark:text-slate-500" />
             </button>
           )}
         </div>
@@ -232,13 +232,13 @@ export default function InterpretationPanel({
         {/* Initial state - show interpret button */}
         {!hasInterpreted && !isLoading && (
           <div className="text-center py-8">
-            <div className="w-16 h-16 border border-slate-200 dark:border-slate-800 mx-auto mb-4 flex items-center justify-center">
+            <div className="w-16 h-16 border border-[#E5E7EB] dark:border-slate-800 mx-auto mb-4 flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-accent-500" />
             </div>
-            <h3 className="font-mono text-sm text-slate-600 dark:text-slate-300 mb-2">
+            <h3 className="font-mono text-sm text-[#374151] dark:text-slate-300 mb-2">
               READY TO INTERPRET
             </h3>
-            <p className="font-mono text-xs text-slate-500 max-w-xs mx-auto mb-6">
+            <p className="font-mono text-sm text-[#6B7280] dark:text-slate-500 max-w-xs mx-auto mb-6">
               Get AI-powered validation, calculations, and detailed explanations for this FCF.
             </p>
             <button
@@ -258,14 +258,14 @@ export default function InterpretationPanel({
         {/* Loading state */}
         {isLoading && (
           <div className="text-center py-8">
-            <div className="w-16 h-16 border border-slate-200 dark:border-slate-800 mx-auto mb-4 flex items-center justify-center relative">
+            <div className="w-16 h-16 border border-[#E5E7EB] dark:border-slate-800 mx-auto mb-4 flex items-center justify-center relative">
               <div className="absolute inset-2 border border-accent-500/30 animate-pulse" />
               <RefreshCw className="w-6 h-6 text-accent-500 animate-spin" />
             </div>
-            <h3 className="font-mono text-sm text-slate-600 dark:text-slate-300 mb-2">
+            <h3 className="font-mono text-sm text-[#374151] dark:text-slate-300 mb-2">
               ANALYZING FCF
             </h3>
-            <p className="font-mono text-xs text-slate-500">
+            <p className="font-mono text-sm text-[#6B7280] dark:text-slate-500">
               Running validation, calculations, and AI analysis...
             </p>
             <div className="flex items-center justify-center gap-1 mt-4">
@@ -285,16 +285,16 @@ export default function InterpretationPanel({
           <div className="p-4 bg-error-500/10 border border-error-500/30">
             <div className="flex items-center gap-2 mb-2">
               <AlertCircle className="w-4 h-4 text-error-500" />
-              <span className="font-mono text-xs text-error-400 font-semibold">
+              <span className="font-mono text-sm text-error-500 font-semibold">
                 INTERPRETATION FAILED
               </span>
             </div>
-            <p className="font-mono text-xs text-error-400/80">{error}</p>
+            <p className="font-mono text-sm text-error-400">{error}</p>
             <button
               onClick={handleInterpret}
-              className="mt-3 flex items-center gap-2 px-3 py-1.5 border border-error-500/30 text-error-400 font-mono text-xs hover:bg-error-500/10 transition-colors"
+              className="mt-3 flex items-center gap-2 px-3 py-2 border border-error-500/30 text-error-500 font-mono text-xs hover:bg-error-500/10 transition-colors"
             >
-              <RefreshCw className="w-3 h-3" />
+              <RefreshCw className="w-3.5 h-3.5" />
               RETRY
             </button>
           </div>
@@ -310,15 +310,15 @@ export default function InterpretationPanel({
                 <div className="flex items-center gap-1.5">
                   {result.validation.valid ? (
                     <>
-                      <CheckCircle2 className="w-3 h-3 text-accent-500" />
-                      <span className="font-mono text-[10px] text-accent-500">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-accent-500" />
+                      <span className="font-mono text-xs text-accent-500">
                         VALID
                       </span>
                     </>
                   ) : (
                     <>
-                      <AlertCircle className="w-3 h-3 text-error-500" />
-                      <span className="font-mono text-[10px] text-error-500">
+                      <AlertCircle className="w-3.5 h-3.5 text-error-500" />
+                      <span className="font-mono text-xs text-error-500">
                         {result.validation.summary.errorCount} ERROR
                         {result.validation.summary.errorCount !== 1 ? "S" : ""}
                       </span>
@@ -336,7 +336,7 @@ export default function InterpretationPanel({
                 ) : (
                   <div className="flex items-center gap-2 text-accent-500">
                     <Shield className="w-4 h-4" />
-                    <span className="font-mono text-xs">
+                    <span className="font-mono text-sm">
                       ASME Y14.5-2018 compliant
                     </span>
                   </div>
@@ -349,35 +349,35 @@ export default function InterpretationPanel({
               <SubPanel
                 label="CALCULATIONS"
                 headerRight={
-                  <Calculator className="w-3 h-3 text-slate-500" />
+                  <Calculator className="w-3.5 h-3.5 text-[#6B7280] dark:text-slate-500" />
                 }
               >
                 <div className="p-3 space-y-2">
                   {calculations.map((calc, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-3 bg-white/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800"
+                      className="flex items-center justify-between p-3 bg-white dark:bg-slate-950/50 border border-[#E5E7EB] dark:border-slate-800"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] text-slate-400">
+                          <span className="font-mono text-xs text-[#9CA3AF] dark:text-slate-400">
                             {String(index + 1).padStart(2, "0")}
                           </span>
-                          <span className="font-mono text-xs text-slate-700 dark:text-slate-200">
+                          <span className="font-mono text-sm text-[#374151] dark:text-slate-200">
                             {calc.name.toUpperCase()}
                           </span>
                         </div>
                         {calc.description && (
-                          <p className="font-mono text-[10px] text-slate-500 mt-1 ml-6">
+                          <p className="font-mono text-xs text-[#6B7280] dark:text-slate-500 mt-1 ml-6">
                             {calc.description}
                           </p>
                         )}
                       </div>
                       <div className="text-right">
-                        <span className="font-mono text-sm font-bold text-accent-500">
+                        <span className="font-mono text-base font-bold text-accent-500">
                           {calc.value.toFixed(3)}
                         </span>
-                        <span className="font-mono text-[10px] text-slate-500 ml-1">
+                        <span className="font-mono text-xs text-[#6B7280] dark:text-slate-500 ml-1">
                           {calc.unit}
                         </span>
                       </div>
@@ -393,15 +393,15 @@ export default function InterpretationPanel({
                 label="AI EXPLANATION"
                 headerRight={
                   <div className="flex items-center gap-1.5">
-                    <Sparkles className="w-3 h-3 text-purple-400" />
-                    <span className="font-mono text-[10px] text-slate-500">
-                      GPT-5.1
+                    <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                    <span className="font-mono text-xs text-[#6B7280] dark:text-slate-500">
+                      CLAUDE
                     </span>
                   </div>
                 }
               >
                 <div className="p-4">
-                  <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap font-mono">
+                  <div className="text-sm text-[#374151] dark:text-slate-300 leading-relaxed whitespace-pre-wrap font-mono">
                     {result.explanation.explanation
                       .split("**")
                       .map((part, i) =>
@@ -417,14 +417,14 @@ export default function InterpretationPanel({
                   {result.explanation.warnings &&
                     result.explanation.warnings.length > 0 && (
                       <div className="mt-4 p-3 bg-warning-500/10 border border-warning-500/20">
-                        <span className="font-mono text-[10px] text-warning-500 tracking-widest">
+                        <span className="font-mono text-xs text-warning-500 tracking-widest">
                           NOTES
                         </span>
                         <ul className="mt-2 space-y-1">
                           {result.explanation.warnings.map((warning, i) => (
                             <li
                               key={i}
-                              className="font-mono text-xs text-warning-400"
+                              className="font-mono text-sm text-warning-500"
                             >
                               {warning}
                             </li>
@@ -440,9 +440,9 @@ export default function InterpretationPanel({
             <div className="flex justify-center pt-2">
               <button
                 onClick={handleInterpret}
-                className="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-mono text-xs hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-400 font-mono text-xs hover:border-[#D1D5DB] dark:hover:border-slate-600 hover:text-[#374151] dark:hover:text-slate-300 transition-colors"
               >
-                <RefreshCw className="w-3 h-3" />
+                <RefreshCw className="w-3.5 h-3.5" />
                 RE-INTERPRET
               </button>
             </div>

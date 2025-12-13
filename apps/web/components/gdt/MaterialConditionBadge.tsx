@@ -16,7 +16,7 @@ interface MaterialConditionBadgeProps {
 }
 
 const sizeClasses = {
-  xs: "h-4 px-1 text-[10px]",
+  xs: "h-5 px-1 text-xs",
   sm: "h-5 px-1.5 text-xs",
   md: "h-6 px-2 text-sm",
   lg: "h-7 px-2.5 text-base",
@@ -25,18 +25,18 @@ const sizeClasses = {
 const conditionStyles: Record<MaterialConditionSymbol, { bg: string; text: string; border: string }> = {
   MMC: {
     bg: "bg-amber-500/10",
-    text: "text-amber-400",
-    border: "border-amber-500/20",
+    text: "text-amber-500",
+    border: "border-amber-500/30",
   },
   LMC: {
     bg: "bg-cyan-500/10",
-    text: "text-cyan-400",
-    border: "border-cyan-500/20",
+    text: "text-cyan-500",
+    border: "border-cyan-500/30",
   },
   RFS: {
-    bg: "bg-slate-700/50",
-    text: "text-slate-400",
-    border: "border-slate-600",
+    bg: "bg-[#F3F4F6] dark:bg-slate-700/50",
+    text: "text-[#6B7280] dark:text-slate-400",
+    border: "border-[#D1D5DB] dark:border-slate-600",
   },
 };
 
@@ -120,12 +120,12 @@ export function MaterialConditionSelector({
             onClick={() => onChange(isSelected ? undefined : condition)}
             className={cn(
               "inline-flex items-center justify-center",
-              "rounded font-mono font-medium border",
+              "font-mono font-medium border",
               "transition-all duration-200",
               sizeClasses[size],
               isSelected
                 ? [styles.bg, styles.text, styles.border]
-                : "bg-slate-800 text-slate-500 border-slate-700 hover:border-slate-600 hover:text-slate-400"
+                : "bg-white dark:bg-slate-800 text-[#6B7280] dark:text-slate-500 border-[#E5E7EB] dark:border-slate-700 hover:border-[#D1D5DB] dark:hover:border-slate-600 hover:text-[#374151] dark:hover:text-slate-400"
             )}
             aria-pressed={isSelected}
             aria-label={MATERIAL_CONDITION_LABELS[condition]}

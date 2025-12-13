@@ -18,15 +18,15 @@ const severityConfig = {
     icon: AlertCircle,
     bgClass: "bg-error-500/10",
     borderClass: "border-error-500/20",
-    textClass: "text-error-400",
-    codeClass: "bg-error-500/20 text-error-400",
+    textClass: "text-error-500",
+    codeClass: "bg-error-500/20 text-error-500",
   },
   warning: {
     icon: AlertTriangle,
     bgClass: "bg-warning-500/10",
     borderClass: "border-warning-500/20",
-    textClass: "text-warning-400",
-    codeClass: "bg-warning-500/20 text-warning-400",
+    textClass: "text-warning-500",
+    codeClass: "bg-warning-500/20 text-warning-500",
   },
 };
 
@@ -73,7 +73,7 @@ export default function ValidationMessage({
 
         {/* Path (field location) */}
         {issue.path && (
-          <p className="text-xs text-slate-500 mt-1 font-mono">
+          <p className="text-xs text-[#6B7280] dark:text-slate-500 mt-1 font-mono">
             at: {issue.path}
           </p>
         )}
@@ -83,7 +83,7 @@ export default function ValidationMessage({
           <div className="mt-2">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-300 transition-colors"
+              className="flex items-center gap-1 text-xs text-[#6B7280] dark:text-slate-400 hover:text-[#374151] dark:hover:text-slate-300 transition-colors"
             >
               {expanded ? (
                 <ChevronUp className="w-3 h-3" />
@@ -93,9 +93,9 @@ export default function ValidationMessage({
               {expanded ? "Hide suggestion" : "Show suggestion"}
             </button>
             {expanded && (
-              <div className="mt-2 p-2 rounded bg-slate-800/50 border border-slate-700">
-                <p className="text-xs text-slate-300">
-                  <Info className="w-3 h-3 inline mr-1 text-primary-400" />
+              <div className="mt-2 p-2 bg-[#F9FAFB] dark:bg-slate-800/50 border border-[#E5E7EB] dark:border-slate-700">
+                <p className="text-sm text-[#374151] dark:text-slate-300">
+                  <Info className="w-3.5 h-3.5 inline mr-1 text-primary-500" />
                   {issue.context.suggestion}
                 </p>
               </div>
@@ -108,10 +108,10 @@ export default function ValidationMessage({
       {dismissable && onDismiss && (
         <button
           onClick={onDismiss}
-          className="p-1 rounded hover:bg-slate-700/50 transition-colors"
+          className="p-1 hover:bg-[#F3F4F6] dark:hover:bg-slate-700/50 transition-colors"
           aria-label="Dismiss"
         >
-          <X className="w-4 h-4 text-slate-500" />
+          <X className="w-4 h-4 text-[#6B7280] dark:text-slate-500" />
         </button>
       )}
     </div>
@@ -141,7 +141,7 @@ export function ValidationPanel({
   const isValid = errors.length === 0;
 
   return (
-    <div className={cn("rounded-lg border overflow-hidden", className)}>
+    <div className={cn("border overflow-hidden", className)}>
       {/* Header */}
       <button
         onClick={() => collapsible && setExpanded(!expanded)}
@@ -151,7 +151,7 @@ export function ValidationPanel({
           isValid
             ? "bg-success-500/10 border-b border-success-500/20"
             : "bg-error-500/10 border-b border-error-500/20",
-          collapsible && "cursor-pointer hover:bg-slate-800/50"
+          collapsible && "cursor-pointer hover:bg-[#F3F4F6] dark:hover:bg-slate-800/50"
         )}
         disabled={!collapsible}
       >
@@ -161,32 +161,32 @@ export function ValidationPanel({
           ) : (
             <AlertCircle className="w-5 h-5 text-error-500" />
           )}
-          <span className="font-medium text-slate-200">{title}</span>
+          <span className="font-medium text-[#111827] dark:text-slate-200">{title}</span>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Counts */}
           <div className="flex items-center gap-2 text-sm">
             {errors.length > 0 && (
-              <span className="text-error-400">
+              <span className="text-error-500">
                 {errors.length} error{errors.length !== 1 ? "s" : ""}
               </span>
             )}
             {warnings.length > 0 && (
-              <span className="text-warning-400">
+              <span className="text-warning-500">
                 {warnings.length} warning{warnings.length !== 1 ? "s" : ""}
               </span>
             )}
             {isValid && warnings.length === 0 && (
-              <span className="text-success-400">Valid</span>
+              <span className="text-success-500">Valid</span>
             )}
           </div>
 
           {collapsible && (
             expanded ? (
-              <ChevronUp className="w-4 h-4 text-slate-400" />
+              <ChevronUp className="w-4 h-4 text-[#6B7280] dark:text-slate-400" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-[#6B7280] dark:text-slate-400" />
             )
           )}
         </div>
@@ -194,7 +194,7 @@ export function ValidationPanel({
 
       {/* Issues list */}
       {expanded && issues.length > 0 && (
-        <div className="p-4 space-y-3 bg-slate-900/50">
+        <div className="p-4 space-y-3 bg-[#F9FAFB] dark:bg-slate-900/50">
           {errors.map((issue, index) => (
             <ValidationMessage key={`error-${index}`} issue={issue} />
           ))}
@@ -206,9 +206,9 @@ export function ValidationPanel({
 
       {/* Empty state */}
       {expanded && issues.length === 0 && (
-        <div className="p-6 text-center bg-slate-900/50">
+        <div className="p-6 text-center bg-[#F9FAFB] dark:bg-slate-900/50">
           <CheckCircle2 className="w-8 h-8 text-success-500 mx-auto mb-2" />
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[#6B7280] dark:text-slate-400">
             No validation issues found
           </p>
         </div>

@@ -22,10 +22,10 @@ const sizeClasses = {
 };
 
 const variantClasses = {
-  default: "bg-slate-800 border-slate-600 text-accent-500",
-  primary: "bg-primary-500/10 border-primary-500/30 text-primary-400",
-  secondary: "bg-accent-500/10 border-accent-500/30 text-accent-400",
-  tertiary: "bg-slate-700/50 border-slate-600 text-slate-300",
+  default: "bg-[#F9FAFB] dark:bg-slate-800 border-[#E5E7EB] dark:border-slate-600 text-accent-500",
+  primary: "bg-primary-500/10 border-primary-500/30 text-primary-500",
+  secondary: "bg-accent-500/10 border-accent-500/30 text-accent-500",
+  tertiary: "bg-[#F3F4F6] dark:bg-slate-700/50 border-[#D1D5DB] dark:border-slate-600 text-[#374151] dark:text-slate-300",
 };
 
 export default function DatumBadge({
@@ -67,7 +67,7 @@ export default function DatumBadge({
             e.stopPropagation();
             onRemove();
           }}
-          className="ml-0.5 p-0.5 rounded hover:bg-slate-700 transition-colors"
+          className="ml-0.5 p-0.5 hover:bg-[#E5E7EB] dark:hover:bg-slate-700 transition-colors"
           aria-label={`Remove datum ${datum.id}`}
         >
           <X className="w-3 h-3" />
@@ -95,7 +95,7 @@ export function DatumList({
 }) {
   if (datums.length === 0) {
     return (
-      <span className="text-sm text-slate-500 italic">
+      <span className="text-sm text-[#6B7280] dark:text-slate-500 italic">
         No datum references
       </span>
     );
@@ -105,7 +105,7 @@ export function DatumList({
     <div className={cn("flex items-center gap-1", className)}>
       {datums.map((datum, index) => (
         <div key={`${datum.id}-${index}`} className="flex items-center">
-          {index > 0 && <span className="mx-1 text-slate-600">|</span>}
+          {index > 0 && <span className="mx-1 text-[#9CA3AF] dark:text-slate-600">|</span>}
           <DatumBadge
             datum={datum}
             size={size}
@@ -172,13 +172,13 @@ export function DatumSelector({
             disabled={isDisabled}
             className={cn(
               "inline-flex items-center justify-center",
-              "border rounded font-mono font-bold",
+              "border font-mono font-bold",
               "transition-all duration-200",
               compact ? "w-6 h-6 text-xs border" : sizeClasses[effectiveSize],
               !compact && "border-2",
               isSelected
-                ? "bg-accent-500/20 border-accent-500 text-accent-400"
-                : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300",
+                ? "bg-accent-500/20 border-accent-500 text-accent-500"
+                : "bg-white dark:bg-slate-800 border-[#E5E7EB] dark:border-slate-700 text-[#374151] dark:text-slate-400 hover:border-[#D1D5DB] dark:hover:border-slate-600 hover:text-[#111827] dark:hover:text-slate-300",
               isDisabled && "opacity-40 cursor-not-allowed"
             )}
             aria-pressed={isSelected}
