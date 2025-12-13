@@ -1,0 +1,219 @@
+---
+title: "Getting Started with DatumPilot"
+description: "Learn how to create your account, navigate the dashboard, and build your first Feature Control Frame in DatumPilot."
+lastUpdated: "2025-01-15"
+category: "support"
+order: 1
+---
+
+# Getting Started with DatumPilot
+
+## What is DatumPilot?
+
+DatumPilot is a web-based application for building GD&T (Geometric Dimensioning and Tolerancing) Feature Control Frames and performing tolerance stack-up analysis. The platform validates your inputs against ASME Y14.5-2018 standards in real-time, catching errors before they reach your drawings.
+
+DatumPilot serves mechanical engineers, quality engineers, manufacturing engineers, and design engineers across automotive, aerospace, medical device, and general manufacturing industries. Whether you're defining part tolerances or analyzing assembly stack-ups, DatumPilot streamlines workflows that traditionally require manual calculations or expensive CAD add-ons.
+
+## Creating Your Account
+
+### Sign Up Options
+
+DatumPilot offers multiple ways to create an account:
+
+- **Google OAuth**: Sign in with your Google account for one-click access
+- **GitHub OAuth**: Connect with your GitHub credentials
+- **Magic Link**: Enter your email address to receive a passwordless login link
+
+{/* Screenshot: signup-options.png */}
+{/* Alt: Sign up page showing Google, GitHub, and magic link options */}
+
+### First Login
+
+After signing up:
+
+1. You'll receive a verification email if using magic link authentication
+2. Click the verification link to confirm your email address
+3. On first login, you'll land on your Dashboard with a welcome message
+4. Your account starts on the **Free** plan with full access to core features
+
+## Understanding the Dashboard
+
+The Dashboard is your central hub for managing GD&T work.
+
+{/* Screenshot: dashboard-overview.png */}
+{/* Alt: Dashboard showing projects list, quick actions, and recent activity */}
+
+### Projects Overview
+
+Projects organize your FCFs and stack-up analyses into logical groups. Each project card displays:
+
+- Project name and description
+- Count of FCFs and stack-ups contained
+- Last modified date
+- Quick access to open or edit
+
+### Quick Actions
+
+The top of your Dashboard provides shortcuts:
+
+- **New FCF**: Jump directly to the FCF Builder
+- **New Stack-up**: Start a tolerance stack-up analysis
+- **New Project**: Create a project to organize your work
+
+### Recent Activity
+
+The activity feed shows your latest actions:
+
+- FCFs created or modified
+- Stack-up analyses run
+- Projects updated
+
+### Navigation Sidebar
+
+Access all application areas from the sidebar:
+
+| Item | Description |
+|------|-------------|
+| **Dashboard** | Overview of projects and recent activity |
+| **FCF Builder** | Create and edit Feature Control Frames |
+| **Stack-up Analysis** | Perform tolerance stack-up calculations |
+| **Projects** | Manage all your projects |
+| **Settings** | Account preferences, billing, and display options |
+
+## Your First Project
+
+### Why Use Projects?
+
+Projects group related FCFs and stack-up analyses together. Common project structures include:
+
+- One project per part (all FCFs for a single component)
+- One project per assembly (all analyses for a system)
+- One project per drawing revision (version tracking)
+
+### Creating a Project
+
+1. Click **New Project** from the Dashboard or Projects page
+2. Enter a **Project Name** (e.g., "Housing Assembly Rev C")
+3. Add an optional **Description** explaining the project scope
+4. Click **Create Project**
+
+{/* Screenshot: create-project-dialog.png */}
+{/* Alt: New project dialog with name and description fields */}
+
+Your project is now ready to contain FCFs and stack-up analyses.
+
+## Quick Start: Build Your First FCF
+
+Follow these steps to create your first Feature Control Frame:
+
+### Step 1: Navigate to FCF Builder
+
+Click **FCF Builder** in the sidebar or use the **New FCF** quick action.
+
+{/* Screenshot: fcf-builder-empty.png */}
+{/* Alt: FCF Builder interface with characteristic selection grid */}
+
+### Step 2: Select a Characteristic
+
+Click on a GD&T characteristic symbol. For this example, select **Position** (the most common tolerance type).
+
+The builder updates to show options specific to Position tolerances.
+
+### Step 3: Set Tolerance Value
+
+Enter your tolerance value in the **Tolerance** field. For example: `0.25`
+
+The unit (mm or inch) follows your account settings.
+
+### Step 4: Add Datum References
+
+Position requires at least one datum reference:
+
+1. Select your **Primary Datum** (e.g., "A")
+2. Optionally add **Secondary** and **Tertiary** datums
+3. Set material boundary modifiers if applicable (MMB, LMB, or RFS)
+
+### Step 5: Preview the FCF
+
+The live preview panel shows your Feature Control Frame as it will appear on a drawing. Verify:
+
+- Correct characteristic symbol
+- Proper tolerance value and any diameter symbol
+- Datum references in the right order
+- No validation errors (shown in red)
+
+{/* Screenshot: fcf-preview-complete.png */}
+{/* Alt: FCF Builder showing completed Position FCF with live preview */}
+
+### Step 6: Save to Project
+
+1. Click **Save FCF**
+2. Select the destination project (or create a new one)
+3. Enter a descriptive name (e.g., "Mounting Hole Position")
+4. Click **Save**
+
+Your FCF is now stored and can be exported or edited later.
+
+## Understanding Your Plan
+
+### Free Plan
+
+Your Free account includes:
+
+- **2 Projects** to organize your work
+- **10 FCFs** for Feature Control Frame definitions
+- **5 Stack-ups** for tolerance analysis
+- **Text/JSON Export** for data portability
+
+Free accounts have access to all builder features, real-time validation, and calculation engines.
+
+### When to Upgrade
+
+Consider upgrading to **Pro** ($29/month) when you need:
+
+- **Visual Exports**: PNG, SVG, and PDF formats for drawings and reports
+- **AI Explanations**: Plain-language interpretation of your FCFs
+- **More Capacity**: 20 projects, 500 FCFs, 100 stack-ups
+
+**Team** ($99/month) adds unlimited capacity, team collaboration features, and priority support.
+
+To manage your subscription, go to **Settings > Billing**.
+
+## Getting Help
+
+### In-App Documentation
+
+You're reading it. The Support section covers:
+
+- [FCF Builder Guide](/support/fcf-builder-guide): Comprehensive builder reference
+- [Stack-up Guide](/support/stack-up-guide): Tolerance analysis workflows
+
+### Contact Support
+
+For account issues or technical problems:
+
+- Email: support@datumpilot.com
+- Response time: Within 24 hours (priority for Team plans)
+
+### Feedback
+
+Help improve DatumPilot:
+
+- Use the **Feedback** button in the app footer
+- Report bugs or request features
+- Share workflow suggestions
+
+We read every submission and prioritize based on user impact.
+
+---
+
+## Next Steps
+
+Now that you understand the basics:
+
+1. **Create a project** for your current work
+2. **Build a few FCFs** to get comfortable with the builder
+3. **Try a stack-up analysis** on an assembly you're designing
+4. **Explore Settings** to customize units and display preferences
+
+For detailed guidance on the FCF Builder, continue to the [FCF Builder Guide](/support/fcf-builder-guide).

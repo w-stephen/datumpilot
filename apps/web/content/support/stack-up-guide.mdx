@@ -1,0 +1,503 @@
+---
+title: "Stack-up Analysis Guide"
+description: "Complete guide to performing tolerance stack-up analysis in DatumPilot, including Worst-Case, RSS, and Six Sigma methods."
+lastUpdated: "2025-01-15"
+category: "support"
+order: 3
+---
+
+# Stack-up Analysis Guide
+
+## What is Tolerance Stack-up Analysis?
+
+Tolerance stack-up analysis predicts how individual part tolerances combine to affect assembly dimensions. When multiple toleranced features contribute to a gap, clearance, or critical dimension, their variations accumulate—sometimes in ways that cause assembly problems.
+
+{/* Screenshot: stackup-concept-diagram.png */}
+{/* Alt: Diagram showing how individual part tolerances combine into total assembly variation */}
+
+### Why It Matters
+
+Stack-up analysis answers critical questions:
+
+- Will these parts always assemble?
+- What's the worst-case gap or interference?
+- Which tolerances contribute most to variation?
+- Can we loosen tolerances without risking failure?
+
+### Common Applications
+
+| Application | Question Answered |
+|-------------|-------------------|
+| **Gap Analysis** | What's the minimum/maximum gap between parts? |
+| **Interference Check** | Will parts interfere at tolerance extremes? |
+| **Clearance Verification** | Is there enough clearance for fasteners/seals? |
+| **Critical Dimension** | Will the assembly meet spec? |
+
+## Analysis Methods Explained
+
+DatumPilot supports three analysis methods. Each balances conservatism against practicality.
+
+### Worst-Case (Arithmetic)
+
+The Worst-Case method assumes all tolerances simultaneously reach their extreme values.
+
+**How it works**: Tolerances are added arithmetically. If you have three tolerances of ±0.1, the total is ±0.3.
+
+**Result**: Guarantees 100% assembly success if parts are within tolerance.
+
+**When to use**:
+- Safety-critical assemblies (aerospace, medical, automotive safety)
+- Low-volume production where statistical assumptions don't apply
+- Few contributors (typically 4 or fewer dimensions)
+- Customer requirements specify worst-case analysis
+
+**Trade-off**: Most conservative method. May force unnecessarily tight tolerances on individual parts.
+
+### RSS (Root Sum Square)
+
+The RSS method assumes tolerances follow normal distributions and combines them statistically.
+
+**How it works**: Tolerances are squared, summed, and square-rooted. For three tolerances of ±0.1: √(0.1² + 0.1² + 0.1²) = ±0.173.
+
+**Result**: Approximately 99.73% assembly success (3-sigma).
+
+**When to use**:
+- High-volume production with stable processes
+- Assemblies with many contributors (>4 dimensions)
+- Manufacturing processes known to be normally distributed
+- Cost-sensitive designs where worst-case is overly conservative
+
+**Benefit**: Typically allows 30-40% looser tolerances than worst-case for assemblies with many contributors.
+
+### Six Sigma
+
+The Six Sigma method uses actual process capability data (Cp/Cpk values) for each dimension.
+
+**How it works**: Each dimension's contribution is weighted by its process capability. Better-controlled processes contribute less variation.
+
+**Result**: Most realistic prediction when process data is available.
+
+**When to use**:
+- Complex assemblies with known manufacturing data
+- Process improvement initiatives
+- Supplier quality analysis
+- Mature production environments with Cp/Cpk data
+
+**Input required**: Process capability values (Cp or Cpk) for each dimension.
+
+### Method Comparison Summary
+
+| Method | Confidence | Tolerance Impact | Data Required |
+|--------|------------|------------------|---------------|
+| Worst-Case | 100% | Tightest | None |
+| RSS | ~99.73% | ~30% looser | None |
+| Six Sigma | Customizable | Most realistic | Process capability |
+
+## Creating a Stack-up Analysis
+
+Follow these steps to set up a tolerance stack-up.
+
+{/* Screenshot: new-stackup-dialog.png */}
+{/* Alt: New stack-up analysis creation dialog */}
+
+### Step 1: Name and Describe
+
+Give your analysis a clear name and description:
+
+- **Name**: "Housing-to-Cover Gap Analysis"
+- **Description**: "Verifies seal gap at interface remains within 0.5-1.5mm"
+
+Good descriptions help when revisiting analyses months later.
+
+### Step 2: Define Measurement Objective
+
+Specify what dimension you're analyzing:
+
+- The closing dimension (gap, clearance, or critical measurement)
+- What you're measuring: distance between two surfaces, clearance around a fastener, etc.
+
+### Step 3: Set Acceptance Criteria
+
+Define pass/fail limits:
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **Minimum** | Lower acceptable limit | 0.5 mm (minimum gap for seal) |
+| **Maximum** | Upper acceptable limit | 1.5 mm (maximum gap before rattle) |
+
+The calculator compares results against these limits.
+
+### Step 4: Choose Positive Direction
+
+Select the direction convention for your loop:
+
+| Option | Use When |
+|--------|----------|
+| **Left-to-right** | Horizontal loops, measuring rightward |
+| **Right-to-left** | Horizontal loops, measuring leftward |
+| **Bottom-to-top** | Vertical loops, measuring upward |
+| **Top-to-bottom** | Vertical loops, measuring downward |
+
+This sets context for sign assignment.
+
+### Step 5: Select Analysis Method
+
+Choose Worst-Case, RSS, or Six Sigma based on your requirements (see [Analysis Methods](#analysis-methods-explained)).
+
+### Step 6: Choose Units
+
+Select mm or inch. All dimensions must use the same unit.
+
+**Note**: Unit conversions are not automatic. Enter all values in the selected unit.
+
+## Sign Convention
+
+Correctly assigning positive and negative signs is critical for accurate results.
+
+{/* Screenshot: sign-convention-diagram.png */}
+{/* Alt: Diagram showing positive and negative dimension assignment */}
+
+### The Fundamental Rules
+
+**A dimension is POSITIVE if**:
+- Increasing the dimension INCREASES the closing dimension (gap)
+
+**A dimension is NEGATIVE if**:
+- Increasing the dimension DECREASES the closing dimension (gap)
+
+### Verification Method
+
+After assigning signs, verify your loop:
+
+1. Sum all nominal values with their signs
+2. The result should equal your expected closing dimension
+
+**Example**:
+- Part A thickness: +10.0 mm
+- Gap: closing dimension
+- Part B thickness: -8.0 mm
+- Housing width: +20.0 mm
+
+Sum: +10.0 - 8.0 + 20.0 = 22.0? That doesn't represent a gap.
+
+Corrected thinking: For a gap between Part A and Part B inside a housing:
+- Housing inside width: +20.0 mm (positive—increasing it increases gap)
+- Part A thickness: -10.0 mm (negative—increasing it decreases gap)
+- Part B thickness: -8.0 mm (negative—increasing it decreases gap)
+
+Sum: +20.0 - 10.0 - 8.0 = 2.0 mm gap ✓
+
+### Common Mistakes
+
+| Mistake | Consequence | Prevention |
+|---------|-------------|------------|
+| All dimensions positive | Grossly overestimated total | Sketch the loop first |
+| Wrong sign on one dimension | Incorrect nominal | Verify sum equals expected |
+| Inconsistent direction | Random errors | Pick one direction, stick with it |
+
+## Adding Dimensions
+
+Click **Add Dimension** to enter each contributor to your stack-up.
+
+{/* Screenshot: add-dimension-form.png */}
+{/* Alt: Dimension entry form showing all fields */}
+
+### Required Fields
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **Name** | Descriptive identifier | "Housing Wall Thickness" |
+| **Nominal** | Target dimension value | 5.000 |
+| **Plus Tolerance** | Upper deviation from nominal | 0.100 |
+| **Minus Tolerance** | Lower deviation from nominal | 0.050 |
+| **Sign** | Positive (+) or Negative (-) | + |
+
+### Optional Fields
+
+| Field | Description | When to Use |
+|-------|-------------|-------------|
+| **Sensitivity Coefficient** | Multiplier for contribution (default 1.0) | Lever arms, angle effects |
+| **Process Capability (Cp)** | Manufacturing capability | Six Sigma method only |
+| **Source Drawing** | Drawing number for traceability | Documentation requirements |
+| **Revision** | Drawing revision level | Change control |
+
+### Tolerance Entry Tips
+
+**Symmetric tolerances** (±0.1):
+- Plus Tolerance: 0.1
+- Minus Tolerance: 0.1
+
+**Asymmetric tolerances** (+0.025/-0.000):
+- Plus Tolerance: 0.025
+- Minus Tolerance: 0.000
+
+**One-sided tolerances** (+0.1/-0.0):
+- Plus Tolerance: 0.1
+- Minus Tolerance: 0.0
+
+### Dimension Limits
+
+- **Minimum**: 2 dimensions required for meaningful analysis
+- **Maximum**: 50 dimensions per analysis
+
+## Understanding Results
+
+After entering dimensions and running analysis, the results panel shows:
+
+{/* Screenshot: stackup-results-panel.png */}
+{/* Alt: Results panel showing nominal, tolerance, max, min, and pass/fail status */}
+
+### Key Metrics
+
+| Metric | Description | Calculation |
+|--------|-------------|-------------|
+| **Nominal Result** | Sum of signed nominals | Σ(sign × nominal) |
+| **Total Tolerance** | Combined tolerance per method | Method-dependent |
+| **Maximum Value** | Upper bound of closing dimension | Nominal + Tolerance |
+| **Minimum Value** | Lower bound of closing dimension | Nominal - Tolerance |
+
+### Pass/Fail Determination
+
+| Status | Meaning |
+|--------|---------|
+| **PASS** | Max ≤ Upper Limit AND Min ≥ Lower Limit |
+| **FAIL** | Max > Upper Limit OR Min < Lower Limit |
+
+### Margin Analysis
+
+| Margin | Calculation | Interpretation |
+|--------|-------------|----------------|
+| **Upper Margin** | Upper Limit - Maximum | Positive = room to spare |
+| **Lower Margin** | Minimum - Lower Limit | Positive = room to spare |
+
+Negative margins indicate how much the design exceeds limits.
+
+## Contribution Analysis
+
+The contribution chart shows which dimensions drive the most variation.
+
+{/* Screenshot: contribution-chart.png */}
+{/* Alt: Pareto chart showing dimension contributions to total tolerance */}
+
+### Reading the Chart
+
+- **Bar height**: Percentage contribution to total tolerance
+- **Sort order**: Largest contributors first (Pareto order)
+- **Cumulative line**: Running total of contributions
+
+### The Pareto Principle
+
+Typically, ~80% of variation comes from ~20% of dimensions. Focus improvement efforts on the largest contributors.
+
+### Using Contribution Data
+
+| Contribution | Action |
+|--------------|--------|
+| >30% single dimension | Prime candidate for tolerance tightening |
+| Many small contributors | Statistical methods (RSS) appropriate |
+| One dominant contributor | May need design change, not just tolerance |
+
+### Contribution Calculation
+
+For Worst-Case:
+```
+Contribution % = (dimension tolerance / total tolerance) × 100
+```
+
+For RSS:
+```
+Contribution % = (dimension tolerance² / total tolerance²) × 100
+```
+
+## Comparing Methods
+
+Run the same analysis with different methods to inform design decisions.
+
+{/* Screenshot: method-comparison.png */}
+{/* Alt: Side-by-side comparison of Worst-Case, RSS, and Six Sigma results */}
+
+### Why Compare?
+
+| Scenario | Insight Gained |
+|----------|----------------|
+| RSS passes, Worst-Case fails | Design is marginal—consider safety factor |
+| Large difference between methods | Many contributors present |
+| Six Sigma tighter than RSS | Process capability issues |
+
+### Decision Framework
+
+1. **Start with RSS** for initial design feasibility
+2. **Check Worst-Case** for safety-critical features
+3. **Use Six Sigma** when production process data is available
+
+### Method Selection Guide
+
+| Number of Contributors | Recommended Starting Method |
+|----------------------|----------------------------|
+| 2-4 | Worst-Case (statistical benefit minimal) |
+| 5-10 | RSS (statistical benefit significant) |
+| >10 | RSS or Six Sigma |
+
+## Working with Asymmetric Tolerances
+
+Many real-world tolerances are asymmetric (e.g., +0.025/-0.000).
+
+### How DatumPilot Handles Asymmetric Tolerances
+
+1. **Mean Shift**: The calculator adjusts the nominal to the mean of the tolerance zone
+2. **Half-Tolerance**: Uses half the total range for statistical calculations
+
+**Example**: 50.000 +0.025/-0.000
+- Total range: 0.025
+- Mean shift: +0.0125 from nominal
+- Adjusted nominal: 50.0125
+- Half-tolerance for RSS: 0.0125
+
+### When Asymmetric Tolerances Occur
+
+| Application | Common Asymmetry |
+|-------------|------------------|
+| Clearance fits | +tolerance/-0 (ensure minimum clearance) |
+| Interference fits | +0/-tolerance (ensure minimum interference) |
+| Critical minimums | +tolerance/-0 (guarantee minimum) |
+| Critical maximums | +0/-tolerance (guarantee maximum) |
+
+## Exporting Results
+
+### PDF Report (Pro Feature)
+
+Generate a comprehensive report including:
+
+- Analysis summary
+- Dimension table with all inputs
+- Results for selected method(s)
+- Contribution chart
+- Pass/fail status
+
+### PNG Chart Export
+
+Export the contribution chart for presentations or reports.
+
+### Copy to Clipboard
+
+Copy results in tabular format for pasting into spreadsheets or documents.
+
+### Integration with FCF Exports
+
+Combine FCF definitions with stack-up results for complete tolerance documentation.
+
+## Best Practices
+
+### Before You Start
+
+**Sketch your loop** before entering dimensions:
+
+1. Draw the physical arrangement
+2. Identify start and end points
+3. Mark each contributing dimension
+4. Assign signs based on direction
+5. Verify loop closure
+
+{/* Screenshot: loop-sketch-example.png */}
+{/* Alt: Hand-sketched tolerance loop with dimensions marked */}
+
+### During Entry
+
+**Double-check sign convention**:
+- Does increasing this dimension increase or decrease the gap?
+- Does the sum of nominals equal expected closing dimension?
+
+**Include all contributors**:
+- Don't forget assembly gaps (e.g., weld gaps, adhesive thickness)
+- Consider thermal expansion if applicable
+- Include measurement uncertainty if significant
+
+**Document sources**:
+- Record drawing numbers and revisions
+- Note assumption basis for estimated tolerances
+
+### After Analysis
+
+**Start conservative**:
+- Begin with Worst-Case to understand maximum risk
+- Relax to RSS only if Worst-Case fails and volume justifies statistical approach
+
+**Address largest contributors first**:
+- Tighten tolerances on top 2-3 contributors
+- Consider design changes if tolerances are already tight
+
+**Re-run after changes**:
+- Verify improvements achieve desired result
+- Check that tightened tolerances are manufacturable
+
+## Troubleshooting
+
+### Nominal Doesn't Match Expected
+
+**Symptom**: Calculated nominal ≠ measured/expected closing dimension
+
+**Causes**:
+1. Sign convention error on one or more dimensions
+2. Missing dimension in the loop
+3. Extra dimension included that shouldn't be
+
+**Solution**: Sketch the loop and trace each dimension, verifying signs.
+
+### All Tolerances Show Equal Contribution
+
+**Symptom**: Contribution chart shows nearly equal bars
+
+**Causes**:
+1. All input tolerances are identical
+2. Fewer than 4 dimensions (limited Pareto effect)
+
+**Solution**: This may be correct. Verify input tolerances match drawing specifications.
+
+### Method Comparison Shows Huge Difference
+
+**Symptom**: RSS result is dramatically smaller than Worst-Case
+
+**Cause**: This is normal for analyses with many contributors. RSS benefit increases with contributor count.
+
+**Reference**:
+| Contributors | RSS / Worst-Case Ratio |
+|--------------|----------------------|
+| 4 | ~50% |
+| 9 | ~33% |
+| 16 | ~25% |
+| 25 | ~20% |
+
+### Six Sigma Results Worse Than RSS
+
+**Symptom**: Six Sigma predicts more variation than RSS
+
+**Cause**: Process capability values indicate poor process control (Cp < 1.33)
+
+**Solution**: Either improve manufacturing processes or use actual capability data. Don't default Cp values to 1.0 if processes are better.
+
+### Negative Minimum Result
+
+**Symptom**: Minimum value is negative (indicating interference)
+
+**Cause**: Design doesn't maintain positive gap at tolerance extremes
+
+**Solution**: Either tighten contributing tolerances or adjust nominal dimensions to increase base gap.
+
+---
+
+## Summary Workflow
+
+1. **Define** the closing dimension and acceptance limits
+2. **Sketch** the tolerance loop
+3. **Enter** all contributing dimensions with correct signs
+4. **Verify** nominal sum matches expected
+5. **Analyze** with appropriate method
+6. **Review** contribution chart
+7. **Iterate** on design if needed
+8. **Document** final analysis
+
+## Next Steps
+
+- Return to [Getting Started](/support/getting-started) for navigation basics
+- Review [FCF Builder Guide](/support/fcf-builder-guide) for Feature Control Frame creation
+- Contact support@datumpilot.com for analysis assistance

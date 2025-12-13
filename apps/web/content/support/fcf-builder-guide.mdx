@@ -1,0 +1,453 @@
+---
+title: "FCF Builder Guide"
+description: "Complete guide to building Feature Control Frames in DatumPilot, including characteristic selection, tolerance zones, datum references, and validation."
+lastUpdated: "2025-01-15"
+category: "support"
+order: 2
+---
+
+# FCF Builder Guide
+
+## Overview
+
+The FCF Builder creates Feature Control Frames (FCFs) through a guided, form-based interface. Unlike traditional CAD dialogs that require memorizing symbol sequences, DatumPilot presents options contextually based on your selections and validates against ASME Y14.5-2018 rules in real-time.
+
+{/* Screenshot: fcf-builder-full-interface.png */}
+{/* Alt: Complete FCF Builder interface showing all panels */}
+
+### Key Benefits
+
+- **Live Preview**: See your FCF render as you build it
+- **Real-time Validation**: Catch errors before they reach drawings
+- **Context-Aware Options**: Only valid choices appear based on your selections
+- **Standard Compliance**: Enforces ASME Y14.5-2018 rules automatically
+
+## Characteristic Selection
+
+Select a geometric characteristic to begin building your FCF. Characteristics are organized by category per ASME Y14.5-2018.
+
+{/* Screenshot: characteristic-selection-grid.png */}
+{/* Alt: Grid of GD&T symbols organized by category */}
+
+### Form Controls
+
+Form controls constrain the shape of a feature independent of any datum reference.
+
+| Symbol | Name | Controls |
+|--------|------|----------|
+| ⏤ | **Flatness** | Surface deviation from a perfect plane |
+| ⏤ | **Straightness** | Line element deviation from perfectly straight |
+| ○ | **Circularity** | Cross-section deviation from a perfect circle |
+| ⌭ | **Cylindricity** | Surface deviation from a perfect cylinder |
+
+**Note**: Form controls never reference datums. The builder disables datum selection when these are chosen.
+
+### Orientation Controls
+
+Orientation controls constrain angular relationship to datum features.
+
+| Symbol | Name | Controls |
+|--------|------|----------|
+| ⟂ | **Perpendicularity** | Surface/axis deviation from 90° to datum |
+| ∠ | **Angularity** | Surface/axis deviation from specified angle to datum |
+| ∥ | **Parallelism** | Surface/axis deviation from parallel to datum |
+
+**Note**: Orientation controls require at least one datum reference.
+
+### Location Controls
+
+Location controls constrain position relative to datum reference frame.
+
+| Symbol | Name | Controls |
+|--------|------|----------|
+| ⊕ | **Position** | Feature location relative to true position |
+| ◎ | **Concentricity** | Axis alignment (median points) |
+| ⌯ | **Symmetry** | Median plane/axis alignment |
+
+**Note**: Location controls require datum references. Position is the most commonly used GD&T control.
+
+### Profile Controls
+
+Profile controls constrain the shape of a line or surface.
+
+| Symbol | Name | Controls |
+|--------|------|----------|
+| ⌒ | **Profile of a Line** | 2D cross-section shape |
+| ⌓ | **Profile of a Surface** | 3D surface shape |
+
+**Note**: Profile controls may or may not require datums depending on application.
+
+### Runout Controls
+
+Runout controls constrain surface variation during rotation about a datum axis.
+
+| Symbol | Name | Controls |
+|--------|------|----------|
+| ↗ | **Circular Runout** | Single cross-section variation during rotation |
+| ↗↗ | **Total Runout** | Entire surface variation during rotation |
+
+**Note**: Runout controls always require a datum axis.
+
+## Tolerance Zone Definition
+
+After selecting a characteristic, define the tolerance zone that controls feature variation.
+
+{/* Screenshot: tolerance-zone-panel.png */}
+{/* Alt: Tolerance zone input panel showing diameter toggle and value field */}
+
+### Diameter Symbol Toggle
+
+The diameter symbol (⌀) indicates a cylindrical or spherical tolerance zone.
+
+| Toggle State | Tolerance Zone Shape | Common Uses |
+|--------------|---------------------|-------------|
+| **Off** | Parallel planes (width zone) | Surfaces, line elements |
+| **On** | Cylinder or sphere | Hole axes, pin positions |
+
+**When to Use**: Enable the diameter symbol for axis positions (holes, pins, shafts) where the tolerance zone should be cylindrical.
+
+### Tolerance Value
+
+Enter the total tolerance zone size in your selected unit (mm or inch).
+
+- Numeric values only (e.g., `0.25`, `0.010`)
+- The builder validates against reasonable ranges
+- Unit follows your account settings (Settings > Display)
+
+### Material Condition Modifiers
+
+Material condition modifiers change how tolerance applies based on feature size.
+
+| Modifier | Symbol | Meaning |
+|----------|--------|---------|
+| **RFS** | (none) | Regardless of Feature Size—tolerance applies at any produced size |
+| **MMC** | Ⓜ | Maximum Material Condition—bonus tolerance available as feature departs from MMC |
+| **LMC** | Ⓛ | Least Material Condition—bonus tolerance available as feature departs from LMC |
+
+#### When Modifiers Apply
+
+| Characteristic | RFS | MMC | LMC |
+|---------------|-----|-----|-----|
+| Form (Flatness, etc.) | Default | Not allowed | Not allowed |
+| Orientation | Allowed | Feature of size only | Feature of size only |
+| Position | Default | Feature of size only | Feature of size only |
+| Profile | Allowed | Feature of size only | Feature of size only |
+| Runout | Default | Not allowed | Not allowed |
+
+**Note**: MMC and LMC only apply to features of size (holes, pins, slots, tabs). The builder enables these options only when valid.
+
+#### Bonus Tolerance (MMC/LMC)
+
+When MMC or LMC is specified, the actual tolerance available depends on the produced feature size:
+
+**MMC Example** (hole at ⌀10.0 ±0.1, position tolerance ⌀0.25 at MMC):
+- At MMC (⌀9.9): Position tolerance = 0.25
+- At ⌀10.0: Position tolerance = 0.25 + 0.10 = 0.35
+- At LMC (⌀10.1): Position tolerance = 0.25 + 0.20 = 0.45
+
+The DatumPilot calculator computes bonus tolerance when you provide feature size data.
+
+## Datum Reference Frame
+
+Datum references establish the coordinate system for measuring the controlled feature.
+
+{/* Screenshot: datum-reference-panel.png */}
+{/* Alt: Datum reference selection showing primary, secondary, tertiary fields */}
+
+### Datum Order
+
+Datums are referenced in order of precedence:
+
+| Position | Name | Degrees of Freedom Constrained |
+|----------|------|-------------------------------|
+| 1st | **Primary** | 3 (establishes first contact plane/axis) |
+| 2nd | **Secondary** | 2 (perpendicular constraint) |
+| 3rd | **Tertiary** | 1 (final rotational/translational lock) |
+
+**Important**: The order matters. `|A|B|C|` creates a different datum reference frame than `|B|A|C|`. The primary datum always constrains the most degrees of freedom.
+
+### Selecting Datums
+
+1. **Primary Datum** (required for most controls): Select from available datum letters (A-Z)
+2. **Secondary Datum** (optional): Select a different letter
+3. **Tertiary Datum** (optional): Select a third unique letter
+
+The builder prevents selecting the same datum twice.
+
+### Datum Material Boundary Modifiers
+
+Like tolerance modifiers, datums can have material boundary modifiers:
+
+| Modifier | Symbol | Meaning |
+|----------|--------|---------|
+| **RMB** | (none) | Regardless of Material Boundary—datum established at actual surface |
+| **MMB** | Ⓜ | Maximum Material Boundary—datum established at virtual condition |
+| **LMB** | Ⓛ | Least Material Boundary—opposite of MMB |
+
+**When to Use**: MMB is common when using datum features that are also features of size (e.g., a datum hole). This allows the part to shift within the datum feature simulator.
+
+### Validation Rules
+
+The builder enforces these datum rules:
+
+- **No duplicates**: Each datum letter can appear only once
+- **Minimum datums**: Position requires at least one; form controls require none
+- **Modifier restrictions**: MMB/LMB only on datum features of size
+
+## Feature Type Selection
+
+Specify the type of feature being controlled to enable accurate calculations.
+
+{/* Screenshot: feature-type-selection.png */}
+{/* Alt: Feature type dropdown showing available options */}
+
+### Available Feature Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| **Internal Hole** | Round hole through or into material | Clearance holes, tapped holes |
+| **External Shaft** | Round protrusion from material | Pins, shafts, bosses |
+| **Slot** | Elongated internal feature | Keyways, oblong holes |
+| **Tab** | Elongated external feature | Keys, tabs |
+| **Plane** | Flat surface | Mounting faces |
+| **Boss/Pin** | Raised cylindrical feature | Locating pins |
+| **Pattern** | Multiple identical features | Bolt circle, hole patterns |
+| **Other** | Non-standard features | Complex geometry |
+
+### Why Feature Type Matters
+
+Feature type affects:
+
+1. **MMC/LMC Calculations**: Internal features have MMC at smallest size; external at largest
+2. **Bonus Tolerance**: Calculator uses feature type to determine bonus direction
+3. **Interpretation**: AI explanations reference the specific feature geometry
+
+### Pattern Count
+
+For pattern features, specify the quantity:
+
+- Enter the count (e.g., `4` for a 4-hole bolt circle)
+- The FCF displays as "4X" prefix
+- Calculations apply to each feature in the pattern
+
+## Advanced Options
+
+### Projected Tolerance Zone
+
+A projected tolerance zone extends the position tolerance zone above the surface of the part.
+
+{/* Screenshot: projected-tolerance-zone.png */}
+{/* Alt: Diagram showing projected tolerance zone extending from hole */}
+
+#### When to Use
+
+Use projected tolerance zones when:
+
+- Fasteners (bolts, studs) extend through the part
+- Mating part alignment depends on the fastener angle, not hole position
+- Interference could occur outside the controlled feature
+
+#### Setting Up
+
+1. Enable **Projected Tolerance Zone** toggle
+2. Enter **Projection Height** (typically mating part thickness + engagement)
+3. The FCF displays with the ⓟ symbol and height value
+
+### Composite FCF
+
+<Callout type="info">
+Composite FCF functionality is planned for a future release. This allows specifying both pattern location and feature-to-feature refinement in a single frame.
+</Callout>
+
+## Live Preview
+
+The preview panel renders your FCF in real-time as you make selections.
+
+{/* Screenshot: live-preview-panel.png */}
+{/* Alt: Live preview showing rendered FCF with validation status */}
+
+### Reading the Preview
+
+The preview displays:
+
+- **Characteristic Symbol**: First compartment
+- **Tolerance Zone**: Second compartment (diameter symbol if applicable, value, modifier)
+- **Datum References**: Subsequent compartments in order
+
+### Validation Indicators
+
+| Indicator | Meaning |
+|-----------|---------|
+| Green checkmark | FCF is valid per ASME Y14.5-2018 |
+| Yellow warning | Valid but with advisory notes |
+| Red error | Invalid—must fix before saving |
+
+### Inline Messages
+
+Validation messages appear below the preview:
+
+- **Errors**: Must be resolved (e.g., "Position requires at least one datum reference")
+- **Warnings**: Advisory only (e.g., "RFS is implicit and typically not shown")
+
+## Validation Rules
+
+DatumPilot validates FCFs against ASME Y14.5-2018 rules. Here are common errors and solutions.
+
+### Error: Datum Required
+
+**Message**: "Datum required for [characteristic]"
+
+**Cause**: Location and orientation controls need datum references.
+
+**Solution**: Add at least one datum reference in the Datum Reference Frame panel.
+
+### Error: Modifier Not Allowed
+
+**Message**: "MMC not allowed for [characteristic]"
+
+**Cause**: Form controls (Flatness, Straightness, Circularity, Cylindricity) always apply RFS.
+
+**Solution**: Remove the material condition modifier or select a different characteristic.
+
+### Error: Duplicate Datum
+
+**Message**: "Duplicate datum reference"
+
+**Cause**: Same datum letter appears more than once.
+
+**Solution**: Select unique datum letters for primary, secondary, and tertiary positions.
+
+### Error: Invalid Tolerance Value
+
+**Message**: "Tolerance must be a positive number"
+
+**Cause**: Zero, negative, or non-numeric tolerance entered.
+
+**Solution**: Enter a positive decimal value (e.g., `0.25`).
+
+### Warning: Implicit RFS
+
+**Message**: "RFS is implicit per ASME Y14.5-2018"
+
+**Cause**: Explicitly showing RFS modifier when it's the default.
+
+**Solution**: This is valid but unnecessary. Modern practice omits RFS symbol.
+
+### Understanding Error Codes
+
+Each validation message includes a code for reference:
+
+| Code | Category |
+|------|----------|
+| E001-E009 | Schema validation errors |
+| E010-E019 | Characteristic-specific rules |
+| E020-E029 | Datum reference rules |
+| E030-E039 | Modifier application rules |
+
+## Saving and Exporting
+
+### Save to Project
+
+1. Click **Save FCF** when validation passes
+2. Select destination project from dropdown
+3. Enter a descriptive name (e.g., "Bore Position to A-B-C")
+4. Click **Save**
+
+**Tip**: Use consistent naming conventions across your project for easy reference.
+
+### Export Options
+
+| Format | Description | Availability |
+|--------|-------------|--------------|
+| **JSON** | Machine-readable data structure | All plans |
+| **PNG** | Raster image for documents | Pro, Team |
+| **SVG** | Vector graphic for CAD import | Pro, Team |
+| **PDF** | Document with FCF and metadata | Pro, Team |
+
+### Copy to Clipboard
+
+The **Copy JSON** button copies the FCF data structure. Use this for:
+
+- Integration with other tools
+- Documentation
+- Backup
+
+## AI Interpretation (Pro Feature)
+
+<Callout type="info">
+AI Interpretation requires a Pro or Team subscription.
+</Callout>
+
+The AI interpreter provides plain-language explanations of your FCF.
+
+{/* Screenshot: ai-interpretation-panel.png */}
+{/* Alt: AI interpretation showing tolerance zone description and measurement guidance */}
+
+### What You Get
+
+1. **Tolerance Zone Description**: Physical shape and size of the acceptable zone
+2. **Datum Precedence**: How each datum constrains degrees of freedom
+3. **Material Condition Effects**: How MMC/LMC affects actual tolerance
+4. **Measurement Setup**: Guidance for inspection planning
+
+### Example Interpretation
+
+For a Position FCF `⊕ | ⌀0.25 Ⓜ | A | B | C`:
+
+> "This Feature Control Frame specifies the position of a feature of size relative to datum reference frame A-B-C. The tolerance zone is a cylinder of diameter 0.25mm at Maximum Material Condition.
+>
+> **Bonus Tolerance**: As the feature departs from MMC, additional tolerance becomes available equal to the departure amount.
+>
+> **Datum A** (primary): Establishes the first contact plane, constraining 3 degrees of freedom.
+> **Datum B** (secondary): Provides perpendicular constraint, constraining 2 additional degrees of freedom.
+> **Datum C** (tertiary): Locks the final degree of freedom for complete part orientation."
+
+## Tips and Best Practices
+
+### Start with the Characteristic
+
+Begin every FCF by selecting the geometric characteristic. This:
+
+- Enables appropriate options automatically
+- Prevents invalid modifier selections
+- Sets context for datum requirements
+
+### Use Accurate Feature Types
+
+Select the feature type that matches your geometry:
+
+- Enables correct MMC/LMC calculations
+- Improves AI interpretation accuracy
+- Produces better documentation
+
+### Review Warnings Before Export
+
+Warnings don't prevent saving, but review them:
+
+- Some indicate potential drawing review issues
+- Others suggest standard practice improvements
+
+### Name FCFs Descriptively
+
+Good names make projects manageable:
+
+- ✓ "Mounting Hole Position to A-B-C"
+- ✓ "Bore Perpendicularity to Datum A"
+- ✗ "FCF 1"
+- ✗ "Position"
+
+### Use Projects Consistently
+
+Organize FCFs logically:
+
+- One project per part or assembly
+- Group related FCFs together
+- Include revision identifiers when needed
+
+---
+
+## Next Steps
+
+- Learn tolerance stack-up analysis in the [Stack-up Guide](/support/stack-up-guide)
+- Return to [Getting Started](/support/getting-started) for basic navigation
+- Contact support@datumpilot.com for additional help
