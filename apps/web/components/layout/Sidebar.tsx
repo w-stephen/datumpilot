@@ -7,8 +7,6 @@ import {
   PenTool,
   FolderKanban,
   Settings,
-  ChevronLeft,
-  ChevronRight,
   Crosshair,
   Sun,
   Moon,
@@ -63,7 +61,6 @@ const bottomNavItems: NavItem[] = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -86,10 +83,9 @@ export default function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen",
+        "fixed left-0 top-0 z-40 h-screen w-64",
         "bg-white dark:bg-[#0A0E14] border-r border-[#E5E7EB] dark:border-slate-800",
-        "flex flex-col transition-all duration-300 ease-in-out",
-        collapsed ? "w-[72px]" : "w-64"
+        "flex flex-col"
       )}
     >
       {/* Logo */}
@@ -104,28 +100,24 @@ export default function Sidebar() {
             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-px bg-accent-500" />
             <Crosshair className="w-5 h-5 text-accent-500" strokeWidth={1.5} />
           </div>
-          {!collapsed && (
-            <div className="flex flex-col">
-              <span className="font-mono font-bold text-sm text-[#111827] dark:text-slate-50 tracking-widest">
-                DATUMPILOT
-              </span>
-              <span className="font-mono text-[9px] text-[#6B7280] dark:text-slate-600 tracking-[0.2em]">
-                GD&T SYSTEM
-              </span>
-            </div>
-          )}
+          <div className="flex flex-col">
+            <span className="font-mono font-bold text-sm text-[#111827] dark:text-slate-50 tracking-widest">
+              DATUMPILOT
+            </span>
+            <span className="font-mono text-[9px] text-[#6B7280] dark:text-slate-600 tracking-[0.2em]">
+              GD&T SYSTEM
+            </span>
+          </div>
         </Link>
       </div>
 
       {/* Section Label */}
-      {!collapsed && (
-        <div className="px-4 pt-6 pb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-px bg-[#E5E7EB] dark:bg-slate-700" />
-            <span className="font-mono text-[9px] text-[#6B7280] dark:text-slate-600 tracking-[0.2em]">NAV.MAIN</span>
-          </div>
+      <div className="px-4 pt-6 pb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-px bg-[#E5E7EB] dark:bg-slate-700" />
+          <span className="font-mono text-[9px] text-[#6B7280] dark:text-slate-600 tracking-[0.2em]">NAV.MAIN</span>
         </div>
-      )}
+      </div>
 
       {/* Main Navigation */}
       <nav className="flex-1 px-3 py-2 overflow-y-auto scrollbar-hide">
@@ -164,21 +156,12 @@ export default function Sidebar() {
                   )}
                 />
 
-                {!collapsed && (
-                  <span className={cn(
-                    "font-mono text-xs tracking-wide truncate",
-                    active ? "text-accent-500" : "text-[#374151] dark:text-slate-400 group-hover:text-[#111827] dark:group-hover:text-slate-200"
-                  )}>
-                    {item.label}
-                  </span>
-                )}
-
-                {/* Tooltip for collapsed state */}
-                {collapsed && (
-                  <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-[#E5E7EB] dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
-                    <span className="font-mono text-xs text-[#111827] dark:text-slate-200">{item.label}</span>
-                  </div>
-                )}
+                <span className={cn(
+                  "font-mono text-xs tracking-wide truncate",
+                  active ? "text-accent-500" : "text-[#374151] dark:text-slate-400 group-hover:text-[#111827] dark:group-hover:text-slate-200"
+                )}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}
@@ -187,14 +170,12 @@ export default function Sidebar() {
 
       {/* Bottom Navigation */}
       <div className="px-3 py-3 border-t border-[#E5E7EB] dark:border-slate-800">
-        {!collapsed && (
-          <div className="px-3 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-px bg-[#E5E7EB] dark:bg-slate-700" />
-              <span className="font-mono text-[9px] text-[#6B7280] dark:text-slate-600 tracking-[0.2em]">NAV.SYS</span>
-            </div>
+        <div className="px-3 pb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-px bg-[#E5E7EB] dark:bg-slate-700" />
+            <span className="font-mono text-[9px] text-[#6B7280] dark:text-slate-600 tracking-[0.2em]">NAV.SYS</span>
           </div>
-        )}
+        </div>
 
         {/* Theme Toggle */}
         <button
@@ -219,20 +200,9 @@ export default function Sidebar() {
             <div className="w-4 h-4 flex-shrink-0" />
           )}
 
-          {!collapsed && (
-            <span className="font-mono text-xs tracking-wide text-[#374151] dark:text-slate-400">
-              {mounted && theme === "dark" ? "DARK MODE" : "LIGHT MODE"}
-            </span>
-          )}
-
-          {/* Tooltip for collapsed state */}
-          {collapsed && (
-            <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-[#E5E7EB] dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
-              <span className="font-mono text-xs text-[#111827] dark:text-slate-200">
-                {mounted && theme === "dark" ? "SWITCH TO LIGHT" : "SWITCH TO DARK"}
-              </span>
-            </div>
-          )}
+          <span className="font-mono text-xs tracking-wide text-[#374151] dark:text-slate-400">
+            {mounted && theme === "dark" ? "DARK MODE" : "LIGHT MODE"}
+          </span>
         </button>
 
         {bottomNavItems.map((item) => {
@@ -267,78 +237,27 @@ export default function Sidebar() {
                   active ? "text-accent-500" : "text-[#374151] dark:text-slate-600 group-hover:text-[#111827] dark:group-hover:text-slate-400"
                 )}
               />
-              {!collapsed && (
-                <span className={cn(
-                  "font-mono text-xs tracking-wide",
-                  active ? "text-accent-500" : "text-[#374151] dark:text-slate-400 group-hover:text-[#111827] dark:group-hover:text-slate-200"
-                )}>
-                  {item.label}
-                </span>
-              )}
-
-              {/* Tooltip for collapsed state */}
-              {collapsed && (
-                <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-[#E5E7EB] dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
-                  <span className="font-mono text-xs text-[#111827] dark:text-slate-200">{item.label}</span>
-                </div>
-              )}
+              <span className={cn(
+                "font-mono text-xs tracking-wide",
+                active ? "text-accent-500" : "text-[#374151] dark:text-slate-400 group-hover:text-[#111827] dark:group-hover:text-slate-200"
+              )}>
+                {item.label}
+              </span>
             </Link>
           );
         })}
-
-        {/* Collapse Toggle */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={cn(
-            "group relative mt-2 transition-all duration-200",
-            collapsed
-              ? "w-full flex items-center justify-center py-3 hover:bg-accent-500/10"
-              : "w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/50",
-            "text-[#374151] dark:text-slate-600 hover:text-[#111827] dark:hover:text-slate-400"
-          )}
-        >
-          {collapsed ? (
-            <>
-              {/* Expand button - centered and prominent */}
-              <div className="w-8 h-8 border border-[#E5E7EB] dark:border-slate-700 hover:border-accent-500/50 flex items-center justify-center transition-colors">
-                <ChevronRight className="w-4 h-4" />
-              </div>
-              {/* Tooltip */}
-              <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-[#E5E7EB] dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
-                <span className="font-mono text-xs text-[#111827] dark:text-slate-200">EXPAND</span>
-              </div>
-            </>
-          ) : (
-            <>
-              <span className="font-mono text-[9px] w-5 flex-shrink-0 text-[#9CA3AF] dark:text-slate-700">
-                {"<<"}
-              </span>
-              <ChevronLeft className="w-4 h-4" />
-              <span className="font-mono text-xs tracking-wide">COLLAPSE</span>
-            </>
-          )}
-        </button>
       </div>
 
       {/* Version indicator */}
-      {!collapsed && (
-        <div className="px-4 py-3 border-t border-[#E5E7EB] dark:border-slate-800/50">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[9px] text-[#9CA3AF] dark:text-slate-700">v1.0.0</span>
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 bg-accent-500 animate-pulse" />
-              <span className="font-mono text-[9px] text-[#6B7280] dark:text-slate-600">ONLINE</span>
-            </div>
+      <div className="px-4 py-3 border-t border-[#E5E7EB] dark:border-slate-800/50">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[9px] text-[#9CA3AF] dark:text-slate-700">v1.0.0</span>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 bg-accent-500 animate-pulse" />
+            <span className="font-mono text-[9px] text-[#6B7280] dark:text-slate-600">ONLINE</span>
           </div>
         </div>
-      )}
-
-      {/* Collapsed state indicator */}
-      {collapsed && (
-        <div className="px-3 py-3 border-t border-[#E5E7EB] dark:border-slate-800/50 flex justify-center">
-          <div className="w-1.5 h-1.5 bg-accent-500 animate-pulse" />
-        </div>
-      )}
+      </div>
     </aside>
   );
 }
