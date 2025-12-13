@@ -84,7 +84,7 @@ function AnimatedCounter({ target }: { target: number }) {
   return <span>{count}</span>;
 }
 
-// Technical panel wrapper with VS Code-inspired light mode
+// Technical panel wrapper with VS Code-inspired light mode + glassmorphism
 function TechnicalPanel({
   children,
   label,
@@ -96,18 +96,18 @@ function TechnicalPanel({
 }) {
   return (
     <div className={cn(
-      "relative bg-white dark:bg-slate-900/40 border border-[#E5E5E5] dark:border-slate-800",
+      "relative bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm border border-white/50 dark:border-slate-800 shadow-sm shadow-black/[0.03]",
       label && "mt-3", // Add top margin when label present to prevent clipping
       className
     )}>
       {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D4D4D4] dark:border-slate-700" />
-      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D4D4D4] dark:border-slate-700" />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D4D4D4] dark:border-slate-700" />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D4D4D4] dark:border-slate-700" />
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D4D4D4]/70 dark:border-slate-700" />
 
       {label && (
-        <div className="absolute -top-2.5 left-4 px-2 bg-[#F3F3F3] dark:bg-[#0D1117] font-mono text-[10px] text-[#6E6E6E] dark:text-slate-500 tracking-widest">
+        <div className="absolute -top-2.5 left-4 px-2 bg-[#F3F3F3]/90 dark:bg-[#0D1117] font-mono text-[10px] text-[#6E6E6E] dark:text-slate-500 tracking-widest backdrop-blur-sm">
           {label}
         </div>
       )}
@@ -139,7 +139,7 @@ export default function DashboardPage() {
             GD&T Feature Control Frame Management System
           </p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900/60 border border-[#E5E5E5] dark:border-slate-800">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/70 dark:bg-slate-900/60 backdrop-blur-sm border border-white/50 dark:border-slate-800 shadow-sm shadow-black/[0.02]">
           <div className="w-1.5 h-1.5 rounded-full bg-accent-500 animate-pulse" />
           <Clock className="w-3.5 h-3.5 text-[#6E6E6E] dark:text-slate-500" />
           <span className="font-mono text-xs text-[#6E6E6E] dark:text-slate-500">LIVE</span>
@@ -185,17 +185,17 @@ export default function DashboardPage() {
             <Link
               key={action.href}
               href={action.href}
-              className="group relative bg-white dark:bg-slate-900/40 border border-[#E5E5E5] dark:border-slate-800 hover:border-accent-500/30 transition-all duration-300"
+              className="group relative bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm border border-white/50 dark:border-slate-800 hover:border-accent-500/30 hover:shadow-md hover:shadow-accent-500/5 transition-all duration-300"
               style={{
                 clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
               }}
             >
               {/* Corner cuts visual */}
-              <div className="absolute top-0 right-0 w-3 h-3 border-l border-b border-[#E5E5E5] dark:border-slate-800 group-hover:border-accent-500/30 transition-colors" style={{ transform: 'translate(0, 0) rotate(45deg)', transformOrigin: 'top right' }} />
+              <div className="absolute top-0 right-0 w-3 h-3 border-l border-b border-white/50 dark:border-slate-800 group-hover:border-accent-500/30 transition-colors" style={{ transform: 'translate(0, 0) rotate(45deg)', transformOrigin: 'top right' }} />
 
               <div className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-9 h-9 border border-[#D4D4D4] dark:border-slate-700 bg-[#F8F8F8] dark:bg-slate-800/50 flex items-center justify-center group-hover:border-accent-500/50 group-hover:bg-accent-500/5 transition-all">
+                  <div className="w-9 h-9 border border-[#D4D4D4]/70 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center group-hover:border-accent-500/50 group-hover:bg-accent-500/10 transition-all">
                     <action.icon className="w-4 h-4 text-[#616161] dark:text-slate-400 group-hover:text-accent-500 transition-colors" />
                   </div>
                   <div className="flex items-center gap-1.5">

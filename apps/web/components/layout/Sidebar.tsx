@@ -87,13 +87,13 @@ export default function Sidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen",
-        "bg-[#F3F3F3] dark:bg-[#0A0E14] border-r border-[#E5E5E5] dark:border-slate-800",
+        "bg-[#F3F3F3]/80 dark:bg-[#0A0E14] backdrop-blur-md border-r border-white/50 dark:border-slate-800",
         "flex flex-col transition-all duration-300 ease-in-out",
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center h-16 px-4 border-b border-[#E5E5E5] dark:border-slate-800">
+      <div className="flex items-center h-16 px-4 border-b border-white/30 dark:border-slate-800">
         <Link href="/app" className="flex items-center gap-3">
           <div className="relative flex items-center justify-center w-10 h-10">
             {/* Crosshair logo */}
@@ -186,7 +186,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom Navigation */}
-      <div className="px-3 py-3 border-t border-[#E5E5E5] dark:border-slate-800">
+      <div className="px-3 py-3 border-t border-white/30 dark:border-slate-800">
         {!collapsed && (
           <div className="px-3 pb-3">
             <div className="flex items-center gap-2">

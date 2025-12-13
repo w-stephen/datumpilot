@@ -97,7 +97,7 @@ type ViewMode = "grid" | "list";
 type SortField = "name" | "updatedAt" | "fcfCount";
 type SortDirection = "asc" | "desc";
 
-// Technical panel wrapper
+// Technical panel wrapper with glassmorphism
 function TechnicalPanel({
   children,
   label,
@@ -109,18 +109,18 @@ function TechnicalPanel({
 }) {
   return (
     <div className={cn(
-      "relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800",
+      "relative bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm border border-white/50 dark:border-slate-800 shadow-sm shadow-black/[0.03]",
       label && "mt-3",
       className
     )}>
       {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-slate-300 dark:border-slate-700" />
-      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-slate-300 dark:border-slate-700" />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-slate-300 dark:border-slate-700" />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-300 dark:border-slate-700" />
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D4D4D4]/70 dark:border-slate-700" />
 
       {label && (
-        <div className="absolute -top-2.5 left-4 px-2 bg-slate-50 dark:bg-[#0D1117] font-mono text-[10px] text-slate-600 dark:text-slate-500 tracking-widest">
+        <div className="absolute -top-2.5 left-4 px-2 bg-[#F3F3F3]/90 dark:bg-[#0D1117] font-mono text-[10px] text-[#6E6E6E] dark:text-slate-500 tracking-widest backdrop-blur-sm">
           {label}
         </div>
       )}
@@ -410,16 +410,16 @@ function ProjectCard({
   return (
     <Link
       href={`/app/projects/${project.id}`}
-      className="group relative bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+      className="group relative bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm border border-white/50 dark:border-slate-800 shadow-sm shadow-black/[0.03] hover:border-accent-500/30 hover:shadow-md hover:shadow-accent-500/5 transition-all"
     >
       {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-slate-300 dark:border-slate-700" />
-      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-slate-300 dark:border-slate-700" />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-slate-300 dark:border-slate-700" />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-300 dark:border-slate-700" />
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#D4D4D4]/70 dark:border-slate-700" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#D4D4D4]/70 dark:border-slate-700" />
 
       {/* Index label */}
-      <div className="absolute -top-2.5 left-4 px-2 bg-slate-50 dark:bg-[#0D1117] font-mono text-[10px] text-slate-600 dark:text-slate-600 tracking-widest">
+      <div className="absolute -top-2.5 left-4 px-2 bg-[#F3F3F3]/90 dark:bg-[#0D1117] font-mono text-[10px] text-[#6E6E6E] dark:text-slate-600 tracking-widest backdrop-blur-sm">
         PROJ.{String(index + 1).padStart(2, '0')}
       </div>
 
@@ -435,12 +435,12 @@ function ProjectCard({
           <MoreVertical className="w-4 h-4 text-slate-500" />
         </button>
         {showDropdown && (
-          <div className="absolute right-0 top-8 w-32 bg-white dark:bg-[#0A0E14] border border-slate-200 dark:border-slate-800 py-1 z-10">
+          <div className="absolute right-0 top-8 w-32 bg-white/90 dark:bg-[#0A0E14] backdrop-blur-md border border-white/50 dark:border-slate-800 shadow-lg shadow-black/5 py-1 z-10">
             {/* Corner accents for dropdown */}
-            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-slate-300 dark:border-slate-700" />
-            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-300 dark:border-slate-700" />
-            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-slate-300 dark:border-slate-700" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-slate-300 dark:border-slate-700" />
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#D4D4D4]/70 dark:border-slate-700" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#D4D4D4]/70 dark:border-slate-700" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#D4D4D4]/70 dark:border-slate-700" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#D4D4D4]/70 dark:border-slate-700" />
             <button className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
               <Edit className="w-3 h-3" />
               EDIT
@@ -460,8 +460,8 @@ function ProjectCard({
       <div className="p-5 pt-6">
         {/* Header */}
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 border border-slate-300 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center">
-            <FolderKanban className="w-4 h-4 text-slate-500" />
+          <div className="w-10 h-10 border border-[#D4D4D4]/70 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center group-hover:border-accent-500/50 group-hover:bg-accent-500/10 transition-all">
+            <FolderKanban className="w-4 h-4 text-[#616161] group-hover:text-accent-500 transition-colors" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 truncate uppercase">
