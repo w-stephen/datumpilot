@@ -3,10 +3,6 @@
  *
  * GET  /api/projects - List projects for authenticated user
  * POST /api/projects - Create a new project
- *
- * Note: These routes are prepared for Supabase integration (Phase 1).
- * Currently they validate inputs and return structured responses.
- * When Supabase client is implemented, replace mock responses with actual queries.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -15,6 +11,7 @@ import {
   projectInsertSchema,
   projectListParamsSchema
 } from "@/lib/database/validation";
+import { createClient } from "@/lib/supabase/server";
 import type { Project, ApiResult, PaginatedResponse } from "@/lib/database/types";
 
 // ============================================================================
@@ -43,26 +40,15 @@ function handleValidationError(error: ZodError) {
   );
 }
 
-// Placeholder: Extract user ID from auth session
-// TODO (Phase 1): Replace with actual Supabase auth
-function getUserId(_request: NextRequest): string | null {
-  // In Phase 1, this will use:
-  // const supabase = createServerClient(...)
-  // const { data: { user } } = await supabase.auth.getUser()
-  // return user?.id ?? null
-
-  // For now, return a mock user ID for development
-  // In production, this MUST return null if not authenticated
-  return "00000000-0000-0000-0000-000000000001";
-}
-
 // ============================================================================
 // GET /api/projects - List projects
 // ============================================================================
 
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
     return createApiError("UNAUTHORIZED", "Authentication required", 401);
   }
 
@@ -93,48 +79,47 @@ export async function GET(request: NextRequest) {
     throw error;
   }
 
-  // TODO (Phase 1): Replace with actual Supabase query
-  // const supabase = createServerClient(...)
-  // let query = supabase
-  //   .from("projects")
-  //   .select("*", { count: "exact" })
-  //   .eq("user_id", userId)
-  //   .order(params.sortBy ?? "created_at", { ascending: params.sortOrder === "asc" })
-  //   .range((params.page - 1) * params.pageSize, params.page * params.pageSize - 1);
-  //
-  // if (!params.includeDeleted) {
-  //   query = query.is("deleted_at", null);
-  // }
-  // if (params.search) {
-  //   query = query.ilike("name", `%${params.search}%`);
-  // }
-  // if (params.tags?.length) {
-  //   query = query.overlaps("tags", params.tags);
-  // }
+  // Build query
+  let query = supabase
+    .from("projects")
+    .select("*", { count: "exact" })
+    .eq("user_id", user.id)
+    .order(params.sortBy ?? "created_at", { ascending: params.sortOrder === "asc" });
 
-  // Mock response for development
-  const mockProjects: Project[] = [
-    {
-      id: "11111111-1111-1111-1111-111111111111",
-      user_id: userId,
-      name: "Sample Project",
-      description: "A sample project for development",
-      tags: ["gdt", "sample"],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      deleted_at: null
-    }
-  ];
+  if (!params.includeDeleted) {
+    query = query.is("deleted_at", null);
+  }
+  if (params.search) {
+    query = query.ilike("name", `%${params.search}%`);
+  }
+  if (params.tags && params.tags.length > 0) {
+    query = query.overlaps("tags", params.tags);
+  }
+
+  // Apply pagination
+  const from = (params.page - 1) * params.pageSize;
+  const to = from + params.pageSize - 1;
+  query = query.range(from, to);
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+    return createApiError("DATABASE_ERROR", error.message, 500);
+  }
+
+  const total = count ?? 0;
+  const totalPages = Math.ceil(total / params.pageSize);
 
   const response: ApiResult<PaginatedResponse<Project>> = {
     success: true,
     data: {
-      data: mockProjects,
+      data: data as Project[],
       pagination: {
         page: params.page,
         pageSize: params.pageSize,
-        total: mockProjects.length,
-        totalPages: 1
+        total,
+        totalPages
       }
     }
   };
@@ -147,8 +132,10 @@ export async function GET(request: NextRequest) {
 // ============================================================================
 
 export async function POST(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
     return createApiError("UNAUTHORIZED", "Authentication required", 401);
   }
 
@@ -170,41 +157,29 @@ export async function POST(request: NextRequest) {
     throw error;
   }
 
-  // TODO (Phase 1): Replace with actual Supabase insert
-  // const supabase = createServerClient(...)
-  // const { data, error } = await supabase
-  //   .from("projects")
-  //   .insert({
-  //     user_id: userId,
-  //     name: input.name,
-  //     description: input.description,
-  //     tags: input.tags
-  //   })
-  //   .select()
-  //   .single();
-  //
-  // if (error) {
-  //   if (error.code === "23505") { // unique_violation
-  //     return createApiError("DUPLICATE_NAME", "A project with this name already exists", 409);
-  //   }
-  //   return createApiError("DATABASE_ERROR", error.message, 500);
-  // }
+  // Insert into database
+  const { data, error } = await supabase
+    .from("projects")
+    .insert({
+      user_id: user.id,
+      name: input.name,
+      description: input.description,
+      tags: input.tags
+    })
+    .select()
+    .single();
 
-  // Mock response for development
-  const mockProject: Project = {
-    id: crypto.randomUUID(),
-    user_id: userId,
-    name: input.name,
-    description: input.description ?? null,
-    tags: input.tags,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    deleted_at: null
-  };
+  if (error) {
+    if (error.code === "23505") { // unique_violation
+      return createApiError("DUPLICATE_NAME", "A project with this name already exists", 409);
+    }
+    console.error("Error creating project:", error);
+    return createApiError("DATABASE_ERROR", error.message, 500);
+  }
 
   const response: ApiResult<Project> = {
     success: true,
-    data: mockProject
+    data: data as Project
   };
 
   return NextResponse.json(response, { status: 201 });

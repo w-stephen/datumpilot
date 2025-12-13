@@ -3,8 +3,6 @@
  *
  * GET  /api/fcf/records - List FCF records for a project
  * POST /api/fcf/records - Create a new FCF record
- *
- * Note: Prepared for Supabase integration (Phase 1).
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -13,6 +11,7 @@ import {
   fcfRecordInsertSchema,
   fcfRecordListParamsSchema
 } from "@/lib/database/validation";
+import { createClient } from "@/lib/supabase/server";
 import { validateFcf } from "@/lib/rules/validateFcf";
 import type { FcfRecord, ApiResult, PaginatedResponse } from "@/lib/database/types";
 
@@ -42,19 +41,15 @@ function handleValidationError(error: ZodError) {
   );
 }
 
-// Placeholder: Extract user ID from auth session
-// TODO (Phase 1): Replace with actual Supabase auth
-function getUserId(_request: NextRequest): string | null {
-  return "00000000-0000-0000-0000-000000000001";
-}
-
 // ============================================================================
 // GET /api/fcf/records - List FCF records for a project
 // ============================================================================
 
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
     return createApiError("UNAUTHORIZED", "Authentication required", 401);
   }
 
@@ -86,49 +81,60 @@ export async function GET(request: NextRequest) {
     throw error;
   }
 
-  // TODO (Phase 1): Verify user owns the project first
-  // const supabase = createServerClient(...)
-  // const { data: project } = await supabase
-  //   .from("projects")
-  //   .select("id")
-  //   .eq("id", params.projectId)
-  //   .eq("user_id", userId)
-  //   .is("deleted_at", null)
-  //   .single();
-  // if (!project) {
-  //   return createApiError("NOT_FOUND", "Project not found", 404);
-  // }
+  // Verify user owns the project
+  const { data: project } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("id", params.projectId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .single();
 
-  // TODO (Phase 1): Replace with actual Supabase query
-  // let query = supabase
-  //   .from("fcf_records")
-  //   .select("*", { count: "exact" })
-  //   .eq("project_id", params.projectId)
-  //   .order(params.sortBy ?? "created_at", { ascending: params.sortOrder === "asc" })
-  //   .range((params.page - 1) * params.pageSize, params.page * params.pageSize - 1);
-  //
-  // if (!params.includeDeleted) {
-  //   query = query.is("deleted_at", null);
-  // }
-  // if (params.characteristic) {
-  //   query = query.eq("characteristic", params.characteristic);
-  // }
-  // if (params.search) {
-  //   query = query.ilike("name", `%${params.search}%`);
-  // }
+  if (!project) {
+    return createApiError("NOT_FOUND", "Project not found", 404);
+  }
 
-  // Mock response for development
-  const mockRecords: FcfRecord[] = [];
+  // Build query for FCF records
+  let query = supabase
+    .from("fcf_records")
+    .select("*", { count: "exact" })
+    .eq("project_id", params.projectId)
+    .order(params.sortBy ?? "created_at", { ascending: params.sortOrder === "asc" });
+
+  if (!params.includeDeleted) {
+    query = query.is("deleted_at", null);
+  }
+  if (params.characteristic) {
+    query = query.eq("characteristic", params.characteristic);
+  }
+  if (params.search) {
+    query = query.ilike("name", `%${params.search}%`);
+  }
+
+  // Apply pagination
+  const from = (params.page - 1) * params.pageSize;
+  const to = from + params.pageSize - 1;
+  query = query.range(from, to);
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    console.error("Error fetching FCF records:", error);
+    return createApiError("DATABASE_ERROR", error.message, 500);
+  }
+
+  const total = count ?? 0;
+  const totalPages = Math.ceil(total / params.pageSize);
 
   const response: ApiResult<PaginatedResponse<FcfRecord>> = {
     success: true,
     data: {
-      data: mockRecords,
+      data: data as FcfRecord[],
       pagination: {
         page: params.page,
         pageSize: params.pageSize,
-        total: 0,
-        totalPages: 0
+        total,
+        totalPages
       }
     }
   };
@@ -141,8 +147,10 @@ export async function GET(request: NextRequest) {
 // ============================================================================
 
 export async function POST(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
     return createApiError("UNAUTHORIZED", "Authentication required", 401);
   }
 
@@ -164,6 +172,19 @@ export async function POST(request: NextRequest) {
     throw error;
   }
 
+  // Verify user owns the project
+  const { data: project } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("id", input.project_id)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .single();
+
+  if (!project) {
+    return createApiError("NOT_FOUND", "Project not found", 404);
+  }
+
   // Run deterministic validation on the FCF JSON
   const validationResult = validateFcf(input.fcf_json);
 
@@ -183,76 +204,39 @@ export async function POST(request: NextRequest) {
     confidence = "medium";
   }
 
-  // TODO (Phase 1): Verify user owns the project and check quotas
-  // const supabase = createServerClient(...)
-  // const { data: project } = await supabase
-  //   .from("projects")
-  //   .select("id, project_quotas(*)")
-  //   .eq("id", input.project_id)
-  //   .eq("user_id", userId)
-  //   .is("deleted_at", null)
-  //   .single();
-  //
-  // if (!project) {
-  //   return createApiError("NOT_FOUND", "Project not found", 404);
-  // }
+  // Insert into database
+  const { data, error } = await supabase
+    .from("fcf_records")
+    .insert({
+      project_id: input.project_id,
+      created_by: user.id,
+      name: input.name,
+      characteristic: input.characteristic,
+      feature_type: input.feature_type,
+      source_unit: input.source_unit,
+      standard: input.standard,
+      source_input_type: input.source_input_type,
+      fcf_json: input.fcf_json,
+      parse_confidence: input.parse_confidence,
+      validation_errors: validationErrors.length > 0 ? validationErrors : null,
+      calc_summary: input.calc_summary,
+      explanation: input.explanation,
+      confidence: confidence,
+      warnings: validationResult.warnings.length > 0
+        ? validationResult.warnings.map((w) => w.message)
+        : null,
+      source_upload_id: input.source_upload_id
+    })
+    .select()
+    .single();
 
-  // TODO (Phase 1): Replace with actual Supabase insert
-  // const { data, error } = await supabase
-  //   .from("fcf_records")
-  //   .insert({
-  //     project_id: input.project_id,
-  //     created_by: userId,
-  //     name: input.name,
-  //     characteristic: input.characteristic,
-  //     feature_type: input.feature_type,
-  //     source_unit: input.source_unit,
-  //     standard: input.standard,
-  //     source_input_type: input.source_input_type,
-  //     fcf_json: input.fcf_json,
-  //     parse_confidence: input.parse_confidence,
-  //     validation_errors: validationErrors,
-  //     calc_summary: input.calc_summary,
-  //     explanation: input.explanation,
-  //     confidence: confidence,
-  //     warnings: validationResult.warnings.map(w => w.message),
-  //     source_upload_id: input.source_upload_id
-  //   })
-  //   .select()
-  //   .single();
-  //
-  // if (error) {
-  //   if (error.code === "23505") { // unique_violation
-  //     return createApiError("DUPLICATE_NAME", "An FCF record with this name already exists in this project", 409);
-  //   }
-  //   return createApiError("DATABASE_ERROR", error.message, 500);
-  // }
-
-  // Mock response for development
-  const mockRecord: FcfRecord = {
-    id: crypto.randomUUID(),
-    project_id: input.project_id,
-    created_by: userId,
-    name: input.name,
-    characteristic: input.characteristic,
-    feature_type: input.feature_type ?? null,
-    source_unit: input.source_unit ?? "mm",
-    standard: input.standard ?? "ASME_Y14_5_2018",
-    source_input_type: input.source_input_type,
-    fcf_json: input.fcf_json,
-    parse_confidence: input.parse_confidence ?? null,
-    validation_errors: validationErrors.length > 0 ? validationErrors : null,
-    calc_summary: input.calc_summary ?? null,
-    explanation: input.explanation ?? null,
-    confidence: confidence,
-    warnings: validationResult.warnings.length > 0
-      ? validationResult.warnings.map((w) => w.message)
-      : null,
-    source_upload_id: input.source_upload_id ?? null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    deleted_at: null
-  };
+  if (error) {
+    if (error.code === "23505") { // unique_violation
+      return createApiError("DUPLICATE_NAME", "An FCF record with this name already exists in this project", 409);
+    }
+    console.error("Error creating FCF record:", error);
+    return createApiError("DATABASE_ERROR", error.message, 500);
+  }
 
   const response: ApiResult<{
     record: FcfRecord;
@@ -264,7 +248,7 @@ export async function POST(request: NextRequest) {
   }> = {
     success: true,
     data: {
-      record: mockRecord,
+      record: data as FcfRecord,
       validation: {
         valid: validationResult.valid,
         errorCount: validationResult.summary.errorCount,

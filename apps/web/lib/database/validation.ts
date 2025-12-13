@@ -80,8 +80,15 @@ export const uploadListParamsSchema = paginationSchema.extend({
 export const characteristicSchema = z.enum([
   "position",
   "flatness",
+  "straightness",
+  "circularity",
+  "cylindricity",
   "perpendicularity",
+  "parallelism",
+  "angularity",
   "profile",
+  "runout",
+  "totalRunout",
   "other"
 ]);
 

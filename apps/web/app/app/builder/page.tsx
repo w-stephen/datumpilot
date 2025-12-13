@@ -17,6 +17,7 @@ import type { ValidationResult } from "@/lib/rules/validateFcf";
 import FcfBuilderPanel from "@/components/fcf/FcfBuilderPanel";
 import FcfPreview from "@/components/fcf/FcfPreview";
 import InterpretationPanel from "@/components/fcf/InterpretationPanel";
+import SaveFcfModal from "@/components/fcf/SaveFcfModal";
 
 type ViewMode = "split" | "builder" | "preview";
 
@@ -63,6 +64,7 @@ export default function BuilderPage() {
 
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("split");
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   // Mock validation
   const handleValidate = useCallback(async (fcfData: Partial<FcfJson>) => {
@@ -224,6 +226,7 @@ export default function BuilderPage() {
               <RotateCcw className="w-4 h-4" />
             </button>
             <button
+              onClick={() => setShowSaveModal(true)}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 font-mono text-xs font-semibold transition-all",
                 validationResult?.valid
@@ -385,6 +388,16 @@ export default function BuilderPage() {
           )}
         </div>
       </div>
+
+      {/* Save Modal */}
+      <SaveFcfModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        fcf={fcf}
+        onSaveSuccess={(recordId, projectId) => {
+          console.log(`FCF saved: ${recordId} to project ${projectId}`);
+        }}
+      />
     </div>
   );
 }
