@@ -87,13 +87,13 @@ export default function Sidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen",
-        "bg-slate-50 dark:bg-[#0A0E14] border-r border-slate-200 dark:border-slate-800",
+        "bg-[#F3F3F3] dark:bg-[#0A0E14] border-r border-[#E5E5E5] dark:border-slate-800",
         "flex flex-col transition-all duration-300 ease-in-out",
         collapsed ? "w-[72px]" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center h-16 px-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex items-center h-16 px-4 border-b border-[#E5E5E5] dark:border-slate-800">
         <Link href="/app" className="flex items-center gap-3">
           <div className="relative flex items-center justify-center w-10 h-10">
             {/* Crosshair logo */}
@@ -106,10 +106,10 @@ export default function Sidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-mono font-bold text-sm text-slate-900 dark:text-slate-50 tracking-widest">
+              <span className="font-mono font-bold text-sm text-[#1F1F1F] dark:text-slate-50 tracking-widest">
                 DATUMPILOT
               </span>
-              <span className="font-mono text-[9px] text-slate-500 dark:text-slate-600 tracking-[0.2em]">
+              <span className="font-mono text-[9px] text-[#6E6E6E] dark:text-slate-600 tracking-[0.2em]">
                 GD&T SYSTEM
               </span>
             </div>
@@ -121,8 +121,8 @@ export default function Sidebar() {
       {!collapsed && (
         <div className="px-4 pt-6 pb-2">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-px bg-slate-300 dark:bg-slate-700" />
-            <span className="font-mono text-[9px] text-slate-500 dark:text-slate-600 tracking-[0.2em]">NAV.MAIN</span>
+            <div className="w-4 h-px bg-[#D4D4D4] dark:bg-slate-700" />
+            <span className="font-mono text-[9px] text-[#6E6E6E] dark:text-slate-600 tracking-[0.2em]">NAV.MAIN</span>
           </div>
         </div>
       )}
@@ -141,7 +141,7 @@ export default function Sidebar() {
                   "transition-all duration-200",
                   active
                     ? "bg-accent-500/10 text-accent-500"
-                    : "text-slate-600 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-300"
+                    : "text-[#616161] dark:text-slate-500 hover:bg-[#E8E8E8] dark:hover:bg-slate-800/50 hover:text-[#1F1F1F] dark:hover:text-slate-300"
                 )}
               >
                 {/* Active indicator - technical bar */}
@@ -152,7 +152,7 @@ export default function Sidebar() {
                 {/* Code number */}
                 <span className={cn(
                   "font-mono text-[9px] w-5 flex-shrink-0 transition-colors",
-                  active ? "text-accent-500" : "text-slate-400 dark:text-slate-700 group-hover:text-slate-600 dark:group-hover:text-slate-500"
+                  active ? "text-accent-500" : "text-[#8B8B8B] dark:text-slate-700 group-hover:text-[#616161] dark:group-hover:text-slate-500"
                 )}>
                   {item.code}
                 </span>
@@ -160,14 +160,14 @@ export default function Sidebar() {
                 <item.icon
                   className={cn(
                     "w-4 h-4 flex-shrink-0 transition-colors",
-                    active ? "text-accent-500" : "text-slate-500 dark:text-slate-600 group-hover:text-slate-700 dark:group-hover:text-slate-400"
+                    active ? "text-accent-500" : "text-[#616161] dark:text-slate-600 group-hover:text-[#1F1F1F] dark:group-hover:text-slate-400"
                   )}
                 />
 
                 {!collapsed && (
                   <span className={cn(
                     "font-mono text-xs tracking-wide truncate",
-                    active ? "text-accent-500" : "text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"
+                    active ? "text-accent-500" : "text-[#616161] dark:text-slate-400 group-hover:text-[#1F1F1F] dark:group-hover:text-slate-200"
                   )}>
                     {item.label}
                   </span>
@@ -175,13 +175,8 @@ export default function Sidebar() {
 
                 {/* Tooltip for collapsed state */}
                 {collapsed && (
-                  <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-slate-200 dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                    {/* Corner accents */}
-                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-slate-300 dark:border-slate-700" />
-                    <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-300 dark:border-slate-700" />
-                    <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-slate-300 dark:border-slate-700" />
-                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-slate-300 dark:border-slate-700" />
-                    <span className="font-mono text-xs text-slate-700 dark:text-slate-200">{item.label}</span>
+                  <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-[#E5E5E5] dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-md">
+                    <span className="font-mono text-xs text-[#1F1F1F] dark:text-slate-200">{item.label}</span>
                   </div>
                 )}
               </Link>
@@ -191,12 +186,12 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom Navigation */}
-      <div className="px-3 py-3 border-t border-slate-200 dark:border-slate-800">
+      <div className="px-3 py-3 border-t border-[#E5E5E5] dark:border-slate-800">
         {!collapsed && (
           <div className="px-3 pb-3">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-px bg-slate-300 dark:bg-slate-700" />
-              <span className="font-mono text-[9px] text-slate-500 dark:text-slate-600 tracking-[0.2em]">NAV.SYS</span>
+              <div className="w-4 h-px bg-[#D4D4D4] dark:bg-slate-700" />
+              <span className="font-mono text-[9px] text-[#6E6E6E] dark:text-slate-600 tracking-[0.2em]">NAV.SYS</span>
             </div>
           </div>
         )}
@@ -206,11 +201,11 @@ export default function Sidebar() {
           onClick={toggleTheme}
           className={cn(
             "group relative w-full flex items-center gap-3 px-3 py-2.5 mb-1",
-            "text-slate-600 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-300",
+            "text-[#616161] dark:text-slate-500 hover:bg-[#E8E8E8] dark:hover:bg-slate-800/50 hover:text-[#1F1F1F] dark:hover:text-slate-300",
             "transition-all duration-200"
           )}
         >
-          <span className="font-mono text-[9px] w-5 flex-shrink-0 text-slate-400 dark:text-slate-700">
+          <span className="font-mono text-[9px] w-5 flex-shrink-0 text-[#8B8B8B] dark:text-slate-700">
             {mounted && theme === "dark" ? "DK" : "LT"}
           </span>
 
@@ -225,19 +220,15 @@ export default function Sidebar() {
           )}
 
           {!collapsed && (
-            <span className="font-mono text-xs tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="font-mono text-xs tracking-wide text-[#616161] dark:text-slate-400">
               {mounted && theme === "dark" ? "DARK MODE" : "LIGHT MODE"}
             </span>
           )}
 
           {/* Tooltip for collapsed state */}
           {collapsed && (
-            <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-slate-200 dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-slate-300 dark:border-slate-700" />
-              <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-300 dark:border-slate-700" />
-              <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-slate-300 dark:border-slate-700" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-slate-300 dark:border-slate-700" />
-              <span className="font-mono text-xs text-slate-700 dark:text-slate-200">
+            <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-[#E5E5E5] dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-md">
+              <span className="font-mono text-xs text-[#1F1F1F] dark:text-slate-200">
                 {mounted && theme === "dark" ? "SWITCH TO LIGHT" : "SWITCH TO DARK"}
               </span>
             </div>
@@ -255,7 +246,7 @@ export default function Sidebar() {
                 "transition-all duration-200",
                 active
                   ? "bg-accent-500/10 text-accent-500"
-                  : "text-slate-600 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-300"
+                  : "text-[#616161] dark:text-slate-500 hover:bg-[#E8E8E8] dark:hover:bg-slate-800/50 hover:text-[#1F1F1F] dark:hover:text-slate-300"
               )}
             >
               {/* Active indicator */}
@@ -265,7 +256,7 @@ export default function Sidebar() {
 
               <span className={cn(
                 "font-mono text-[9px] w-5 flex-shrink-0 transition-colors",
-                active ? "text-accent-500" : "text-slate-400 dark:text-slate-700 group-hover:text-slate-600 dark:group-hover:text-slate-500"
+                active ? "text-accent-500" : "text-[#8B8B8B] dark:text-slate-700 group-hover:text-[#616161] dark:group-hover:text-slate-500"
               )}>
                 {item.code}
               </span>
@@ -273,13 +264,13 @@ export default function Sidebar() {
               <item.icon
                 className={cn(
                   "w-4 h-4 flex-shrink-0 transition-colors",
-                  active ? "text-accent-500" : "text-slate-500 dark:text-slate-600 group-hover:text-slate-700 dark:group-hover:text-slate-400"
+                  active ? "text-accent-500" : "text-[#616161] dark:text-slate-600 group-hover:text-[#1F1F1F] dark:group-hover:text-slate-400"
                 )}
               />
               {!collapsed && (
                 <span className={cn(
                   "font-mono text-xs tracking-wide",
-                  active ? "text-accent-500" : "text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"
+                  active ? "text-accent-500" : "text-[#616161] dark:text-slate-400 group-hover:text-[#1F1F1F] dark:group-hover:text-slate-200"
                 )}>
                   {item.label}
                 </span>
@@ -287,12 +278,8 @@ export default function Sidebar() {
 
               {/* Tooltip for collapsed state */}
               {collapsed && (
-                <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-slate-200 dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                  <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-slate-300 dark:border-slate-700" />
-                  <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-300 dark:border-slate-700" />
-                  <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-slate-300 dark:border-slate-700" />
-                  <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-slate-300 dark:border-slate-700" />
-                  <span className="font-mono text-xs text-slate-700 dark:text-slate-200">{item.label}</span>
+                <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-[#E5E5E5] dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-md">
+                  <span className="font-mono text-xs text-[#1F1F1F] dark:text-slate-200">{item.label}</span>
                 </div>
               )}
             </Link>
@@ -306,28 +293,24 @@ export default function Sidebar() {
             "group relative mt-2 transition-all duration-200",
             collapsed
               ? "w-full flex items-center justify-center py-3 hover:bg-accent-500/10"
-              : "w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800/50",
-            "text-slate-600 dark:text-slate-600 hover:text-slate-800 dark:hover:text-slate-400"
+              : "w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#E8E8E8] dark:hover:bg-slate-800/50",
+            "text-[#616161] dark:text-slate-600 hover:text-[#1F1F1F] dark:hover:text-slate-400"
           )}
         >
           {collapsed ? (
             <>
               {/* Expand button - centered and prominent */}
-              <div className="w-8 h-8 border border-slate-300 dark:border-slate-700 hover:border-accent-500/50 flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 border border-[#D4D4D4] dark:border-slate-700 hover:border-accent-500/50 flex items-center justify-center transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </div>
               {/* Tooltip */}
-              <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-slate-200 dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-slate-300 dark:border-slate-700" />
-                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-300 dark:border-slate-700" />
-                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-slate-300 dark:border-slate-700" />
-                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-slate-300 dark:border-slate-700" />
-                <span className="font-mono text-xs text-slate-700 dark:text-slate-200">EXPAND</span>
+              <div className="absolute left-full ml-3 px-3 py-2 bg-white dark:bg-[#0A0E14] border border-[#E5E5E5] dark:border-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-md">
+                <span className="font-mono text-xs text-[#1F1F1F] dark:text-slate-200">EXPAND</span>
               </div>
             </>
           ) : (
             <>
-              <span className="font-mono text-[9px] w-5 flex-shrink-0 text-slate-400 dark:text-slate-700">
+              <span className="font-mono text-[9px] w-5 flex-shrink-0 text-[#8B8B8B] dark:text-slate-700">
                 {"<<"}
               </span>
               <ChevronLeft className="w-4 h-4" />
@@ -339,12 +322,12 @@ export default function Sidebar() {
 
       {/* Version indicator */}
       {!collapsed && (
-        <div className="px-4 py-3 border-t border-slate-200/50 dark:border-slate-800/50">
+        <div className="px-4 py-3 border-t border-[#E5E5E5]/50 dark:border-slate-800/50">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[9px] text-slate-400 dark:text-slate-700">v1.0.0</span>
+            <span className="font-mono text-[9px] text-[#8B8B8B] dark:text-slate-700">v1.0.0</span>
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 bg-accent-500 animate-pulse" />
-              <span className="font-mono text-[9px] text-slate-500 dark:text-slate-600">ONLINE</span>
+              <span className="font-mono text-[9px] text-[#6E6E6E] dark:text-slate-600">ONLINE</span>
             </div>
           </div>
         </div>
@@ -352,7 +335,7 @@ export default function Sidebar() {
 
       {/* Collapsed state indicator */}
       {collapsed && (
-        <div className="px-3 py-3 border-t border-slate-200/50 dark:border-slate-800/50 flex justify-center">
+        <div className="px-3 py-3 border-t border-[#E5E5E5]/50 dark:border-slate-800/50 flex justify-center">
           <div className="w-1.5 h-1.5 bg-accent-500 animate-pulse" />
         </div>
       )}

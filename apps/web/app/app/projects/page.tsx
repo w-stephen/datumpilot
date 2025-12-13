@@ -120,7 +120,7 @@ function TechnicalPanel({
       <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-300 dark:border-slate-700" />
 
       {label && (
-        <div className="absolute -top-2.5 left-4 px-2 bg-slate-50 dark:bg-[#0D1117] font-mono text-[10px] text-slate-500 tracking-widest">
+        <div className="absolute -top-2.5 left-4 px-2 bg-slate-50 dark:bg-[#0D1117] font-mono text-[10px] text-slate-600 dark:text-slate-500 tracking-widest">
           {label}
         </div>
       )}
@@ -210,7 +210,7 @@ export default function ProjectsPage() {
           <h1 className="font-mono text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
             PROJECTS
           </h1>
-          <p className="text-slate-500 mt-1 font-mono text-sm">
+          <p className="text-slate-600 dark:text-slate-500 mt-1 font-mono text-sm">
             Manage FCF collections, measurements, and analysis runs
           </p>
         </div>
@@ -234,7 +234,7 @@ export default function ProjectsPage() {
           </span>
         </div>
         <div className="h-4 w-px bg-slate-300 dark:bg-slate-700" />
-        <span className="font-mono text-[10px] text-slate-500">
+        <span className="font-mono text-[10px] text-slate-600 dark:text-slate-500">
           SORT: {sortField.toUpperCase()} {sortDirection.toUpperCase()}
         </span>
         {selectedTags.length > 0 && (
@@ -419,7 +419,7 @@ function ProjectCard({
       <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-300 dark:border-slate-700" />
 
       {/* Index label */}
-      <div className="absolute -top-2.5 left-4 px-2 bg-slate-50 dark:bg-[#0D1117] font-mono text-[10px] text-slate-500 dark:text-slate-600 tracking-widest">
+      <div className="absolute -top-2.5 left-4 px-2 bg-slate-50 dark:bg-[#0D1117] font-mono text-[10px] text-slate-600 dark:text-slate-600 tracking-widest">
         PROJ.{String(index + 1).padStart(2, '0')}
       </div>
 
@@ -467,7 +467,7 @@ function ProjectCard({
             <h3 className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 truncate uppercase">
               {project.name}
             </h3>
-            <p className="font-mono text-[10px] text-slate-500 line-clamp-2 mt-1">
+            <p className="font-mono text-[10px] text-slate-600 dark:text-slate-500 line-clamp-2 mt-1">
               {project.description}
             </p>
           </div>
@@ -480,14 +480,14 @@ function ProjectCard({
             <span className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300">
               {project.fcfCount}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 dark:text-slate-600">FCFs</span>
+            <span className="font-mono text-[10px] text-slate-600 dark:text-slate-600">FCFs</span>
           </div>
           <div className="flex items-center gap-1.5">
             <FileJson className="w-3.5 h-3.5 text-primary-500" />
             <span className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300">
               {project.measurementCount}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 dark:text-slate-600">MEAS</span>
+            <span className="font-mono text-[10px] text-slate-600 dark:text-slate-600">MEAS</span>
           </div>
         </div>
 
@@ -499,7 +499,7 @@ function ProjectCard({
               {status.label}
             </span>
           </div>
-          <div className="flex items-center gap-1 font-mono text-[10px] text-slate-500 dark:text-slate-600">
+          <div className="flex items-center gap-1 font-mono text-[10px] text-slate-600 dark:text-slate-600">
             <Clock className="w-3 h-3" />
             {new Date(project.updatedAt).toLocaleDateString()}
           </div>
@@ -511,7 +511,7 @@ function ProjectCard({
             {project.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 font-mono text-[9px] border border-slate-200 dark:border-slate-800 text-slate-500 uppercase"
+                className="px-2 py-0.5 font-mono text-[9px] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-500 uppercase"
               >
                 {tag}
               </span>

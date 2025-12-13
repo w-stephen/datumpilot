@@ -9,7 +9,7 @@ interface AppShellProps {
 
 export default function AppShell({ children }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#F3F3F3] dark:bg-slate-950">
       {/* Sidebar */}
       <Sidebar />
 
@@ -26,9 +26,9 @@ export default function AppShell({ children }: AppShellProps) {
         </main>
       </div>
 
-      {/* Grid pattern overlay for subtle visual texture */}
+      {/* Grid pattern overlay for subtle visual texture - dark mode only */}
       <div
-        className="fixed inset-0 pointer-events-none z-0 opacity-30"
+        className="fixed inset-0 pointer-events-none z-0 opacity-0 dark:opacity-30"
         style={{
           backgroundImage: `
             linear-gradient(to right, rgba(59, 130, 246, 0.02) 1px, transparent 1px),

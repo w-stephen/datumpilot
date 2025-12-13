@@ -127,7 +127,20 @@
 
 /* CSS Variables for dynamic values */
 :root {
-  /* Background Colors */
+  /* VS Code-inspired Light Mode Colors */
+  --vscode-bg-primary: #F3F3F3;
+  --vscode-bg-secondary: #FFFFFF;
+  --vscode-bg-sidebar: #F3F3F3;
+  --vscode-bg-card: #FFFFFF;
+  --vscode-text-primary: #1F1F1F;
+  --vscode-text-secondary: #616161;
+  --vscode-text-muted: #6E6E6E;
+  --vscode-text-faint: #8B8B8B;
+  --vscode-border: #E5E5E5;
+  --vscode-border-light: #F0F0F0;
+  --vscode-accent: #0066B8;
+
+  /* Background Colors (dark mode) */
   --color-bg-primary: #0F1419;
   --color-bg-secondary: #1A2332;
   --color-bg-tertiary: #243244;
@@ -169,14 +182,12 @@ html.dark {
   color-scheme: dark;
 }
 
-/* Light mode body */
+/* Light mode body - VS Code inspired neutral grays */
 body {
-  background-color: var(--color-slate-50);
-  color: var(--color-slate-900);
+  background-color: #F3F3F3;
+  color: #1F1F1F;
   font-family: var(--font-family-sans);
-  background-image:
-    radial-gradient(ellipse at top, rgba(59, 130, 246, 0.05), transparent 50%),
-    linear-gradient(to bottom, #F8FAFC, #F1F5F9);
+  background-image: none;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -196,7 +207,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-mono);
   font-weight: 600;
   letter-spacing: -0.025em;
-  color: var(--color-slate-900);
+  color: var(--vscode-text-primary);
 }
 
 html.dark h1, html.dark h2, html.dark h3,
@@ -235,23 +246,23 @@ code, pre {
   color: white;
 }
 
-/* Scrollbar styling - Light mode */
+/* Scrollbar styling - Light mode (VS Code inspired) */
 ::-webkit-scrollbar {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.625rem;
+  height: 0.625rem;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--color-slate-100);
+  background-color: var(--vscode-bg-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color-slate-300);
-  border-radius: 9999px;
+  background-color: rgba(100, 100, 100, 0.4);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-slate-400);
+  background-color: rgba(100, 100, 100, 0.7);
 }
 
 /* Scrollbar styling - Dark mode */
