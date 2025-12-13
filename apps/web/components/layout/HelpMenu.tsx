@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   HelpCircle,
   Book,
@@ -25,19 +26,19 @@ interface HelpMenuItem {
 const helpItems: HelpMenuItem[] = [
   {
     label: "Getting Started",
-    href: "/docs/getting-started",
+    href: "/support/getting-started",
     icon: Book,
     external: false,
   },
   {
     label: "FCF Builder Guide",
-    href: "/docs/fcf-builder",
+    href: "/support/fcf-builder-guide",
     icon: Book,
     external: false,
   },
   {
     label: "Stack-up Guide",
-    href: "/docs/stack-up",
+    href: "/support/stack-up-guide",
     icon: Book,
     external: false,
   },
@@ -190,6 +191,7 @@ export function HelpMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Close on click outside
   useEffect(() => {
@@ -225,7 +227,7 @@ export function HelpMenu() {
       window.open(item.href, "_blank");
       setIsOpen(false);
     } else if (item.href) {
-      // Handle internal navigation - for now just close
+      router.push(item.href);
       setIsOpen(false);
     }
   };

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getAllSupportArticles } from "@/lib/content/support";
-import { BookOpen, Layers, Calculator } from "lucide-react";
+import { BookOpen, Layers, Calculator, ArrowLeft } from "lucide-react";
 
 const iconMap: Record<string, React.ReactNode> = {
   "getting-started": <BookOpen className="h-6 w-6" />,
@@ -19,6 +19,22 @@ export default function SupportPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
+      {/* Top navigation bar */}
+      <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/80">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <span className="text-sm font-medium text-gray-900 dark:text-white">
+            DatumPilot Support
+          </span>
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 rounded-md bg-primary-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-700 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to App
+          </Link>
+        </div>
+      </header>
+
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">

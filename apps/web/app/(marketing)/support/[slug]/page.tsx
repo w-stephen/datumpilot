@@ -10,7 +10,7 @@ import {
 } from "@/lib/content/support";
 import { mdxComponents } from "@/components/mdx";
 import { TableOfContents } from "@/components/mdx/TableOfContents";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -49,17 +49,27 @@ export default async function SupportArticlePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
-        <nav className="mb-8">
+      {/* Top navigation bar */}
+      <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/80">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <Link
             href="/support"
             className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
           >
             <ChevronLeft className="h-4 w-4" />
-            Back to Support
+            Support
           </Link>
-        </nav>
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 rounded-md bg-primary-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-700 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to App
+          </Link>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
 
         {/* Article Header */}
         <header className="mb-8 max-w-4xl">
